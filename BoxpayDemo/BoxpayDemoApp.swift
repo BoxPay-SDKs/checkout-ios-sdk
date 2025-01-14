@@ -32,7 +32,7 @@ struct ContentViewTest: View {
                     .padding()
 
                 Button(action: {
-                    viewModel.makePaymentRequest { success in
+                    viewModel.generateToken { success in
                         if success {
                             navigateToCheckout = true // Navigate on success
                         }
@@ -64,8 +64,9 @@ struct ContentViewTest: View {
                 Spacer()
 
                 // Hidden NavigationLink to trigger navigation programmatically
+                //baseUrlFlag testing == 0, sandbox == 1, prod == 2
                 NavigationLink(
-                    destination: MainCheckoutSheet(token: viewModel.token ?? ""),
+                    destination: MainCheckoutSheet(token: viewModel.token ?? "",baseUrlFlag: 0),
                     isActive: $navigateToCheckout
                 ) {
                     EmptyView()
@@ -88,10 +89,15 @@ class APIViewModel: ObservableObject {
     @Published var token: String?
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var baseUrlProd: String = "https://apis.boxpay.in"
+    @Published var baseUrlSandbox: String = "https://sandbox-apis.boxpay.tech"
+    @Published var baseUrlTest: String = "https://test-apis.boxpay.tech"
 
-    private let url = "https://test-apis.boxpay.tech/v0/merchants/lGfqzNSKKA/sessions"
+    //replace baseUrl for token generation
+    private lazy var url = baseUrlTest + "/v0/merchants/oh3mnorsME/sessions"
 
-    func makePaymentRequest(completion: @escaping (Bool) -> Void) {
+
+    func generateToken(completion: @escaping (Bool) -> Void) {
         guard let url = URL(string: self.url) else {
             self.errorMessage = "Invalid URL"
             completion(false)
@@ -104,16 +110,17 @@ class APIViewModel: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer 3z3G6PT8vDhxQCKRQzmRsujsO5xtsQAYLUR3zcKrPwVrphfAqfyS20bvvCg2X95APJsT5UeeS5YdD41aHbz6mg", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer tVTBfIiwpdR5gUlUQ9cDGfO9NceZ4p4QUIclTQnPWcVvZlLyOOEPJ3nF18UKvvpfAcNCSgr4VDzQiAkTXhhBbs", forHTTPHeaderField: "Authorization")
         request.addValue("Android SDK", forHTTPHeaderField: "X-Client-Connector-Name")
         request.addValue("1.0.0", forHTTPHeaderField: "X-Client-Connector-Version")
 
+        //token generation json
         let jsonData = """
         {
           "context" : {
             "countryCode" : "IN",
             "legalEntity" : {
-              "code" : "razorpay"
+              "code" : "easebuzz"
             },
             "orderId" : "test12"
           },

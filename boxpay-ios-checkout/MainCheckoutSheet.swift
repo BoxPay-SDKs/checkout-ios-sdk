@@ -1,5 +1,6 @@
 import SwiftUI
 import Foundation
+import UIKit
 
 
 extension Image {
@@ -15,6 +16,7 @@ public struct MainCheckoutSheet: View {
     // Access the presentation mode
     @StateObject private var viewModel = CheckoutViewModel()
     private let token: String // Token to be passed into the view
+    let apiManager = APIManager()
     private var orderItems: [OrderItem] {
         viewModel.sessionData?.paymentDetails.order?.items ?? []
     }
@@ -26,13 +28,18 @@ public struct MainCheckoutSheet: View {
     @State private var upiCollectMethod = false
     @State private var upiIntentMethod = false
     @State private var upiQRMethod = false
-    
     @State private var cardsMethod = false
     @State private var walletMethods = false
     @State private var netBankingMethods = false
     @State private var emiMethod = false
     @State private var bnplMethod = false
+    @State private var orderDetailsVisibility = true
     
+    let baseUrlProd: String = "https://apis.boxpay.in"
+    let baseUrlSandbox: String = "https://sandbox-apis.boxpay.tech"
+    let baseUrlTest: String = "https://test-apis.boxpay.tech"
+    
+    // This is dynamic array for payment options we update this later
     var dynamicPaymentOptions: [PaymentOption] {
         PaymentOption.allOptions(
             cardsMethod: cardsMethod,
@@ -45,23 +52,32 @@ public struct MainCheckoutSheet: View {
     
     
     // Custom initializer to accept the token
-    public init(token: String) {
+    public init(token: String,baseUrlFlag: Int) {
         self.token = token
+        // Save base url passed by the merchant
+        if(baseUrlFlag == 0){
+            apiManager.setBaseURL(baseUrlTest)
+        }else if(baseUrlFlag == 1){
+            apiManager.setBaseURL(baseUrlSandbox)
+        }else if(baseUrlFlag == 2){
+            apiManager.setBaseURL(baseUrlProd)
+        }
     }
     
     
     private func processPaymentOptions() {
+        // updating booleans with enabled payment options
         for paymentMethod in paymentOptionList {
-            if paymentMethod.title == "Upi" {
-                if paymentMethod.type == "UpiCollect" {
+            if paymentMethod.type == "Upi" {
+                if paymentMethod.brand == "UpiCollect" {
                     upiCollectMethod = true
                     upiAvailable = true
                 }
-                if paymentMethod.type == "UpiIntent" {
+                if paymentMethod.brand == "UpiIntent" {
                     upiIntentMethod = true
                     upiAvailable = true
                 }
-                if paymentMethod.type == "UpiQr" {
+                if paymentMethod.brand == "UpiQr" {
                     upiQRMethod = true
                     upiAvailable = true
                 }
@@ -88,7 +104,7 @@ public struct MainCheckoutSheet: View {
     public var body: some View {
         
         VStack(spacing: 12) {
-            
+            //header
             HStack {
                 Spacer()
                     .frame(width: 15)
@@ -149,66 +165,88 @@ public struct MainCheckoutSheet: View {
                     }
                     
                     // UPI Section - Changed "Add new UPI id" to match the "Add new address" style
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Pay by any UPI App")
-                            .font(.system(size: 14, weight: .semibold))
-                            .padding(.leading)
+                    // "Add new UPI ID" card
+                    if(upiIntentMethod || upiCollectMethod){
                         
-                        // "Add new UPI ID" card
                         VStack(alignment: .leading, spacing: 8) {
-                            
-                            // HStack for Images and Text
-                            HStack(spacing: 30) { // Add custom spacing between images
-                                VStack {
-                                    Image(frameworkAsset: "gpay_upi_logo")
-                                        .resizable()
-                                        .frame(width: 40, height: 40)
-                                    Text("GPay") // Text below the image
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(.black)
-                                }
-                                
-                                VStack {
-                                    Image(frameworkAsset: "phonepe")
-                                        .resizable()
-                                        .frame(width: 40, height: 40)
-                                    Text("PhonePe") // Text below the image
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(.black)
-                                }
-                                
-                                VStack {
-                                    Image(frameworkAsset: "paytm_upi_logo")
-                                        .resizable()
-                                        .frame(width: 50, height: 40)
-                                    Text("Paytm") // Text below the image
-                                        .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(.black)
-                                }
-                                
-                                Spacer()
-                            }
-                            Spacer()
-                            Divider()
-                            Spacer()
-                            HStack {
-                                Image(frameworkAsset: "add_green")
-                                    .foregroundColor(.green)
-                                Text("Add new UPI ID")
+                            if(upiIntentMethod){
+                                Text("Pay by any UPI App")
                                     .font(.system(size: 14, weight: .semibold))
-                                    .foregroundColor(.green)
-                                Spacer()
-                                Image(systemName: "chevron.down")
-                                    .foregroundColor(.gray)
+                                    .padding(.leading)
+                            }else{
+                                Text("Pay using UPI ID")
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .padding(.leading)
                             }
-                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                
+                                // HStack for Images and Text
+                                if upiIntentMethod {
+                                    HStack(spacing: 30) { // Add custom spacing between images
+                                        if(!isGooglePayInstalled()){
+                                            VStack {
+                                                Image(frameworkAsset: "gpay_upi_logo")
+                                                    .resizable()
+                                                    .frame(width: 40, height: 40)
+                                                Text("GPay") // Text below the image
+                                                    .font(.system(size: 12, weight: .medium))
+                                                    .foregroundColor(.black)
+                                            }
+                                            
+                                        }
+                                        if(!isPhonePeInstalled()){
+                                            
+                                            VStack {
+                                                Image(frameworkAsset: "phonepe")
+                                                    .resizable()
+                                                    .frame(width: 40, height: 40)
+                                                Text("PhonePe") // Text below the image
+                                                    .font(.system(size: 12, weight: .medium))
+                                                    .foregroundColor(.black)
+                                            }}
+                                        
+                                        if(!isPaytmInstalled()){
+                                            
+                                            
+                                            VStack {
+                                                Image(frameworkAsset: "paytm_upi_logo")
+                                                    .resizable()
+                                                    .frame(width: 50, height: 40)
+                                                Text("Paytm") // Text below the image
+                                                    .font(.system(size: 12, weight: .medium))
+                                                    .foregroundColor(.black)
+                                            }}
+                                        
+                                        Spacer()
+                                    }
+                                    if(upiIntentMethod && upiCollectMethod){
+                                        Spacer()
+                                        Divider()
+                                        Spacer()
+                                    }
+                                }
+                                
+                                if upiCollectMethod {
+                                    HStack {
+                                        Image(frameworkAsset: "add_green")
+                                            .foregroundColor(.green)
+                                        Text("Add new UPI ID")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(.green)
+                                        Spacer()
+                                        Image(systemName: "chevron.down")
+                                            .foregroundColor(.gray)
+                                    }
+                                }
+                            }
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(radius: 1)
+                            .padding(.horizontal)
                         }
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(12)
-                        .shadow(radius: 1)
-                        .padding(.horizontal)
                     }
+                    
                     
                     // More Payment Options - Inside a large card
                     VStack(alignment: .leading, spacing: 8) {
@@ -259,7 +297,6 @@ public struct MainCheckoutSheet: View {
                         .shadow(radius: 1)
                         .padding(.horizontal)
                         
-                        
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Order Summary")
                                 .font(.system(size: 14, weight: .semibold))
@@ -271,54 +308,58 @@ public struct MainCheckoutSheet: View {
                                     Spacer()
                                     Text("₹" + (viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "0"))
                                         .font(.system(size: 14, weight: .semibold))
-                                    Image(systemName: "chevron.down")
+                                    Image(systemName: orderDetailsVisibility ? "chevron.up" : "chevron.down")
                                         .foregroundColor(.gray)
+                                        .onTapGesture {
+                                            orderDetailsVisibility.toggle()
+                                        }
                                 }
-                                Spacer()
                                 
-                                VStack {
-                                    if orderItems.isEmpty {
-                                        Text("Loading items...")
+                                
+                                if(orderDetailsVisibility){
+                                    Spacer()
+                                    VStack {
+                                        if orderItems.isEmpty {
+                                            Text("Loading items...")
+                                                .font(.system(size: 14, weight: .regular))
+                                        } else {
+                                            ItemsListView(items: orderItems)
+                                        }
+                                    }.background(Color.white)
+                                    
+                                    HStack{
+                                        Text("Sub Total")
                                             .font(.system(size: 14, weight: .regular))
-                                    } else {
-                                        ItemsListView(items: orderItems)
-                                    }
-                                }.background(Color.white)
-                                
-                                HStack{
-                                    Text("Sub Total")
-                                        .font(.system(size: 14, weight: .regular))
-                                    Spacer()
-                                    Text("₹" + (viewModel.sessionData?.paymentDetails.order?.originalAmountLocaleFull ?? "0"))
-                                    .font(.system(size: 14, weight: .regular))                        }
-                                
-                                HStack{
-                                    Text("Shipping Charges")
-                                        .font(.system(size: 14, weight: .regular))
-                                    Spacer()
-                                    Text("₹" + (viewModel.sessionData?.paymentDetails.order?.shippingAmountLocaleFull ?? ""))
-                                    .font(.system(size: 14, weight: .regular))                        }
-                                
-                                HStack{
-                                    Text("Taxes")
-                                        .font(.system(size: 14, weight: .regular))
-                                    Spacer()
-                                    Text("₹" + (viewModel.sessionData?.paymentDetails.order?.taxAmountLocaleFull ?? ""))
-                                    .font(.system(size: 14, weight: .regular))                        }
-                                
-                                Divider()
-                                
-                                HStack {
-                                    Text("Total")
-                                        .font(.system(size: 14, weight: .bold))
-                                    Spacer()
-                                    Text("₹" + (viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "0"))
-                                    .font(.system(size: 14, weight: .bold))                        }
-                                .padding()
-                                .background(Color.gray.opacity(0.2))
-                                .cornerRadius(10)
-                                
-                                
+                                        Spacer()
+                                        Text("₹" + (viewModel.sessionData?.paymentDetails.order?.originalAmountLocaleFull ?? "0"))
+                                        .font(.system(size: 14, weight: .regular))                        }
+                                    
+                                    HStack{
+                                        Text("Shipping Charges")
+                                            .font(.system(size: 14, weight: .regular))
+                                        Spacer()
+                                        Text("₹" + (viewModel.sessionData?.paymentDetails.order?.shippingAmountLocaleFull ?? ""))
+                                        .font(.system(size: 14, weight: .regular))                        }
+                                    
+                                    HStack{
+                                        Text("Taxes")
+                                            .font(.system(size: 14, weight: .regular))
+                                        Spacer()
+                                        Text("₹" + (viewModel.sessionData?.paymentDetails.order?.taxAmountLocaleFull ?? ""))
+                                        .font(.system(size: 14, weight: .regular))                        }
+                                    
+                                    Divider()
+                                    
+                                    HStack {
+                                        Text("Total")
+                                            .font(.system(size: 14, weight: .bold))
+                                        Spacer()
+                                        Text("₹" + (viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "0"))
+                                        .font(.system(size: 14, weight: .bold))                        }
+                                    .padding()
+                                    .background(Color.gray.opacity(0.2))
+                                    .cornerRadius(10)
+                                }
                             }
                             .padding()
                             .background(Color.white)
@@ -347,6 +388,7 @@ public struct MainCheckoutSheet: View {
                     self.processPaymentOptions()
                 }
             }
+            .background(Color(UIColor.systemGray6).ignoresSafeArea())
             .navigationBarBackButtonHidden(true)
         }
     }
@@ -416,7 +458,7 @@ public struct MainCheckoutSheet: View {
                         print("API Response: \(data)")
                     case .failure(let error):
                         self?.errorMessage = error.localizedDescription
-                        print("API Error: \(error.localizedDescription)")
+                        print("API Error: \(error)")
                     }
                 }
             }
@@ -424,17 +466,11 @@ public struct MainCheckoutSheet: View {
     }
     
     
-    
-    struct MainSheetPreview: PreviewProvider {
-        static var previews: some View {
-            MainCheckoutSheet(token: "")
-        }
-    }
-    
     class APIServiceSessionApi {
         
         func getCheckoutSession(token: String, completion: @escaping (Result<CheckoutSession, Error>) -> Void) {
-            let baseUrl = "https://test-apis.boxpay.tech/v0/checkout/sessions/"
+            let apiManager = APIManager()
+            let baseUrl = apiManager.getBaseURL() + "/v0/checkout/sessions/"
             guard let url = URL(string: baseUrl + token) else {
                 print("Invalid URL")
                 completion(.failure(NSError(domain: "Invalid URL", code: -1, userInfo: nil)))
@@ -496,6 +532,7 @@ public struct MainCheckoutSheet: View {
         }
     }
     
+    // Item view for order details list
     struct OrderItemView: View {
         let item: OrderItem
         
@@ -551,7 +588,7 @@ public struct MainCheckoutSheet: View {
         }
     }
     
-    
+    //List setup
     struct ItemsListView: View {
         let items: [OrderItem]
         
@@ -569,4 +606,26 @@ public struct MainCheckoutSheet: View {
         }
     }
     
+}
+
+// Check if GooglePay is installed
+func isGooglePayInstalled() -> Bool {
+    return UIApplication.shared.canOpenURL(URL(string: "gpay://")!)
+}
+
+// Check if Paytm is installed
+func isPaytmInstalled() -> Bool {
+    return UIApplication.shared.canOpenURL(URL(string: "paytm://")!)
+}
+
+// Check if PhonePe is installed
+func isPhonePeInstalled() -> Bool {
+    return UIApplication.shared.canOpenURL(URL(string: "phonepe://")!)
+}
+
+// MainCheckoutSheet preview
+struct MainSheetPreview: PreviewProvider {
+    static var previews: some View {
+        MainCheckoutSheet(token: "qVDnGlSGnC",baseUrlFlag: 0)
+    }
 }

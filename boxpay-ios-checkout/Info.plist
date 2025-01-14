@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict/>
+<dict>
+    <!-- Allow querying for external apps -->
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>gpay</string>       <!-- Google Pay -->
+        <string>paytm</string>      <!-- Paytm -->
+        <string>phonepe</string>    <!-- PhonePe -->
+    </array>
+</dict>
 </plist>
+
