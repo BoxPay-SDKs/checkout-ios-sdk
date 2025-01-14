@@ -7,7 +7,6 @@
 
 import SwiftUI
 import boxpay_ios_checkout
-
 @main
 struct BoxpayDemoApp: App {
     @StateObject private var viewModel = APIViewModel() // API ViewModel shared across the app
@@ -23,6 +22,7 @@ struct BoxpayDemoApp: App {
 
 struct ContentViewTest: View {
     @ObservedObject var viewModel: APIViewModel // Receive the shared view model
+    @State private var navigateToCheckout = false // State to control navigation
 
     var body: some View {
         NavigationView {
@@ -32,9 +32,13 @@ struct ContentViewTest: View {
                     .padding()
 
                 Button(action: {
-                    viewModel.makePaymentRequest()
+                    viewModel.makePaymentRequest { success in
+                        if success {
+                            navigateToCheckout = true // Navigate on success
+                        }
+                    }
                 }) {
-                    Text("Generate Token")
+                    Text("Proceed to Checkout")
                         .foregroundColor(.white)
                         .padding()
                         .frame(width: 250, height: 50)
@@ -45,11 +49,11 @@ struct ContentViewTest: View {
                 .padding(.top, 20)
 
                 // Display the result
-                if let token = viewModel.token {
-                    Text("Token: \(token)")
-                        .padding()
-                } else if viewModel.isLoading {
+                if viewModel.isLoading {
                     ProgressView("Generating Token...")
+                        .padding()
+                } else if let token = viewModel.token {
+                    Text("Token: \(token)")
                         .padding()
                 } else if let errorMessage = viewModel.errorMessage {
                     Text("Error: \(errorMessage)")
@@ -59,21 +63,19 @@ struct ContentViewTest: View {
 
                 Spacer()
 
-                // NavigationLink to open BoxpayCheckout
-                NavigationLink(destination: MainCheckoutSheet()) {
-                    Text("Open Boxpay Checkout")
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(width: 250, height: 50)
-                        .background(Color.green)
-                        .cornerRadius(8)
+                // Hidden NavigationLink to trigger navigation programmatically
+                NavigationLink(
+                    destination: MainCheckoutSheet(token: viewModel.token ?? ""),
+                    isActive: $navigateToCheckout
+                ) {
+                    EmptyView()
                 }
-                .padding(.top, 40)
             }
             .navigationBarTitle("Test App", displayMode: .inline)
         }
     }
 }
+
 
 struct Previewer: PreviewProvider {
     static var previews: some View {
@@ -89,9 +91,10 @@ class APIViewModel: ObservableObject {
 
     private let url = "https://test-apis.boxpay.tech/v0/merchants/lGfqzNSKKA/sessions"
 
-    func makePaymentRequest() {
-        guard let url = URL(string: "https://test-apis.boxpay.tech/v0/merchants/lGfqzNSKKA/sessions") else {
+    func makePaymentRequest(completion: @escaping (Bool) -> Void) {
+        guard let url = URL(string: self.url) else {
             self.errorMessage = "Invalid URL"
+            completion(false)
             return
         }
 
@@ -116,7 +119,7 @@ class APIViewModel: ObservableObject {
           },
           "paymentType" : "S",
           "money" : {
-            "amount" : "65000",
+            "amount" : "25000",
             "currencyCode" : "INR"
           },
           "descriptor" : {
@@ -171,6 +174,40 @@ class APIViewModel: ObservableObject {
               "discountedAmount" : null,
               "amountWithoutTaxLocale" : "10",
               "amountWithoutTaxLocaleFull" : "10"
+            },{
+              "id" : "test3",
+              "itemName" : "La Fille Regular Solid Handheld Bag Blue",
+              "description" : "testProduct",
+              "quantity" : 1,
+              "manufacturer" : null,
+              "brand" : null,
+              "color" : null,
+              "productUrl" : null,
+              "imageUrl" : "https://assetscdn1.paytm.com/images/catalog/product/B/BA/BAGLAFILLE-BLUEINTO887307A255D05/1563381583133_0..jpg",
+              "categories" : null,
+              "amountWithoutTax" : 500,
+              "taxAmount" : 76.27,
+              "taxPercentage" : null,
+              "discountedAmount" : null,
+              "amountWithoutTaxLocale" : "10",
+              "amountWithoutTaxLocaleFull" : "10"
+            },{
+              "id" : "test2",
+              "itemName" : "La Fille Regular Solid Handheld Bag Blue",
+              "description" : "testProduct",
+              "quantity" : 2,
+              "manufacturer" : null,
+              "brand" : null,
+              "color" : null,
+              "productUrl" : null,
+              "imageUrl" : "https://assetscdn1.paytm.com/images/catalog/product/B/BA/BAGLAFILLE-BLUEINTO887307A255D05/1563381583133_0..jpg",
+              "categories" : null,
+              "amountWithoutTax" : 525,
+              "taxAmount" : 76.27,
+              "taxPercentage" : null,
+              "discountedAmount" : null,
+              "amountWithoutTaxLocale" : "10",
+              "amountWithoutTaxLocaleFull" : "10"
             }]
           },
           "statusNotifyUrl" : "https://www.boxpay.tech",
@@ -180,7 +217,6 @@ class APIViewModel: ObservableObject {
           "expiryDurationSec" : 900
         }
         """.data(using: .utf8)
-
         request.httpBody = jsonData
 
         URLSession.shared.dataTask(with: request) { data, response, error in
@@ -189,8 +225,7 @@ class APIViewModel: ObservableObject {
 
                 if let error = error {
                     self.errorMessage = "Request failed: \(error.localizedDescription)"
-                    print("Error: \(error.localizedDescription)")
-                
+                    completion(false)
                     return
                 }
 
@@ -198,19 +233,15 @@ class APIViewModel: ObservableObject {
                       let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                       let token = json["token"] as? String else {
                     self.errorMessage = "Failed to parse response."
-                    print("Response parsing failed")
-                
+                    completion(false)
                     return
                 }
 
-                // Update token and show success
                 self.token = token
                 print("Token: \(token)")
-                
+                completion(true)
             }
         }.resume()
     }
-
-    
 }
 

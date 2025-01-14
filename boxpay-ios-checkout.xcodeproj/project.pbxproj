@@ -7,19 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AC27EA182D2FA4520012B47A /* BoxpayDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59EF7E2D265A4600A12D2F /* BoxpayDemoApp.swift */; };
+		AC27EA192D2FA4520012B47A /* BoxpayDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59EF7E2D265A4600A12D2F /* BoxpayDemoApp.swift */; };
+		AC27EA1F2D2FA8A10012B47A /* CheckoutSessionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC27EA1E2D2FA8950012B47A /* CheckoutSessionResponse.swift */; };
+		AC27EA212D2FDC070012B47A /* MainCheckoutSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6A65C52D22833E00B4DAE5 /* MainCheckoutSheet.swift */; };
 		AC59EF812D265A4600A12D2F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59EF802D265A4600A12D2F /* ContentView.swift */; };
 		AC59EF832D265A4900A12D2F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC59EF822D265A4900A12D2F /* Assets.xcassets */; };
 		AC59EF862D265A4900A12D2F /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC59EF852D265A4900A12D2F /* Preview Assets.xcassets */; };
-		AC59EF952D265D3B00A12D2F /* BoxpayDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59EF7E2D265A4600A12D2F /* BoxpayDemoApp.swift */; };
-		AC59EF972D2692B500A12D2F /* BoxpayDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59EF7E2D265A4600A12D2F /* BoxpayDemoApp.swift */; };
 		AC59EF992D27CAB600A12D2F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59EF802D265A4600A12D2F /* ContentView.swift */; };
 		AC6A65BD2D2282B400B4DAE5 /* boxpay_ios_checkout.h in Headers */ = {isa = PBXBuildFile; fileRef = AC6A65BC2D2282B400B4DAE5 /* boxpay_ios_checkout.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		AC6A65C62D22833E00B4DAE5 /* MainCheckoutSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6A65C52D22833E00B4DAE5 /* MainCheckoutSheet.swift */; };
 		AC6A65C82D22AE8100B4DAE5 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC6A65C72D22AE8100B4DAE5 /* Media.xcassets */; };
 		AC6A65CA2D22B20500B4DAE5 /* TestClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6A65C92D22B20500B4DAE5 /* TestClass.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AC27EA1E2D2FA8950012B47A /* CheckoutSessionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutSessionResponse.swift; sourceTree = "<group>"; };
 		AC59EF7C2D265A4600A12D2F /* BoxpayDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BoxpayDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC59EF7E2D265A4600A12D2F /* BoxpayDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxpayDemoApp.swift; sourceTree = "<group>"; };
 		AC59EF802D265A4600A12D2F /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -52,6 +54,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AC27EA1D2D2FA8850012B47A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AC27EA1E2D2FA8950012B47A /* CheckoutSessionResponse.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		AC59EF7D2D265A4600A12D2F /* BoxpayDemo */ = {
 			isa = PBXGroup;
 			children = (
@@ -93,6 +103,7 @@
 		AC6A65BB2D2282B400B4DAE5 /* boxpay-ios-checkout */ = {
 			isa = PBXGroup;
 			children = (
+				AC27EA1D2D2FA8850012B47A /* Models */,
 				AC6A65F42D23B93400B4DAE5 /* Info.plist */,
 				AC6A65BC2D2282B400B4DAE5 /* boxpay_ios_checkout.h */,
 				AC6A65C52D22833E00B4DAE5 /* MainCheckoutSheet.swift */,
@@ -215,7 +226,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AC59EF812D265A4600A12D2F /* ContentView.swift in Sources */,
-				AC59EF952D265D3B00A12D2F /* BoxpayDemoApp.swift in Sources */,
+				AC27EA192D2FA4520012B47A /* BoxpayDemoApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -223,10 +234,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC27EA212D2FDC070012B47A /* MainCheckoutSheet.swift in Sources */,
+				AC27EA1F2D2FA8A10012B47A /* CheckoutSessionResponse.swift in Sources */,
 				AC6A65CA2D22B20500B4DAE5 /* TestClass.swift in Sources */,
-				AC6A65C62D22833E00B4DAE5 /* MainCheckoutSheet.swift in Sources */,
 				AC59EF992D27CAB600A12D2F /* ContentView.swift in Sources */,
-				AC59EF972D2692B500A12D2F /* BoxpayDemoApp.swift in Sources */,
+				AC27EA182D2FA4520012B47A /* BoxpayDemoApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
