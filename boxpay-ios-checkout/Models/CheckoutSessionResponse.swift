@@ -146,8 +146,12 @@ public struct MerchantDetails: Codable {
     let timeZone: String?
     let locale: String?
     let template: String?
-    let customFields: [String]?
+    let customFields: [CustomField]?
     let convenienceFeeChargedToShopper: Bool
+}
+
+public struct CustomField: Codable {
+    let fieldName: String
 }
 
 // MARK: - CheckoutTheme struct
@@ -167,7 +171,7 @@ public struct Configs: Codable {
     let paymentMethods: [PaymentMethod]
     let additionalFieldSets: [String]
     let enabledFields: [EnabledField]
-    let referrers: [String]
+    let referrers: [String]?
 }
 
 // MARK: - PaymentMethod struct
