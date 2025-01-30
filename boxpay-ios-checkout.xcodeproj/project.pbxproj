@@ -10,7 +10,6 @@
 		AC27EA192D2FA4520012B47A /* BoxpayDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59EF7E2D265A4600A12D2F /* BoxpayDemoApp.swift */; };
 		AC27EA1F2D2FA8A10012B47A /* CheckoutSessionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC27EA1E2D2FA8950012B47A /* CheckoutSessionResponse.swift */; };
 		AC27EA212D2FDC070012B47A /* MainCheckoutSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6A65C52D22833E00B4DAE5 /* MainCheckoutSheet.swift */; };
-		AC27EA232D36483E0012B47A /* boxpay_ios_checkout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC6A65B92D2282B400B4DAE5 /* boxpay_ios_checkout.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 		AC27EA252D3667340012B47A /* APIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC27EA242D3667340012B47A /* APIManager.swift */; };
 		AC59EF812D265A4600A12D2F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC59EF802D265A4600A12D2F /* ContentView.swift */; };
 		AC59EF832D265A4900A12D2F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC59EF822D265A4900A12D2F /* Assets.xcassets */; };
@@ -18,7 +17,46 @@
 		AC6A65BD2D2282B400B4DAE5 /* boxpay_ios_checkout.h in Headers */ = {isa = PBXBuildFile; fileRef = AC6A65BC2D2282B400B4DAE5 /* boxpay_ios_checkout.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC6A65C82D22AE8100B4DAE5 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AC6A65C72D22AE8100B4DAE5 /* Media.xcassets */; };
 		AC6A65CA2D22B20500B4DAE5 /* TestClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6A65C92D22B20500B4DAE5 /* TestClass.swift */; };
+		AC7EA4802D3E294400E279FF /* GeneralSuccessScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA47F2D3E294100E279FF /* GeneralSuccessScreen.swift */; };
+		AC7EA4822D40EA5500E279FF /* PaymentResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4812D40EA4E00E279FF /* PaymentResponse.swift */; };
+		AC7EA4842D40F6AC00E279FF /* PaymentFailureScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4832D40F6AA00E279FF /* PaymentFailureScreen.swift */; };
+		AC7EA4872D422D3100E279FF /* TimerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4862D422D2E00E279FF /* TimerManager.swift */; };
+		AC7EA4892D4230D600E279FF /* SessionExpireScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4882D4230CA00E279FF /* SessionExpireScreen.swift */; };
+		AC7EA48B2D4233B100E279FF /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA48A2D4233AA00E279FF /* Color.swift */; };
+		AC7EA48D2D423F7F00E279FF /* TimeDifferenceCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA48C2D423F7D00E279FF /* TimeDifferenceCalculator.swift */; };
+		AC7EA48F2D47558900E279FF /* AddCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA48E2D47558900E279FF /* AddCardView.swift */; };
+		AC7EA4912D47882D00E279FF /* NavigationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4902D47881B00E279FF /* NavigationHelper.swift */; };
+		AC7EA4942D47AD6000E279FF /* CVVInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4932D47AD6000E279FF /* CVVInfoView.swift */; };
+		AC7EA4962D49064700E279FF /* KeyboardDismissModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4952D49064200E279FF /* KeyboardDismissModifier.swift */; };
+		AC7EA4982D49EFD500E279FF /* WebViewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4972D49EFD300E279FF /* WebViewScreen.swift */; };
+		AC7EA49E2D49FDEC00E279FF /* LoaderViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA49D2D49FDEA00E279FF /* LoaderViewModifier.swift */; };
+		AC7EA4A02D4A04C900E279FF /* CustomFailureSheetModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA49F2D4A04BB00E279FF /* CustomFailureSheetModifier.swift */; };
+		AC7EA4A42D4A088C00E279FF /* PaymentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4A32D4A088900E279FF /* PaymentViewModel.swift */; };
+		AC7EA4A62D4A08C600E279FF /* RepeatingTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4A52D4A08BF00E279FF /* RepeatingTask.swift */; };
+		AC7EA4A82D4A35D200E279FF /* PaymentResultDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4A72D4A35D100E279FF /* PaymentResultDelegate.swift */; };
+		AC7EA4AA2D4A35E200E279FF /* PaymentResultObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4A92D4A35E200E279FF /* PaymentResultObject.swift */; };
+		AC7EA4AC2D4A35FB00E279FF /* PaymentCallbackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4AB2D4A35FB00E279FF /* PaymentCallbackManager.swift */; };
+		AC7EA4AE2D4A431E00E279FF /* PaymentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4AD2D4A431E00E279FF /* PaymentViewController.swift */; };
+		AC7EA4B02D4A433000E279FF /* ConfigurationOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4AF2D4A433000E279FF /* ConfigurationOptions.swift */; };
+		AC7EA4B32D4B3F5000E279FF /* DismissManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4B22D4B3F4F00E279FF /* DismissManager.swift */; };
+		ACCC75A52D38E94300D50347 /* Contentnew.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCC75A42D38E93800D50347 /* Contentnew.swift */; };
+		ACCC75A72D38E9F100D50347 /* boxpay_ios_checkout.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AC6A65B92D2282B400B4DAE5 /* boxpay_ios_checkout.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		ACCC75A92D38EB7A00D50347 /* boxpay_ios_checkout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC6A65B92D2282B400B4DAE5 /* boxpay_ios_checkout.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		ACCC75A82D38E9F100D50347 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				ACCC75A72D38E9F100D50347 /* boxpay_ios_checkout.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		AC27EA1E2D2FA8950012B47A /* CheckoutSessionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutSessionResponse.swift; sourceTree = "<group>"; };
@@ -34,7 +72,30 @@
 		AC6A65C52D22833E00B4DAE5 /* MainCheckoutSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainCheckoutSheet.swift; sourceTree = "<group>"; };
 		AC6A65C72D22AE8100B4DAE5 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		AC6A65C92D22B20500B4DAE5 /* TestClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClass.swift; sourceTree = "<group>"; };
-		AC6A65F42D23B93400B4DAE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		AC6A65F42D23B93400B4DAE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AC7EA47F2D3E294100E279FF /* GeneralSuccessScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSuccessScreen.swift; sourceTree = "<group>"; };
+		AC7EA4812D40EA4E00E279FF /* PaymentResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentResponse.swift; sourceTree = "<group>"; };
+		AC7EA4832D40F6AA00E279FF /* PaymentFailureScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentFailureScreen.swift; sourceTree = "<group>"; };
+		AC7EA4862D422D2E00E279FF /* TimerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerManager.swift; sourceTree = "<group>"; };
+		AC7EA4882D4230CA00E279FF /* SessionExpireScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExpireScreen.swift; sourceTree = "<group>"; };
+		AC7EA48A2D4233AA00E279FF /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
+		AC7EA48C2D423F7D00E279FF /* TimeDifferenceCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeDifferenceCalculator.swift; sourceTree = "<group>"; };
+		AC7EA48E2D47558900E279FF /* AddCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCardView.swift; sourceTree = "<group>"; };
+		AC7EA4902D47881B00E279FF /* NavigationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationHelper.swift; sourceTree = "<group>"; };
+		AC7EA4932D47AD6000E279FF /* CVVInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVVInfoView.swift; sourceTree = "<group>"; };
+		AC7EA4952D49064200E279FF /* KeyboardDismissModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardDismissModifier.swift; sourceTree = "<group>"; };
+		AC7EA4972D49EFD300E279FF /* WebViewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewScreen.swift; sourceTree = "<group>"; };
+		AC7EA49D2D49FDEA00E279FF /* LoaderViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoaderViewModifier.swift; sourceTree = "<group>"; };
+		AC7EA49F2D4A04BB00E279FF /* CustomFailureSheetModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomFailureSheetModifier.swift; sourceTree = "<group>"; };
+		AC7EA4A32D4A088900E279FF /* PaymentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentViewModel.swift; sourceTree = "<group>"; };
+		AC7EA4A52D4A08BF00E279FF /* RepeatingTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepeatingTask.swift; sourceTree = "<group>"; };
+		AC7EA4A72D4A35D100E279FF /* PaymentResultDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentResultDelegate.swift; sourceTree = "<group>"; };
+		AC7EA4A92D4A35E200E279FF /* PaymentResultObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentResultObject.swift; sourceTree = "<group>"; };
+		AC7EA4AB2D4A35FB00E279FF /* PaymentCallbackManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentCallbackManager.swift; sourceTree = "<group>"; };
+		AC7EA4AD2D4A431E00E279FF /* PaymentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentViewController.swift; sourceTree = "<group>"; };
+		AC7EA4AF2D4A433000E279FF /* ConfigurationOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationOptions.swift; sourceTree = "<group>"; };
+		AC7EA4B22D4B3F4F00E279FF /* DismissManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissManager.swift; sourceTree = "<group>"; };
+		ACCC75A42D38E93800D50347 /* Contentnew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contentnew.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,7 +103,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AC27EA232D36483E0012B47A /* boxpay_ios_checkout.framework in Frameworks */,
+				ACCC75A92D38EB7A00D50347 /* boxpay_ios_checkout.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,6 +120,9 @@
 		AC27EA1D2D2FA8850012B47A /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				AC7EA4AF2D4A433000E279FF /* ConfigurationOptions.swift */,
+				AC7EA4A92D4A35E200E279FF /* PaymentResultObject.swift */,
+				AC7EA4812D40EA4E00E279FF /* PaymentResponse.swift */,
 				AC27EA1E2D2FA8950012B47A /* CheckoutSessionResponse.swift */,
 			);
 			path = Models;
@@ -121,15 +185,59 @@
 		AC6A65BB2D2282B400B4DAE5 /* boxpay-ios-checkout */ = {
 			isa = PBXGroup;
 			children = (
+				AC7EA4B12D4B3DE900E279FF /* PaymentUtils */,
+				AC7EA4852D422D2100E279FF /* Utils */,
+				AC7EA47E2D3E293700E279FF /* Screens */,
 				AC27EA262D3679B30012B47A /* Network */,
 				AC27EA1D2D2FA8850012B47A /* Models */,
 				AC6A65F42D23B93400B4DAE5 /* Info.plist */,
 				AC6A65BC2D2282B400B4DAE5 /* boxpay_ios_checkout.h */,
+				ACCC75A42D38E93800D50347 /* Contentnew.swift */,
 				AC6A65C52D22833E00B4DAE5 /* MainCheckoutSheet.swift */,
 				AC6A65C92D22B20500B4DAE5 /* TestClass.swift */,
 				AC6A65C72D22AE8100B4DAE5 /* Media.xcassets */,
 			);
 			path = "boxpay-ios-checkout";
+			sourceTree = "<group>";
+		};
+		AC7EA47E2D3E293700E279FF /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				AC7EA4932D47AD6000E279FF /* CVVInfoView.swift */,
+				AC7EA48E2D47558900E279FF /* AddCardView.swift */,
+				AC7EA4882D4230CA00E279FF /* SessionExpireScreen.swift */,
+				AC7EA4832D40F6AA00E279FF /* PaymentFailureScreen.swift */,
+				AC7EA47F2D3E294100E279FF /* GeneralSuccessScreen.swift */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		AC7EA4852D422D2100E279FF /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				AC7EA4B22D4B3F4F00E279FF /* DismissManager.swift */,
+				AC7EA49F2D4A04BB00E279FF /* CustomFailureSheetModifier.swift */,
+				AC7EA49D2D49FDEA00E279FF /* LoaderViewModifier.swift */,
+				AC7EA4972D49EFD300E279FF /* WebViewScreen.swift */,
+				AC7EA4952D49064200E279FF /* KeyboardDismissModifier.swift */,
+				AC7EA4902D47881B00E279FF /* NavigationHelper.swift */,
+				AC7EA48C2D423F7D00E279FF /* TimeDifferenceCalculator.swift */,
+				AC7EA48A2D4233AA00E279FF /* Color.swift */,
+				AC7EA4862D422D2E00E279FF /* TimerManager.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		AC7EA4B12D4B3DE900E279FF /* PaymentUtils */ = {
+			isa = PBXGroup;
+			children = (
+				AC7EA4AD2D4A431E00E279FF /* PaymentViewController.swift */,
+				AC7EA4AB2D4A35FB00E279FF /* PaymentCallbackManager.swift */,
+				AC7EA4A72D4A35D100E279FF /* PaymentResultDelegate.swift */,
+				AC7EA4A32D4A088900E279FF /* PaymentViewModel.swift */,
+				AC7EA4A52D4A08BF00E279FF /* RepeatingTask.swift */,
+			);
+			path = PaymentUtils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -153,6 +261,7 @@
 				AC59EF782D265A4500A12D2F /* Sources */,
 				AC59EF792D265A4500A12D2F /* Frameworks */,
 				AC59EF7A2D265A4500A12D2F /* Resources */,
+				ACCC75A82D38E9F100D50347 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -253,9 +362,32 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AC7EA4A82D4A35D200E279FF /* PaymentResultDelegate.swift in Sources */,
+				AC7EA4802D3E294400E279FF /* GeneralSuccessScreen.swift in Sources */,
+				ACCC75A52D38E94300D50347 /* Contentnew.swift in Sources */,
+				AC7EA49E2D49FDEC00E279FF /* LoaderViewModifier.swift in Sources */,
+				AC7EA4822D40EA5500E279FF /* PaymentResponse.swift in Sources */,
+				AC7EA4892D4230D600E279FF /* SessionExpireScreen.swift in Sources */,
+				AC7EA4982D49EFD500E279FF /* WebViewScreen.swift in Sources */,
+				AC7EA4AA2D4A35E200E279FF /* PaymentResultObject.swift in Sources */,
+				AC7EA4962D49064700E279FF /* KeyboardDismissModifier.swift in Sources */,
+				AC7EA48B2D4233B100E279FF /* Color.swift in Sources */,
+				AC7EA4842D40F6AC00E279FF /* PaymentFailureScreen.swift in Sources */,
+				AC7EA4B32D4B3F5000E279FF /* DismissManager.swift in Sources */,
 				AC27EA252D3667340012B47A /* APIManager.swift in Sources */,
+				AC7EA48F2D47558900E279FF /* AddCardView.swift in Sources */,
+				AC7EA4AC2D4A35FB00E279FF /* PaymentCallbackManager.swift in Sources */,
+				AC7EA4A42D4A088C00E279FF /* PaymentViewModel.swift in Sources */,
+				AC7EA4A02D4A04C900E279FF /* CustomFailureSheetModifier.swift in Sources */,
 				AC27EA212D2FDC070012B47A /* MainCheckoutSheet.swift in Sources */,
+				AC7EA4AE2D4A431E00E279FF /* PaymentViewController.swift in Sources */,
+				AC7EA4A62D4A08C600E279FF /* RepeatingTask.swift in Sources */,
+				AC7EA4912D47882D00E279FF /* NavigationHelper.swift in Sources */,
+				AC7EA4872D422D3100E279FF /* TimerManager.swift in Sources */,
+				AC7EA4B02D4A433000E279FF /* ConfigurationOptions.swift in Sources */,
+				AC7EA48D2D423F7F00E279FF /* TimeDifferenceCalculator.swift in Sources */,
 				AC27EA1F2D2FA8A10012B47A /* CheckoutSessionResponse.swift in Sources */,
+				AC7EA4942D47AD6000E279FF /* CVVInfoView.swift in Sources */,
 				AC6A65CA2D22B20500B4DAE5 /* TestClass.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -271,6 +403,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"BoxpayDemo/Preview Content\"";
+				DEVELOPMENT_TEAM = D96785JPX5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BoxpayDemo/Info.plist;
@@ -299,6 +432,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"BoxpayDemo/Preview Content\"";
+				DEVELOPMENT_TEAM = D96785JPX5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BoxpayDemo/Info.plist;
@@ -430,6 +564,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";

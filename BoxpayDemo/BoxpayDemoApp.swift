@@ -19,7 +19,6 @@ struct BoxpayDemoApp: App {
 } 
 
 
-
 struct ContentViewTest: View {
     @ObservedObject var viewModel: APIViewModel // Receive the shared view model
     @State private var navigateToCheckout = false // State to control navigation
@@ -66,13 +65,22 @@ struct ContentViewTest: View {
                 // Hidden NavigationLink to trigger navigation programmatically
                 //baseUrlFlag testing == 0, sandbox == 1, prod == 2
                 NavigationLink(
-                    destination: MainCheckoutSheet(token: viewModel.token ?? "",baseUrlFlag: 0),
+                    destination: MainCheckoutSheet(
+                        token: viewModel.token ?? "",
+                        baseUrlFlag: 0,
+                        onPaymentResult: { result in
+                            print("Payment Result aagya baabe: \(result.status)")
+                            // Handle result here (e.g., update UI, notify server, etc.)
+                        }
+                    ),
                     isActive: $navigateToCheckout
                 ) {
                     EmptyView()
                 }
             }
             .navigationBarTitle("Test App", displayMode: .inline)
+            .background(Color(UIColor.white)).preferredColorScheme(.light)
+                .navigationBarBackButtonHidden(true)
         }
     }
 }
@@ -193,23 +201,6 @@ class APIViewModel: ObservableObject {
               "imageUrl" : "https://assetscdn1.paytm.com/images/catalog/product/B/BA/BAGLAFILLE-BLUEINTO887307A255D05/1563381583133_0..jpg",
               "categories" : null,
               "amountWithoutTax" : 500,
-              "taxAmount" : 76.27,
-              "taxPercentage" : null,
-              "discountedAmount" : null,
-              "amountWithoutTaxLocale" : "10",
-              "amountWithoutTaxLocaleFull" : "10"
-            },{
-              "id" : "test2",
-              "itemName" : "La Fille Regular Solid Handheld Bag Blue",
-              "description" : "testProduct",
-              "quantity" : 2,
-              "manufacturer" : null,
-              "brand" : null,
-              "color" : null,
-              "productUrl" : null,
-              "imageUrl" : "https://assetscdn1.paytm.com/images/catalog/product/B/BA/BAGLAFILLE-BLUEINTO887307A255D05/1563381583133_0..jpg",
-              "categories" : null,
-              "amountWithoutTax" : 525,
               "taxAmount" : 76.27,
               "taxPercentage" : null,
               "discountedAmount" : null,
