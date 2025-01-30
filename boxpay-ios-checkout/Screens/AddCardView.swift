@@ -9,6 +9,7 @@
 import SwiftUI
 import Foundation
 import Combine
+import AlertToast
 
 @available(iOS 15.0, *)
 struct AddCardView: View {
@@ -33,6 +34,7 @@ struct AddCardView: View {
     @State private var isCardHolderNameTypedOnce: Bool = false
     @State private var showFailureScreen: Bool = false
     @State private var showSuccessSheet: Bool = false
+    @State private var showFieldErrorToast: Bool = false
     @State private var keyboardHeight: CGFloat = 0 // Tracks the keyboard height
     
     @State private var showWebView = false
@@ -57,7 +59,7 @@ struct AddCardView: View {
                 // Card Information Form
                 ScrollView {
                     Divider().frame(height: 1)
-                    VStack(spacing: 13) {
+                    VStack(spacing: 15) {
                         cardNumberField
                         expiryAndCvvFields
                         cardHolderNameField
@@ -169,8 +171,10 @@ struct AddCardView: View {
                     // Trigger the callback to pass the result back
                     PaymentCallbackManager.shared.triggerPaymentResult(result: result)
                     
+                    //closes the MainCheckoutSheet
+                    //DismissManager.shared.dismissAll() to dismiss all registered screens at once
+                    DismissManager.shared.dismiss("MainCheckoutSheet")
                     // Close the success screen
-                    DismissManager.shared.dismiss()
                     showSuccessSheet = false
                     dismiss()
                 }
@@ -183,7 +187,16 @@ struct AddCardView: View {
         }.onAppear {
             isLoading = false
         }
-        
+        .toast(isPresenting: $showFieldErrorToast, duration: 2, tapToDismiss: true, alert: {
+            AlertToast(displayMode: .banner(.pop), type: .regular, title: "Please fill all the fields")
+           //AlertToast goes here
+        }, onTap: {
+           //onTap would call either if `tapToDismis` is true/false
+           //If tapToDismiss is true, onTap would call and then dismis the alert
+        }, completion: {
+            showFieldErrorToast = false
+           //Completion block after dismiss
+        })
         .background(Color.white.ignoresSafeArea()).preferredColorScheme(.light)
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(.keyboard, edges: .bottom)
@@ -485,8 +498,12 @@ struct AddCardView: View {
     
     private var payNowButton: some View {
         Button(action: {
-            repeatingTask.startRepeatingTask(showSuccesScreen: $showSuccessSheet, showFailureScreen: $showFailureScreen, repeatingTask: repeatingTask, isLoading: $isLoading)
-            cardUrlViewModel.fetchCardPaymentUrl(isLoading: $isLoading, showFailureScreen: $showFailureScreen, cardNumber: cardNumber, cvv: cvv, expiry: convertExpiryDate(expiryDate) ?? "" , cardHolderName: cardHolderName)
+            if(isPayNowEnabled){
+                repeatingTask.startRepeatingTask(showSuccesScreen: $showSuccessSheet, showFailureScreen: $showFailureScreen, repeatingTask: repeatingTask, isLoading: $isLoading)
+                cardUrlViewModel.fetchCardPaymentUrl(isLoading: $isLoading, showFailureScreen: $showFailureScreen, cardNumber: cardNumber, cvv: cvv, expiry: convertExpiryDate(expiryDate) ?? "" , cardHolderName: cardHolderName)
+            }else{
+                showFieldErrorToast = true
+            }
         }) {
             Text("Pay Now")
                 .font(.system(size: 16, weight: .semibold))
@@ -603,14 +620,14 @@ class CardUrlViewModel: ObservableObject {
                 )
             ),
             shopper: ShopperCardView(
-                firstName: "Nitish",
-                lastName: "Arora",
+                firstName: "testing",
+                lastName: "testing_last_name",
                 gender: nil,
-                phoneNumber: "918556050340",
-                email: "nitish.arora@boxpay.tech",
+                phoneNumber: "919999999999",
+                email: "testing@boxpay.tech",
                 uniqueReference: "123xyz123",
                 dateOfBirth: "2024-11-14T10:31:00Z",
-                panNumber: "FONPV5455R"
+                panNumber: "CTGGW0006T"
             ),
             deviceDetails: DeviceDetails(
                 browser: "vivo",
