@@ -30,20 +30,20 @@ public struct CheckoutSession: Codable {
 
 // MARK: - PaymentDetails struct
 public struct PaymentDetails: Codable {
-    let context: Context
+    let context: ContextModel
     let money: Money
     let onDemandAmount: Bool
     let frontendReturnUrl: String?
     let frontendBackUrl: String?
     let billingAddress: String?
     let shopper: Shopper
-    let order: Order?
+    let order: OrderCheckOut?
     let product: String?
     let subscriptionDetails: String?
 }
 
 // MARK: - Context struct
-public struct Context: Codable {
+public struct ContextModel: Codable {
     let legalEntity: LegalEntity
     let countryCode: String?
     let localeCode: String?
@@ -98,7 +98,7 @@ public struct DeliveryAddress: Codable {
 }
 
 // MARK: - Order struct
-public struct Order: Codable {
+public struct OrderCheckOut: Codable {
     let voucherCode: String?
     let shippingAmount: Double
     let taxAmount: Double
@@ -183,8 +183,102 @@ public struct PaymentMethod: Codable, Hashable {
     let typeTitle: String?
     let logoUrl: String?
     let instrumentTypeValue: String?
-    let applicableOffers: [String]
+    let applicableOffers: [ApplicableOffer]? // Updated to handle both cases
+    let emiMethod: EmiMethod?
 }
+
+public enum ApplicableOffer: Codable, Hashable {
+    case string(String)
+    case object(ApplicableOfferDetails)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        if let stringValue = try? container.decode(String.self) {
+            self = .string(stringValue)
+        } else if let objectValue = try? container.decode(ApplicableOfferDetails.self) {
+            self = .object(objectValue)
+        } else {
+            throw DecodingError.typeMismatch(ApplicableOffer.self, DecodingError.Context(
+                codingPath: decoder.codingPath,
+                debugDescription: "Expected String or ApplicableOfferDetails"
+            ))
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .string(let stringValue):
+            try container.encode(stringValue)
+        case .object(let objectValue):
+            try container.encode(objectValue)
+        }
+    }
+}
+
+public struct ApplicableOfferDetails: Codable, Hashable {
+    let title: String?
+    let description: String?
+    let terms: String?
+    let type: String?
+    let code: String?
+    let discount: DiscountDetails?
+}
+
+public struct DiscountDetails: Codable, Hashable {
+    let percentage: Int?
+    let amount: Int?
+    let type: String?
+    let maxAmount: Int?
+}
+
+
+// Define the EmiMethod struct
+public struct EmiMethod: Codable, Hashable {
+    let brand: String?
+    let issuer: String?
+    let duration: Int?
+    let interestRate: Double?
+    let minAmount: Double?
+    let merchantPayback: String?
+    let subvention: String?
+    let processingFee: ProcessingFee?
+    let emiAmount: Double?
+    let totalAmount: Double?
+    let interestChargedAmount: Double?
+    let bankChargedInterestAmount: Double?
+    let merchantBorneInterestAmount: Double?
+    let logoUrl: String?
+    let netAmount: Double?
+    let merchantBorneInterestRate: Double?
+    let issuerTitle: String?
+    let effectiveInterestRate: Double?
+    let minAmountLocale: String?
+    let minAmountLocaleFull: String?
+    let emiAmountLocale: String?
+    let emiAmountLocaleFull: String?
+    let totalAmountLocale: String?
+    let totalAmountLocaleFull: String?
+    let interestChargedAmountLocale: String?
+    let interestChargedAmountLocaleFull: String?
+    let bankChargedInterestAmountLocale: String?
+    let bankChargedInterestAmountLocaleFull: String?
+    let merchantBorneInterestAmountLocale: String?
+    let merchantBorneInterestAmountLocaleFull: String?
+    let netAmountLocale: String?
+    let netAmountLocaleFull: String?
+}
+
+// Define the ProcessingFee struct
+public struct ProcessingFee: Codable, Hashable {
+    let feeType: String?
+    let percentage: Double?
+    let amount: Double?
+    let amountLocale: String?
+    let amountLocaleFull: String?
+}
+
 
 // MARK: - EnabledField struct
 public struct EnabledField: Codable {

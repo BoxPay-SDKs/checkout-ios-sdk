@@ -11,6 +11,7 @@ import Foundation
 class APIManager {
 
     private let baseURLKey = "BaseURLKey"
+    private let mainTokenKey = "mainTokenKey"
 
     // Get the current base URL (from UserDefaults)
     func getBaseURL() -> String {
@@ -23,10 +24,23 @@ class APIManager {
             return defaultBaseURL
         }
     }
+    
+    func getMainToken() -> String {
+        let defauktToken = ""
+        if let savedToken = UserDefaults.standard.string(forKey: mainTokenKey) {
+            return savedToken
+        } else {
+            return defauktToken
+        }
+    }
 
     // Set a new base URL (in UserDefaults)
     func setBaseURL(_ url: String) {
         UserDefaults.standard.set(url, forKey: baseURLKey)
+    }
+    
+    func setMainToken(_ token: String) {
+        UserDefaults.standard.set(token, forKey: mainTokenKey)
     }
     
     // Example API endpoint that uses the current base URL

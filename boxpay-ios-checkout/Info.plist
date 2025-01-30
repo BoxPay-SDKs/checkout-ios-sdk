@@ -5,10 +5,13 @@
     <!-- Allow querying for external apps -->
     <key>LSApplicationQueriesSchemes</key>
     <array>
-        <string>gpay</string>       <!-- Google Pay -->
-        <string>paytm</string>      <!-- Paytm -->
+        <string>tez</string>       <!-- Google Pay -->
+        <string>paytmmp</string>      <!-- Paytm -->
         <string>phonepe</string>    <!-- PhonePe -->
     </array>
+    
+    <!-- Force light mode -->
+    <key>UIUserInterfaceStyle</key>
+    <string>Light</string>
 </dict>
 </plist>
-
