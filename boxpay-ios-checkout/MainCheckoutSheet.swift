@@ -2,6 +2,7 @@ import SwiftUI
 import Foundation
 import UIKit
 import Combine
+import AlertToast
 
 
 extension Image {
@@ -192,7 +193,7 @@ public struct MainCheckoutSheet: View {
                             showSessionExpireScreen = true
                         }
                         
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.3) {
                             TimerManager.shared.startTimer(duration: 900)
                             self.processPaymentOptions()
                             isUpiIntentProcessing = false
@@ -262,23 +263,19 @@ public struct MainCheckoutSheet: View {
                             
                         }
                     }
+                    .toast(isPresenting: $isUpiIntentProcessing, duration: 100, tapToDismiss: false, alert: {
+                        AlertToast(type: .loading)
+                       //AlertToast goes here
+                    }, onTap: {
+                       //onTap would call either if `tapToDismis` is true/false
+                       //If tapToDismiss is true, onTap would call and then dismis the alert
+                    }, completion: {
+                        isUpiIntentProcessing = false
+                       //Completion block after dismiss
+                    })
             }
             
-            if isUpiIntentProcessing { // Check if loader is active
-                Color.black.opacity(0.5) // Background overlay
-                    .ignoresSafeArea() // Cover the entire screen
-                
-                VStack { // Loader VStack
-                    ProgressView() // Circular loader
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(2) // Adjust loader size
-                    
-                    Text("Loading...") // Loading text
-                        .foregroundColor(.white)
-                        .font(.system(size: 16, weight: .medium))
-                        .padding(.top, 10)
-                } // End of Loader VStack
-            }
+            
         }.navigate(to: AddCardView(), when: $moveToCardsPaymentScreen)
     }
 }

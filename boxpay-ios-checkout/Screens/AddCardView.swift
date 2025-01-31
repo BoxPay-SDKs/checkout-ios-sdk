@@ -81,22 +81,6 @@ struct AddCardView: View {
                     .transition(.move(edge: .bottom))
             }.animation(.bouncy, value: keyboardHeight)
             
-            if isLoading { // Check if loader is active
-                Color.black.opacity(0.5) // Background overlay
-                    .ignoresSafeArea() // Cover the entire screen
-                
-                VStack { // Loader VStack
-                    ProgressView() // Circular loader
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(2) // Adjust loader size
-                    
-                    Text("Loading, please wait...") // Loading text
-                        .foregroundColor(.white)
-                        .font(.system(size: 16, weight: .medium))
-                        .padding(.top, 10)
-                } // End of Loader VStack
-            }
-            
         }.onAppear {
             setupKeyboardListeners()
             repeatingTask.paymentViewModel = paymentViewModel
@@ -196,6 +180,13 @@ struct AddCardView: View {
         }, completion: {
             showFieldErrorToast = false
            //Completion block after dismiss
+        })
+        
+        .toast(isPresenting: $isLoading, duration: 100, tapToDismiss: false, alert: {
+            AlertToast(type: .loading)
+        }, onTap: {
+        }, completion: {
+            isLoading = false
         })
         .background(Color.white.ignoresSafeArea()).preferredColorScheme(.light)
         .navigationBarBackButtonHidden(true)
