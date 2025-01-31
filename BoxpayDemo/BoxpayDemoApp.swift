@@ -22,6 +22,12 @@ struct BoxpayDemoApp: App {
 struct ContentViewTest: View {
     @ObservedObject var viewModel: APIViewModel // Receive the shared view model
     @State private var navigateToCheckout = false // State to control navigation
+    @State private var hidden = true
+    @State private var inputToken: String = ""
+    @State private var baseUrlFlag: Int = 0
+    @State private var selectedOption: String = "Test" // Default selected item
+    let options = ["Test", "Sandbox", "Production"] // Spinner items
+    @State private var navigateToCheckoutUsingCustomToken = false
 
     var body: some View {
         NavigationView {
@@ -30,6 +36,60 @@ struct ContentViewTest: View {
                     .font(.largeTitle)
                     .padding()
 
+                if(hidden){
+                    TextField("Enter custom Token", text: $inputToken)
+                                .padding() // Add padding inside the field
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray, lineWidth: 1) // Gray border
+                                )
+                                .background(Color.white)
+                                .cornerRadius(8)
+                                .padding(.horizontal)
+                    
+                    Picker("Select an option", selection: $selectedOption) {
+                                    ForEach(options, id: \.self) { option in
+                                        Text(option).tag(option)
+                                    }
+                                }
+                                .pickerStyle(MenuPickerStyle())
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                                .background(Color.white)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray, lineWidth: 1) // Gray outline
+                                )
+                                .cornerRadius(8)
+                                .padding(.horizontal) 
+                                .onChange(of: selectedOption) { newValue in
+                                    print("Selected item: \(newValue)")
+                                    if(newValue == "Test"){
+                                        baseUrlFlag = 0
+                                    }else if(newValue == "Sandbox"){
+                                        baseUrlFlag = 1
+                                    }else if(newValue == "Production"){
+                                        baseUrlFlag = 2
+                                    }
+                                }
+                    
+                    Button(action: {
+                        if(!inputToken.isEmpty){
+                            navigateToCheckoutUsingCustomToken = true
+                        }
+                    }) {
+                        Text("Use custom token")
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(width: 250, height: 50)
+                            .background(viewModel.isLoading ? Color.gray : Color.blue)
+                            .cornerRadius(8)
+                    }
+                    .disabled(viewModel.isLoading)
+                    .padding(.top, 20)
+                }
+                
+
                 Button(action: {
                     viewModel.generateToken { success in
                         if success {
@@ -37,7 +97,7 @@ struct ContentViewTest: View {
                         }
                     }
                 }) {
-                    Text("Proceed to Checkout")
+                    Text("Use Default Token")
                         .foregroundColor(.white)
                         .padding()
                         .frame(width: 250, height: 50)
@@ -74,6 +134,21 @@ struct ContentViewTest: View {
                         }
                     ),
                     isActive: $navigateToCheckout
+                ) {
+                    EmptyView()
+                }
+                
+                //custom token naviagtion
+                NavigationLink(
+                    destination: MainCheckoutSheet(
+                        token: inputToken,
+                        baseUrlFlag: baseUrlFlag,
+                        onPaymentResult: { result in
+                            print("Payment Result aagya baabe 2: \(result.status)")
+                            // Handle result here (e.g., update UI, notify server, etc.)
+                        }
+                    ),
+                    isActive: $navigateToCheckoutUsingCustomToken
                 ) {
                     EmptyView()
                 }
@@ -148,13 +223,13 @@ class APIViewModel: ObservableObject {
                     "email": "ankush.kashyap@boxpay.tech",
                     "uniqueReference": "x123y",
                     "deliveryAddress": {
-                        "address1": "first line",
-                        "address2": "second line",
+                        "address1": "#667",
+                        "address2": "Sector-31",
                         "address3": null,
                         "city": "Chandigarh",
                         "state": "Chandigarh",
                         "countryCode": "IN",
-                        "postalCode": "160002",
+                        "postalCode": "160030",
                         "shopperRef": null,
                         "addressRef": null,
                         "labelType": "Other",
