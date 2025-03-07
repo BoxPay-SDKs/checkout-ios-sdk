@@ -125,6 +125,8 @@ class UPIIntentViewModel: ObservableObject {
         let url: String
     }
     
+    
+    
     func generateRandomAlphanumericString(length: Int) -> String {
         let charPool = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
         return String((0..<length).compactMap { _ in charPool.randomElement() })

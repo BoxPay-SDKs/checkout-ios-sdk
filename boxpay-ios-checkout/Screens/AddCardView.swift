@@ -16,6 +16,8 @@ struct AddCardView: View {
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.dismiss) var dismiss
     var onGoBackToApp: (() -> Void)?
+    var emi: PaymentMethod? // ✅ Accept EMI object
+
     @State private var cardNumber: String = ""
     @State private var expiryDate: String = ""
     @State private var cvv: String = ""
@@ -27,6 +29,7 @@ struct AddCardView: View {
     @State private var isPayNowEnabled: Bool = false
     @State private var isCheckboxChecked: Bool = false
     @State private var showCvvInfo: Bool = false
+    @State private var showRbiGuidelines: Bool = false
     @State private var isCardNumberValid: Bool = true
     @State private var isExpiryDateValid: Bool = true
     @State private var isCVVValid: Bool = true
@@ -44,8 +47,11 @@ struct AddCardView: View {
     
     @ObservedObject var cardUrlViewModel = CardUrlViewModel()
     @StateObject private var paymentViewModel = PaymentViewModel()
-    private let repeatingTask = RepeatingTask()
-    
+    @StateObject private var checkOutViewModel = CheckoutViewModel()
+    @StateObject private var repeatingTask = RepeatingTask()
+    private var currencySymbol: String{
+        checkOutViewModel.sessionData?.paymentDetails.money.currencySymbol ?? "₹"
+    }
     enum FocusField {
         case cardNumber, expiryDate, cvv, cardHolderName
     }
@@ -54,12 +60,21 @@ struct AddCardView: View {
         ZStack {
             VStack(spacing: 15) {
                 // Header
-                header
+                PaymentHeaderView(
+                    title: "Card Payment",
+                    itemCount: checkOutViewModel.sessionData?.paymentDetails.order?.items?.count ?? 0,
+                    totalPrice: checkOutViewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "0",
+                    currencySymbol: currencySymbol,
+                    onBack: { presentationMode.wrappedValue.dismiss() }
+                )
+                Divider()
                 
                 // Card Information Form
                 ScrollView {
-                    Divider().frame(height: 1)
                     VStack(spacing: 15) {
+                        if emi != nil {
+                            EMIInfoRow(emi: emi, currencySymbol : currencySymbol)
+                        }
                         cardNumberField
                         expiryAndCvvFields
                         cardHolderNameField
@@ -83,9 +98,12 @@ struct AddCardView: View {
             
         }.onAppear {
             setupKeyboardListeners()
+            let apiManager = APIManager()
+            checkOutViewModel.getCheckoutSession(token: apiManager.getMainToken())
             repeatingTask.paymentViewModel = paymentViewModel
         }
         .onDisappear {
+            repeatingTask.stopRepeatingTask()
             removeKeyboardListeners()
         }
         .sheet(isPresented: $showCvvInfo) {
@@ -101,6 +119,19 @@ struct AddCardView: View {
         }.onDisappear{
             showCvvInfo = false
         }
+        .sheet(isPresented: $showRbiGuidelines) {
+            if #available(iOS 16.0, *) {
+                RBIGuidelinesView(onGoBack: {
+                    showRbiGuidelines = false
+                })
+                .presentationDetents([.height(350)]) // Optional: Set height dynamically
+                .presentationDragIndicator(.visible)
+            } else {
+                // Fallback on earlier versions
+            } // Show drag indicator
+        }.onDisappear{
+            showRbiGuidelines = false
+        }
         .onChange(of: cardUrlViewModel.redirectURL) { newURL in
             // Update state variables when redirectURL changes
             if let url = newURL, !url.isEmpty {
@@ -108,26 +139,33 @@ struct AddCardView: View {
                 showWebView = true  // Show WebView when URL is set
             }
         }
-        .sheet(isPresented: $showWebView) {
+        .sheet(isPresented: $showWebView, onDismiss: {
+            print("WebView closed by user!") // ✅ Detect if user closed manually
+            showFailureScreen = true // ✅ Custom function to handle dismissal
+            isLoading = false
+        }) {
             if let validURL = URL(string: dynamicURL) {
                 WebView(
                     url: validURL,
-                    onDismiss: { showWebView = false } // Close WebView on condition
+                    onDismiss: {
+                        showWebView = false
+                        print("WebView closed after action!") // ✅ Detect if closed after an action
+                    }
                 )
-            } else {
-                Text("Invalid URL") // Show error if URL is invalid
             }
         }
         .sheet(isPresented: $showFailureScreen) {
             if #available(iOS 16.0, *) {
-                PaymentFailureScreen(
+                PaymentFailureScreen(transactionID: paymentViewModel.transactionId, reasonCode: paymentViewModel.reasonCode, reason: paymentViewModel.statusReason,
                     onRetryPayment: {
                         print("Retry Payment action from sheet")
                         showFailureScreen = false
+                        repeatingTask.stopRepeatingTask()
+                        //dismiss()
                     },
                     onReturnToPaymentOptions: {
                         showFailureScreen = false
-                        dismiss()
+                        repeatingTask.stopRepeatingTask()
                         print("Return to Payment Options action from sheet")
                     }
                 )
@@ -159,6 +197,7 @@ struct AddCardView: View {
                     //DismissManager.shared.dismissAll() to dismiss all registered screens at once
                     DismissManager.shared.dismiss("MainCheckoutSheet")
                     // Close the success screen
+                    repeatingTask.stopRepeatingTask()
                     showSuccessSheet = false
                     dismiss()
                 }
@@ -215,6 +254,71 @@ struct AddCardView: View {
         .background(Color.white)
     }
     
+    
+    
+    struct EMIInfoRow: View {
+        var emi: PaymentMethod?
+        let currencySymbol: String
+
+
+        var body: some View {
+            if let emi = emi {
+                HStack(spacing: 10) {
+                    // ✅ Bank Logo
+                    bankImageView(bank: emi)
+                        .frame(width: 30, height: 30)
+                        .clipShape(Circle())
+                        .padding(.leading, 2)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                    
+                    Text(emi.emiMethod?.issuerTitle ?? "Unknown Bank")
+                        .font(.system(size: 16, weight: .semibold))
+
+                    Spacer()
+                    
+                    Text("|")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(Color.gray)
+                        .padding(.trailing,5)
+                    
+                    // ✅ Bank Name
+                    VStack(alignment: .leading, spacing: 2) {
+                        
+
+                        Text("\(emi.emiMethod?.duration ?? 0) months x \(currencySymbol)\(emi.emiMethod?.emiAmount ?? 0, specifier: "%.0f")")
+                            .font(.system(size: 14))
+                            .foregroundColor(.black)
+
+                        Text("@\(emi.emiMethod?.interestRate ?? 0.0, specifier: "%.1f")% p.a.")
+                            .font(.system(size: 12))
+                            .foregroundColor(.gray)
+                    }
+
+                }
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray, lineWidth: 1)
+                )
+            }
+        }
+        
+        private func bankImageView(bank: PaymentMethod) -> some View {
+            Group {
+                if let imageURL = URL(string: bank.logoUrl ?? "") {
+                    SVGImageView(url: imageURL.absoluteString)
+                        .frame(width: 30, height: 30)
+                } else {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .frame(width: 30, height: 30)
+                        .clipShape(Circle())
+                        .foregroundColor(.red)
+                }
+            }
+        }
+    }
+
+    
     private var cardNumberField: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack {
@@ -242,31 +346,36 @@ struct AddCardView: View {
                                     print("Failed to fetch card network information")
                                 }
                             }
-                        }else{
+                        } else {
                             cardBrand = ""
                         }
                     }
+                    .onSubmit {
+                        // Validate card number when the user submits or moves to the next field
+                        isCardNumberValid = cardNumber.replacingOccurrences(of: " ", with: "").count == 16
+                    }
+                
                 if cardBrand.isEmpty {
                     Image(systemName: "creditcard")
                         .foregroundColor(.gray)
                         .frame(width: 22, height: 20)
-                } else if(cardBrand == "VISA") {
+                } else if cardBrand == "VISA" {
                     Image(frameworkAsset: "visa_logo")
                         .resizable()
                         .frame(width: 30, height: 20)
-                }else if(cardBrand == "Mastercard") {
+                } else if cardBrand == "Mastercard" {
                     Image(frameworkAsset: "master_card_logo")
                         .resizable()
                         .frame(width: 30, height: 20)
-                }else if(cardBrand == "RUPAY") {
+                } else if cardBrand == "RUPAY" {
                     Image(frameworkAsset: "rupay_logo")
                         .resizable()
                         .frame(width: 30, height: 20)
-                }else if(cardBrand == "Maestro") {
+                } else if cardBrand == "Maestro" {
                     Image(frameworkAsset: "maestro_logo")
                         .resizable()
                         .frame(width: 30, height: 20)
-                }else if(cardBrand == "AmericanExpress") {
+                } else if cardBrand == "AmericanExpress" {
                     Image(frameworkAsset: "american_express_logo")
                         .resizable()
                         .frame(width: 30, height: 20)
@@ -276,33 +385,33 @@ struct AddCardView: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(
-                        (!isCardNumberValid && !cardNumber.isEmpty)
-                        ? Color.red // Highest priority for invalid input
+                        (!isCardNumberValid && focusedField != .cardNumber && !cardNumber.isEmpty)
+                        ? Color.red // Show error only when not focused and invalid
                         : (focusedField == .cardNumber
-                           ? Color.green // When focused and valid
+                           ? Color.green // When focused
                            : Color.gray), // Default state
                         lineWidth: 1
                     )
             )
-            if(!isCardNumberValid && cardNumber != ""){
+            
+            if !isCardNumberValid && focusedField != .cardNumber && !cardNumber.isEmpty {
                 HStack {
-                    Text("Oops! This card number invalid")
+                    Text("Oops! This card number is invalid")
                         .font(.system(size: 12, weight: .medium))
-                        .padding(.leading,5)
+                        .padding(.leading, 5)
                         .foregroundColor(Color(hex: "#E12121"))
                     Spacer()
                 }
             }
         }
-        .padding(.top, 10)
+        .padding(.top, 1)
     }
-    
-    
+
     private var expiryAndCvvFields: some View {
         HStack(alignment: .top, spacing: 12) {
             // Expiry Date
             VStack(alignment: .leading, spacing: 8) {
-                TextField("MM/YY", text: $expiryDate)
+                TextField("Expiry(MM/YY)", text: $expiryDate)
                     .keyboardType(.numberPad)
                     .focused($focusedField, equals: .expiryDate)
                     .onChange(of: expiryDate) { newValue in
@@ -310,20 +419,39 @@ struct AddCardView: View {
                         expiryDate = formatExpiryDate(newValue)
                         updatePayNowButtonState()
                     }
+                    .onSubmit {
+                        // Validate expiry date when the user submits or moves to the next field
+                        let expiryDateRegex = #"^(0[1-9]|1[0-2])\/\d{2}$"#
+                        if let _ = expiryDate.range(of: expiryDateRegex, options: .regularExpression) {
+                            let components = expiryDate.split(separator: "/")
+                            if components.count == 2,
+                               let month = Int(components[0]),
+                               let year = Int("20" + components[1]) {
+                                let calendar = Calendar.current
+                                let currentYear = calendar.component(.year, from: Date())
+                                let currentMonth = calendar.component(.month, from: Date())
+                                isExpiryDateValid = (year > currentYear) || (year == currentYear && month >= currentMonth)
+                            } else {
+                                isExpiryDateValid = false
+                            }
+                        } else {
+                            isExpiryDateValid = false
+                        }
+                    }
                     .padding()
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(
-                                (!isExpiryDateValid && !expiryDate.isEmpty)
-                                ? Color.red // Highest priority for invalid input
+                                (!isExpiryDateValid && focusedField != .expiryDate && !expiryDate.isEmpty)
+                                ? Color.red // Show error only when not focused and invalid
                                 : (focusedField == .expiryDate
-                                   ? Color.green // When focused and valid
+                                   ? Color.green // When focused
                                    : Color.gray), // Default state
                                 lineWidth: 1
                             )
                     )
                 
-                if (!isExpiryDateValid && expiryDate != "") {
+                if !isExpiryDateValid && focusedField != .expiryDate && !expiryDate.isEmpty {
                     HStack {
                         Text("Oops! Expiry is invalid")
                             .font(.system(size: 12, weight: .medium))
@@ -345,9 +473,15 @@ struct AddCardView: View {
                             cvv = formatCVV(newValue) // Limit CVV to 3 digits
                             updatePayNowButtonState()
                         }
+                        .onSubmit {
+                            // Validate CVV when the user submits or moves to the next field
+                            isCVVValid = cvv.count == 3 && Int(cvv) != nil
+                        }
                     
                     Image(systemName: "questionmark.circle")
                         .foregroundColor(.gray)
+                        .background(Color.clear) // Ensure background doesn’t interfere
+                        .contentShape(Rectangle()) // Expands tap target
                         .onTapGesture {
                             showCvvInfo = true
                         }
@@ -356,17 +490,16 @@ struct AddCardView: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(
-                            (!isCVVValid && !cvv.isEmpty)
-                            ? Color.red // Highest priority for invalid input
+                            (!isCVVValid && focusedField != .cvv && !cvv.isEmpty)
+                            ? Color.red // Show error only when not focused and invalid
                             : (focusedField == .cvv
-                               ? Color.green // When focused and valid
+                               ? Color.green // When focused
                                : Color.gray), // Default state
                             lineWidth: 1
                         )
                 )
                 
-                if (!isCVVValid && cvv != "") {
-                    
+                if !isCVVValid && focusedField != .cvv && !cvv.isEmpty {
                     HStack {
                         Text("Oops! CVV is invalid")
                             .font(.system(size: 12, weight: .medium))
@@ -376,8 +509,8 @@ struct AddCardView: View {
                         Spacer()
                     }
                 }
-            } .alignmentGuide(.top) { _ in 0 }
-            
+            }
+            .alignmentGuide(.top) { _ in 0 }
         }
     }
     
@@ -427,27 +560,32 @@ struct AddCardView: View {
             TextField("Enter name on the card", text: $cardHolderName)
                 .focused($focusedField, equals: .cardHolderName)
                 .onChange(of: cardHolderName) { _ in
-                    isCardHolderNameTypedOnce = true
+                    // Update Pay Now button state as the user types
                     updatePayNowButtonState()
+                }
+                .onSubmit {
+                    // Validate card holder name when the user submits or moves to the next field
+                    isCardHolderNameValid = !cardHolderName.isEmpty
                 }
                 .padding()
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(
-                            (!isCardHolderNameValid && !cardHolderName.isEmpty)
-                            ? Color.red // Highest priority for invalid input
+                            (!isCardHolderNameValid && focusedField != .cardHolderName && !cardHolderName.isEmpty)
+                            ? Color.red // Show error only when not focused and invalid
                             : (focusedField == .cardHolderName
-                               ? Color.green // When focused and valid
+                               ? Color.green // When focused
                                : Color.gray), // Default state
                             lineWidth: 1
                         )
                 )
             
-            if(!isCardHolderNameValid && isCardHolderNameTypedOnce){
+            // Show error message only when the field is not focused and invalid
+            if !isCardHolderNameValid && focusedField != .cardHolderName && !cardHolderName.isEmpty {
                 HStack {
                     Text("Oops! Card holder name is invalid")
                         .font(.system(size: 12, weight: .medium))
-                        .padding(.leading,5)
+                        .padding(.leading, 5)
                         .foregroundColor(Color(hex: "#E12121"))
                         .lineLimit(1)
                     Spacer()
@@ -483,20 +621,36 @@ struct AddCardView: View {
                 .font(.system(size: 12, weight: .semibold))
                 .underline()
                 .foregroundColor(.green)
+                .onTapGesture {
+                    showRbiGuidelines = true
+                }
             Spacer()
         }
     }
     
     private var payNowButton: some View {
         Button(action: {
-            if(isPayNowEnabled){
-                repeatingTask.startRepeatingTask(showSuccesScreen: $showSuccessSheet, showFailureScreen: $showFailureScreen, repeatingTask: repeatingTask, isLoading: $isLoading)
-                cardUrlViewModel.fetchCardPaymentUrl(isLoading: $isLoading, showFailureScreen: $showFailureScreen, cardNumber: cardNumber, cvv: cvv, expiry: convertExpiryDate(expiryDate) ?? "" , cardHolderName: cardHolderName)
-            }else{
+            if isPayNowEnabled {
+                repeatingTask.startRepeatingTask(
+                    showSuccesScreen: $showSuccessSheet,
+                    showFailureScreen: $showFailureScreen,
+                    isLoading: $isLoading
+                )
+                cardUrlViewModel.fetchCardPaymentUrl(
+                    isLoading: $isLoading,
+                    showFailureScreen: $showFailureScreen,
+                    cardNumber: cardNumber,
+                    cvv: cvv,
+                    expiry: convertExpiryDate(expiryDate) ?? "",
+                    cardHolderName: cardHolderName,
+                    emi: emi,
+                    saveCard: isCheckboxChecked
+                )
+            } else {
                 showFieldErrorToast = true
             }
         }) {
-            Text("Pay Now")
+            Text("Proceed to Pay " + currencySymbol + (checkOutViewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "0"))
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
@@ -504,6 +658,7 @@ struct AddCardView: View {
                 .background(isPayNowEnabled ? Color.green : Color.gray) // Toggle background color
                 .cornerRadius(8)
         }
+
     }
     
     // MARK: - Update Pay Now Button State
@@ -513,14 +668,33 @@ struct AddCardView: View {
         
         // Check if expiry date matches the MM/yy format
         let expiryDateRegex = #"^(0[1-9]|1[0-2])\/\d{2}$"#
-        isExpiryDateValid = expiryDate.range(of: expiryDateRegex, options: .regularExpression) != nil
-        
+        if expiryDate.range(of: expiryDateRegex, options: .regularExpression) != nil {
+            let components = expiryDate.split(separator: "/")
+            if components.count == 2,
+               let month = Int(components[0]),
+               let year = Int("20" + components[1]) { // Convert yy to yyyy
+
+                let calendar = Calendar.current
+                let currentYear = calendar.component(.year, from: Date())
+                let currentMonth = calendar.component(.month, from: Date())
+
+                // ✅ Expiry date must be in the future
+                isExpiryDateValid = (year > currentYear) || (year == currentYear && month >= currentMonth)
+            } else {
+                isExpiryDateValid = false
+            }
+        } else {
+            isExpiryDateValid = false
+        }
+
         // Check if CVV is exactly 3 digits
         isCVVValid = cvv.count == 3 && Int(cvv) != nil
         isCardHolderNameValid = !cardHolderName.isEmpty
+        
         // Update the Pay Now button state
         isPayNowEnabled = isCardNumberValid && isExpiryDateValid && isCVVValid && isCardHolderNameValid
     }
+
     
     
     // MARK: - Keyboard Listeners
@@ -561,198 +735,6 @@ struct AddCardView: View {
         return nil
     }
 }
-
-
-class CardUrlViewModel: ObservableObject {
-    @Published var statusMessage: String?
-    @Published var redirectURL: String?
-    @Published var errorMessage: String?
-    
-    private var cancellables = Set<AnyCancellable>()
-    
-    func fetchCardPaymentUrl(isLoading: Binding<Bool>,showFailureScreen : Binding<Bool>, cardNumber: String, cvv: String, expiry: String, cardHolderName: String) {
-        isLoading.wrappedValue = true
-        let apiManager = APIManager()
-        guard let url = URL(string: "\(apiManager.getBaseURL())v0/checkout/sessions/\(apiManager.getMainToken())") else {
-            errorMessage = "Invalid URL"
-            isLoading.wrappedValue = false
-            showFailureScreen.wrappedValue = true
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue(generateRandomAlphanumericString(length: 10), forHTTPHeaderField: "X-Request-Id")
-        request.addValue("iOS SDK", forHTTPHeaderField: "X-Client-Connector-Name")
-        request.addValue("1.0.0", forHTTPHeaderField: "X-Client-Connector-Version")
-        
-        // Build the request body using Codable structs
-        let requestBody = RequestBody(
-            browserData: BrowserData(
-                screenHeight: "2324",
-                screenWidth: "1080",
-                acceptHeader: "application/json",
-                userAgentHeader: "Mozilla/5.0 (Linux; Android 13; V2055 Build/TP1A.220624.014; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/130.0.6723.86 Mobile Safari/537.36",
-                browserLanguage: "en_US",
-                ipAddress: "null",
-                colorDepth: 24,
-                javaEnabled: true,
-                timeZoneOffSet: 330,
-                packageId: "com.boxpay.checkout.demoapp"
-            ),
-            instrumentDetails: InstrumentDetails(
-                type: "card/plain",
-                card: Card(
-                    number: cardNumber,
-                    expiry: expiry,
-                    cvc: cvv,
-                    holderName: cardHolderName
-                )
-            ),
-            shopper: ShopperCardView(
-                firstName: "testing",
-                lastName: "testing_last_name",
-                gender: nil,
-                phoneNumber: "919999999999",
-                email: "testing@boxpay.tech",
-                uniqueReference: "123xyz123",
-                dateOfBirth: "2024-11-14T10:31:00Z",
-                panNumber: "CTGGW0006T"
-            ),
-            deviceDetails: DeviceDetails(
-                browser: "vivo",
-                platformVersion: "13",
-                deviceType: "vivo",
-                deviceName: "vivo",
-                deviceBrandName: "V2055"
-            )
-        )
-        
-        do {
-            let jsonData = try JSONEncoder().encode(requestBody)
-            request.httpBody = jsonData
-        } catch {
-            print("Error encoding request body: \(error.localizedDescription)")
-            errorMessage = "Failed to encode request data"
-            isLoading.wrappedValue = false
-            showFailureScreen.wrappedValue = true
-            return
-        }
-        
-        // Log the request body for debugging
-        if let bodyString = String(data: request.httpBody ?? Data(), encoding: .utf8) {
-            print("Request Body: \(bodyString)")
-        }
-        
-        // Perform the network request
-        URLSession.shared.dataTaskPublisher(for: request)
-            .tryMap { data, response -> Data in
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    print("HTTP Response Status Code: \((response as? HTTPURLResponse)?.statusCode ?? -1)")
-                    throw URLError(.badServerResponse)
-                }
-                return data
-            }
-            .decode(type: APIResponseCardView.self, decoder: JSONDecoder())
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { [weak self] completion in
-                switch completion {
-                case .failure(let error):
-                    print("Request failed with error: \(error.localizedDescription)")
-                    self?.errorMessage = error.localizedDescription
-                    showFailureScreen.wrappedValue = true
-                case .finished:
-                    print("Request finished successfully")
-                }
-            }, receiveValue: { [weak self] response in
-                self?.statusMessage = response.status.reason
-                self?.redirectURL = response.actions.first?.url // Update the redirectURL
-                print("Status: \(response.status.reason)")
-                print("Redirect URL: \(response.actions.first?.url ?? "Not available")")
-            })
-            .store(in: &cancellables)
-    }
-    
-    private func generateRandomAlphanumericString(length: Int) -> String {
-        let charPool = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
-        return String((0..<length).compactMap { _ in charPool.randomElement() })
-    }
-}
-
-
-// MARK: - Codable Structs
-struct RequestBody: Codable {
-    let browserData: BrowserData
-    let instrumentDetails: InstrumentDetails
-    let shopper: ShopperCardView
-    let deviceDetails: DeviceDetails
-}
-
-struct BrowserData: Codable {
-    let screenHeight: String
-    let screenWidth: String
-    let acceptHeader: String
-    let userAgentHeader: String
-    let browserLanguage: String
-    let ipAddress: String
-    let colorDepth: Int
-    let javaEnabled: Bool
-    let timeZoneOffSet: Int
-    let packageId: String
-}
-
-struct InstrumentDetails: Codable {
-    let type: String
-    let card: Card
-}
-
-struct Card: Codable {
-    let number: String
-    let expiry: String
-    let cvc: String
-    let holderName: String
-}
-
-struct ShopperCardView: Codable {
-    let firstName: String
-    let lastName: String
-    let gender: String?
-    let phoneNumber: String
-    let email: String
-    let uniqueReference: String
-    let dateOfBirth: String
-    let panNumber: String
-}
-
-struct DeviceDetails: Codable {
-    let browser: String
-    let platformVersion: String
-    let deviceType: String
-    let deviceName: String
-    let deviceBrandName: String
-}
-
-struct APIResponseCardView: Codable {
-    let transactionId: String
-    let transactionTimestamp: String
-    let status: StatusCardView
-    let actions: [ActionCardView]
-    
-    struct StatusCardView: Codable {
-        let operation: String
-        let status: String
-        let reason: String
-        let reasonCode: String
-    }
-    
-    struct ActionCardView: Codable {
-        let method: String
-        let url: String
-        let type: String
-    }
-}
-
 
 
 func makeCardNetworkIdentificationCall(cardNumber: String, completion: @escaping ([String]?, String?) -> Void) {

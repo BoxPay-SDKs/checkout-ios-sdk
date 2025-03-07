@@ -124,18 +124,19 @@ struct ContentViewTest: View {
 
                 // Hidden NavigationLink to trigger navigation programmatically
                 //baseUrlFlag testing == 0, sandbox == 1, prod == 2
-                NavigationLink(
-                    destination: MainCheckoutSheet(
-                        token: viewModel.token ?? "",
-                        baseUrlFlag: 0,
-                        onPaymentResult: { result in
-                            print("Payment Result aagya baabe: \(result.status)")
-                            // Handle result here (e.g., update UI, notify server, etc.)
-                        }
-                    ),
-                    isActive: $navigateToCheckout
-                ) {
-                    EmptyView()
+                if let token = viewModel.token, !token.isEmpty {
+                    NavigationLink(
+                        destination: MainCheckoutSheet(
+                            token: token,
+                            baseUrlFlag: baseUrlFlag,
+                            onPaymentResult: { result in
+                                print("Payment Result: \(result.status)")
+                            }
+                        ),
+                        isActive: $navigateToCheckout
+                    ) {
+                        EmptyView()
+                    }
                 }
                 
                 //custom token naviagtion
@@ -193,7 +194,7 @@ class APIViewModel: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer tVTBfIiwpdR5gUlUQ9cDGfO9NceZ4p4QUIclTQnPWcVvZlLyOOEPJ3nF18UKvvpfAcNCSgr4VDzQiAkTXhhBbs", forHTTPHeaderField: "Authorization")
+        request.addValue("Bearer i8zuZD3mR9SYvT29z3p4DHRigXBcL5Cu5H2Lpl5M9w1LP7BVqj79YE09vhrskbXTbJjtZ5HsLFfivNjtdCZZZk", forHTTPHeaderField: "Authorization")
         request.addValue("Android SDK", forHTTPHeaderField: "X-Client-Connector-Name")
         request.addValue("1.0.0", forHTTPHeaderField: "X-Client-Connector-Version")
 
@@ -203,7 +204,7 @@ class APIViewModel: ObservableObject {
           "context" : {
             "countryCode" : "IN",
             "legalEntity" : {
-              "code" : "easebuzz"
+              "code" : "razorpay"
             },
             "orderId" : "test12"
           },
@@ -281,6 +282,23 @@ class APIViewModel: ObservableObject {
               "discountedAmount" : null,
               "amountWithoutTaxLocale" : "10",
               "amountWithoutTaxLocaleFull" : "10"
+            },{
+              "id" : "test4",
+              "itemName" : "La Fille Regular Solid Handheld Bag Blue",
+              "description" : "testProduct",
+              "quantity" : 1,
+              "manufacturer" : null,
+              "brand" : null,
+              "color" : null,
+              "productUrl" : null,
+              "imageUrl" : "https://assetscdn1.paytm.com/images/catalog/product/B/BA/BAGLAFILLE-BLUEINTO887307A255D05/1563381583133_0..jpg",
+              "categories" : null,
+              "amountWithoutTax" : 500,
+              "taxAmount" : 76.27,
+              "taxPercentage" : null,
+              "discountedAmount" : null,
+              "amountWithoutTaxLocale" : "10",
+              "amountWithoutTaxLocaleFull" : "10"
             }]
           },
           "statusNotifyUrl" : "https://www.boxpay.tech",
@@ -297,24 +315,45 @@ class APIViewModel: ObservableObject {
                 self.isLoading = false
 
                 if let error = error {
+                    if let urlError = error as? URLError {
+                        print("❌ URL Error: \(urlError.localizedDescription)")
+                        print("⏳ Failure Reason: \(String(describing: urlError.failureURLString))")
+                        print("📡 Network Status: \(String(describing: urlError.networkUnavailableReason))")
+                    } else {
+                        print("❌ Request failed: \(error.localizedDescription)")
+                    }
                     self.errorMessage = "Request failed: \(error.localizedDescription)"
                     completion(false)
                     return
                 }
 
-                guard let data = data,
-                      let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                      let token = json["token"] as? String else {
-                    self.errorMessage = "Failed to parse response."
-                    completion(false)
-                    return
+                if let httpResponse = response as? HTTPURLResponse {
+                    print("📥 Response Code: \(httpResponse.statusCode)")
+                    print("📜 Headers: \(httpResponse.allHeaderFields)")
                 }
 
-                self.token = token
-                print("Token: \(token)")
-                completion(true)
+                if let data = data {
+                    let responseString = String(data: data, encoding: .utf8) ?? "❌ Unable to decode response"
+                    print("📩 Response Data: \(responseString)")
+
+                    guard let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                          let token = json["token"] as? String else {
+                        self.errorMessage = "Failed to parse response."
+                        completion(false)
+                        return
+                    }
+
+                    self.token = token
+                    print("✅ Token: \(token)")
+                    completion(true)
+                } else {
+                    print("❌ No data received from server.")
+                    self.errorMessage = "No data received from server."
+                    completion(false)
+                }
             }
         }.resume()
+
     }
 }
 
