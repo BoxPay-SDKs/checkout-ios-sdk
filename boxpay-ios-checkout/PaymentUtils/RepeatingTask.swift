@@ -10,13 +10,13 @@ import Foundation
 import UIKit
 import Combine
 
-class RepeatingTask {
-    var timer: Timer?
-    var paymentViewModel = PaymentViewModel() // Initialize as a @StateObject only in SwiftUI Views
+class RepeatingTask: ObservableObject {
+    private var timer: Timer?
+    var paymentViewModel = PaymentViewModel()
     let apiManager = APIManager()
-    var callFetchStatus = true
-    
-    func startRepeatingTask(showSuccesScreen: Binding<Bool>, showFailureScreen: Binding<Bool>, repeatingTask: RepeatingTask, isLoading: Binding<Bool>) {
+    @Published var callFetchStatus = true  // Now published, so changes notify SwiftUI
+
+    func startRepeatingTask(showSuccesScreen: Binding<Bool>, showFailureScreen: Binding<Bool>, isLoading: Binding<Bool>) {
         let baseURL = apiManager.getBaseURL()
         let token = "v0/checkout/sessions/" + apiManager.getMainToken() + "/status"
         
@@ -25,17 +25,30 @@ class RepeatingTask {
             return
         }
         
-        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { _ in
-            if(self.callFetchStatus){
-                self.paymentViewModel.fetchStatusAndReason(url: url.absoluteString, showSuccessScreen: showSuccesScreen,showFailureScreen: showFailureScreen, repeatingTask: repeatingTask, isLoading: isLoading)
+        callFetchStatus = true // Ensure flag is set to true when starting
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            guard let self = self, self.callFetchStatus else {
+                print("Timer stopped, skipping API call")
+                return
             }
+
+            self.paymentViewModel.fetchStatusAndReason(
+                url: url.absoluteString,
+                showSuccessScreen: showSuccesScreen,
+                showFailureScreen: showFailureScreen,
+                repeatingTask: self,
+                isLoading: isLoading
+            )
         }
     }
     
     func stopRepeatingTask() {
-        print("Repeating task stopped")
-        self.callFetchStatus = false
-        timer?.invalidate() // Stop the timer
+        print("Stopping repeating task")
+        callFetchStatus = false // Prevents further execution
+        timer?.invalidate()
         timer = nil
     }
 }
+
+

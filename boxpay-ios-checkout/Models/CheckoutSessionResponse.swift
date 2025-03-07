@@ -35,12 +35,85 @@ public struct PaymentDetails: Codable {
     let onDemandAmount: Bool
     let frontendReturnUrl: String?
     let frontendBackUrl: String?
-    let billingAddress: String?
+    let billingAddress: BillingAddressType? // ✅ Can be either a String or Dictionary
     let shopper: Shopper
     let order: OrderCheckOut?
     let product: String?
-    let subscriptionDetails: String?
+    let subscriptionDetails: SubscriptionDetails?
+    let oneTimeMandate: String?
 }
+
+// ✅ Enum to support both String and Dictionary cases
+public enum BillingAddressType: Codable {
+    case string(String)
+    case object(BillingAddress)
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let stringValue = try? container.decode(String.self) {
+            self = .string(stringValue)
+        } else if let objectValue = try? container.decode(BillingAddress.self) {
+            self = .object(objectValue)
+        } else {
+            throw DecodingError.typeMismatch(BillingAddressType.self, DecodingError.Context(
+                codingPath: decoder.codingPath,
+                debugDescription: "Expected String or BillingAddress object"
+            ))
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case .string(let stringValue):
+            try container.encode(stringValue)
+        case .object(let objectValue):
+            try container.encode(objectValue)
+        }
+    }
+}
+
+// ✅ Define BillingAddress struct
+public struct BillingAddress: Codable {
+    let address1: String?
+    let address2: String?
+    let address3: String?
+    let city: String?
+    let state: String?
+    let countryCode: String?
+    let postalCode: String?
+}
+
+
+// MARK: - SubscriptionDetails Model
+public struct SubscriptionDetails: Codable {
+    let type: String
+    let billingCycle: BillingCycle
+    let billingDuration: BillingDuration
+    let nextBillingDate: String
+    let expiryDate: String
+    let recurringExpiryDate: String
+    let maxAmount: Int
+    let nextBillingDateLocale: String
+    let expiryDateLocale: String
+    let recurringExpiryDateLocale: String
+    let maxAmountLocale: String
+    let maxAmountLocaleFull: String
+}
+
+// MARK: - BillingCycle Model
+public struct BillingCycle: Codable {
+    let billingTimeUnit: String
+    let count: Int
+    let billingCycleValue: String
+}
+
+// MARK: - BillingDuration Model
+public struct BillingDuration: Codable {
+    let type: String
+    let noOfCycles: Int
+}
+
 
 // MARK: - Context struct
 public struct ContextModel: Codable {
@@ -59,7 +132,7 @@ public struct LegalEntity: Codable {
 
 // MARK: - Money struct
 public struct Money: Codable {
-    let amount: Double
+    let amount: Double?
     let currencyCode: String?
     let amountLocale: String?
     let amountLocaleFull: String?
@@ -100,11 +173,11 @@ public struct DeliveryAddress: Codable {
 // MARK: - Order struct
 public struct OrderCheckOut: Codable {
     let voucherCode: String?
-    let shippingAmount: Double
-    let taxAmount: Double
-    let originalAmount: Double
+    let shippingAmount: Double?
+    let taxAmount: Double?
+    let originalAmount: Double?
     let totalDiscountedAmount: Double?
-    let items: [OrderItem]
+    let items: [OrderItem]?
     let shippingAmountLocale: String?
     let shippingAmountLocaleFull: String?
     let taxAmountLocale: String?
@@ -117,7 +190,7 @@ public struct OrderCheckOut: Codable {
 public struct OrderItem: Identifiable,Codable {
     public let id: String?
     let itemName: String
-    let description: String
+    let description: String?
     let quantity: Int
     let manufacturer: String?
     let brand: String?
@@ -125,15 +198,15 @@ public struct OrderItem: Identifiable,Codable {
     let productUrl: String?
     let imageUrl: String
     let categories: [String]?
-    let amountWithoutTax: Double
-    let taxAmount: Double
+    let amountWithoutTax: Double?
+    let taxAmount: Double?
     let taxPercentage: Double?
     let discountedAmount: Double?
     let timestamp: String?
     let gender: String?
     let size: String?
     let amountWithoutTaxLocale: String?
-    let amountWithoutTaxLocaleFull: String
+    let amountWithoutTaxLocaleFull: String?
     let taxAmountLocale: String?
     let taxAmountLocaleFull: String?
 }
@@ -268,6 +341,9 @@ public struct EmiMethod: Codable, Hashable {
     let merchantBorneInterestAmountLocaleFull: String?
     let netAmountLocale: String?
     let netAmountLocaleFull: String?
+    let cardlessEmiProvider: String?
+    let cardlessEmiProviderTitle: String?
+    let cardlessEmiProviderValue: String?
 }
 
 // Define the ProcessingFee struct
@@ -311,4 +387,12 @@ public struct TransactionStatus: Codable {
     let status: String?
     let reason: String?
     let reasonCode: String?
+}
+
+
+struct WalletDataClass : Equatable {
+    let walletName: String
+    let walletImage: String
+    let walletBrand: String
+    let walletInstrumentTypeValue: String
 }

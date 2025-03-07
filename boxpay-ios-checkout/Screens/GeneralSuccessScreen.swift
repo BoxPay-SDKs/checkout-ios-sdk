@@ -53,15 +53,6 @@ struct GeneralSuccessScreen: View {
                         .foregroundColor(.black)
                 }
 
-                HStack {
-                    Text("Payment Method")
-                        .font(.system(size: 16))
-                        .foregroundColor(.gray)
-                    Spacer()
-                    Text(paymentMethod)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.black)
-                }
             }
             .padding(.horizontal)
 
@@ -80,12 +71,6 @@ struct GeneralSuccessScreen: View {
 
             DottedDivider()
             // Additional Info Text
-            Text("You will be redirected to the merchant’s page")
-                .font(.system(size: 14))
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .padding(.top, 10)
-
             // Done Button
             Button(action: {
                 onDone?() // Execute the callback when "Done" is pressed

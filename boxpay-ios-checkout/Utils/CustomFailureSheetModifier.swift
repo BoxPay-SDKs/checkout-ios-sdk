@@ -20,6 +20,7 @@ struct CustomFailureSheetModifier: ViewModifier {
             .sheet(isPresented: showSheet) {
                 if #available(iOS 16.0, *) {
                     PaymentFailureScreen(
+                        transactionID: "", reasonCode: "", reason: "",
                         onRetryPayment: {
                             onRetryPayment() // Trigger custom retry payment action
                         },

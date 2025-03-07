@@ -9,9 +9,24 @@ import SwiftUI
 
 
 struct PaymentFailureScreen: View {
-    var message: String = "You may have canceled the payment or there was a delay in response from the Bank's page."
+    var transactionID: String
+    var reasonCode: String
+    var reason: String
     var onRetryPayment: () -> Void
     var onReturnToPaymentOptions: () -> Void
+    var returnTopaymentOption : Bool = false
+    var message: String {
+        if reasonCode.starts(with: "UF") {
+            return reason
+        } else {
+            return "You may have canceled the payment or there was a delay in response from the Bank's page."
+        }
+    }
+    
+    // Computed property to check if reasonCode starts with "UF"
+    var isUFReasonCode: Bool {
+        reasonCode.starts(with: "UF")
+    }
     
     var body: some View {
         VStack(spacing: 20) {
@@ -36,13 +51,14 @@ struct PaymentFailureScreen: View {
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.center)
-                
-                Text("Please retry payment or try using other methods.")
-                    .font(.system(size: 15))
-                    .foregroundColor(.gray)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.center)
+                if(!isUFReasonCode){
+                    Text("Please retry payment or try using other methods.")
+                        .font(.system(size: 15))
+                        .foregroundColor(.gray)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.center)
+                }
             }
             .padding(.horizontal, 20)
             
@@ -61,18 +77,20 @@ struct PaymentFailureScreen: View {
                         .cornerRadius(10)
                 }
                 
-                Button(action: {
-                    // Return to Payment Options Action
-                    onReturnToPaymentOptions()
-                }) {
-                    Text("Return to Payment Options")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, minHeight: 50)
-                        .foregroundColor(.green)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(Color.green, lineWidth: 2)
-                        )
+                if(returnTopaymentOption){
+                    Button(action: {
+                        // Return to Payment Options Action
+                        onReturnToPaymentOptions()
+                    }) {
+                        Text("Return to Payment Options")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                            .foregroundColor(.green)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(Color.green, lineWidth: 2)
+                            )
+                    }
                 }
             }
             .padding(.horizontal, 20)
@@ -85,13 +103,13 @@ struct PaymentFailureScreen: View {
 // Preview
 struct PaymentFailureScreen_Previews: PreviewProvider {
     static var previews: some View {
-        PaymentFailureScreen(
-            onRetryPayment: {
-                print("Retry Payment tapped")
-            },
-            onReturnToPaymentOptions: {
-                print("Return to Payment Options tapped")
-            }
+        PaymentFailureScreen(transactionID: "", reasonCode: "", reason: "",
+                             onRetryPayment: {
+            print("Retry Payment tapped")
+        },
+                             onReturnToPaymentOptions: {
+            print("Return to Payment Options tapped")
+        }
         )
     }
 }
