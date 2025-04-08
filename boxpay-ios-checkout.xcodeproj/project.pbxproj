@@ -59,9 +59,12 @@
 		ACB629652D674104003F67AC /* RBIGuidelinesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB629642D6740F1003F67AC /* RBIGuidelinesView.swift */; };
 		ACB629682D770705003F67AC /* CancelPaymentDialog.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB629672D770705003F67AC /* CancelPaymentDialog.swift */; };
 		ACB6296A2D7AC21E003F67AC /* CustomDialogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB629692D7AC21E003F67AC /* CustomDialogView.swift */; };
+		ACB6296C2D7F0485003F67AC /* RecommendedInstrumentationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACB6296B2D7F0485003F67AC /* RecommendedInstrumentationViewModel.swift */; };
 		ACCC75A52D38E94300D50347 /* Contentnew.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCC75A42D38E93800D50347 /* Contentnew.swift */; };
 		ACCC75A72D38E9F100D50347 /* boxpay_ios_checkout.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AC6A65B92D2282B400B4DAE5 /* boxpay_ios_checkout.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		ACCC75A92D38EB7A00D50347 /* boxpay_ios_checkout.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC6A65B92D2282B400B4DAE5 /* boxpay_ios_checkout.framework */; };
+		ACD7EC752D87ED730091DDA6 /* PaymentModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD7EC742D87ED730091DDA6 /* PaymentModalView.swift */; };
+		ACD7EC772D8C2E430091DDA6 /* DccSuccessScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACD7EC762D8C2E360091DDA6 /* DccSuccessScreen.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -132,7 +135,10 @@
 		ACB629642D6740F1003F67AC /* RBIGuidelinesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RBIGuidelinesView.swift; sourceTree = "<group>"; };
 		ACB629672D770705003F67AC /* CancelPaymentDialog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CancelPaymentDialog.swift; sourceTree = "<group>"; };
 		ACB629692D7AC21E003F67AC /* CustomDialogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomDialogView.swift; sourceTree = "<group>"; };
+		ACB6296B2D7F0485003F67AC /* RecommendedInstrumentationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecommendedInstrumentationViewModel.swift; sourceTree = "<group>"; };
 		ACCC75A42D38E93800D50347 /* Contentnew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contentnew.swift; sourceTree = "<group>"; };
+		ACD7EC742D87ED730091DDA6 /* PaymentModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentModalView.swift; sourceTree = "<group>"; };
+		ACD7EC762D8C2E360091DDA6 /* DccSuccessScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DccSuccessScreen.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -238,6 +244,8 @@
 		AC7EA47E2D3E293700E279FF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				ACD7EC762D8C2E360091DDA6 /* DccSuccessScreen.swift */,
+				ACD7EC742D87ED730091DDA6 /* PaymentModalView.swift */,
 				ACB629642D6740F1003F67AC /* RBIGuidelinesView.swift */,
 				ACB629622D5DC7D9003F67AC /* EMIDetailsView.swift */,
 				ACB629602D5B09BA003F67AC /* EMIOptionsView.swift */,
@@ -286,6 +294,7 @@
 		ACA5AA202D4B774400FE72DB /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				ACB6296B2D7F0485003F67AC /* RecommendedInstrumentationViewModel.swift */,
 				AC82D1D22D54B725005B55D2 /* CommonInitializePaymentViewModel.swift */,
 				ACA5AA312D51FC6E00FE72DB /* CardUrlViewModel.swift */,
 				ACA5AA2F2D51F5ED00FE72DB /* UpiCollectViewmodel.swift */,
@@ -440,6 +449,7 @@
 				AC7EA4892D4230D600E279FF /* SessionExpireScreen.swift in Sources */,
 				ACA5AA262D4B781100FE72DB /* UPIIntentViewModel.swift in Sources */,
 				AC7EA4982D49EFD500E279FF /* WebViewScreen.swift in Sources */,
+				ACD7EC752D87ED730091DDA6 /* PaymentModalView.swift in Sources */,
 				AC7EA4AA2D4A35E200E279FF /* PaymentResultObject.swift in Sources */,
 				ACB629652D674104003F67AC /* RBIGuidelinesView.swift in Sources */,
 				AC7EA4962D49064700E279FF /* KeyboardDismissModifier.swift in Sources */,
@@ -459,6 +469,8 @@
 				ACA5AA322D51FC6E00FE72DB /* CardUrlViewModel.swift in Sources */,
 				ACA5AA302D51F60900FE72DB /* UpiCollectViewmodel.swift in Sources */,
 				AC27EA212D2FDC070012B47A /* MainCheckoutSheet.swift in Sources */,
+				ACB6296C2D7F0485003F67AC /* RecommendedInstrumentationViewModel.swift in Sources */,
+				ACD7EC772D8C2E430091DDA6 /* DccSuccessScreen.swift in Sources */,
 				AC82D1D32D54B725005B55D2 /* CommonInitializePaymentViewModel.swift in Sources */,
 				AC7EA4AE2D4A431E00E279FF /* PaymentViewController.swift in Sources */,
 				AC7EA4A62D4A08C600E279FF /* RepeatingTask.swift in Sources */,

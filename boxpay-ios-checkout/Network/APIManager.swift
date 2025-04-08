@@ -12,6 +12,7 @@ class APIManager {
 
     private let baseURLKey = "BaseURLKey"
     private let mainTokenKey = "mainTokenKey"
+    private let shopperTokenKey = "shopperTokenKey"
 
     // Get the current base URL (from UserDefaults)
     func getBaseURL() -> String {
@@ -33,6 +34,15 @@ class APIManager {
             return defauktToken
         }
     }
+    
+    func getShopperToken() -> String {
+        let defaultShopperToken = ""
+        if let savedShopperToken = UserDefaults.standard.string(forKey: shopperTokenKey) {
+            return savedShopperToken
+        } else {
+            return defaultShopperToken
+        }
+    }
 
     // Set a new base URL (in UserDefaults)
     func setBaseURL(_ url: String) {
@@ -41,6 +51,10 @@ class APIManager {
     
     func setMainToken(_ token: String) {
         UserDefaults.standard.set(token, forKey: mainTokenKey)
+    }
+    
+    func setShopperToken(_ token: String) {
+        UserDefaults.standard.set(token, forKey: shopperTokenKey)
     }
     
     // Example API endpoint that uses the current base URL

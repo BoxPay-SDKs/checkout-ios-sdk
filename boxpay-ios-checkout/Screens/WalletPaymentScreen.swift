@@ -26,7 +26,7 @@ struct WalletPaymentScreen: View {
     @ObservedObject var commonInitializePaymentViewModel = CommonInitializePaymentViewModel()
     @StateObject private var paymentViewModel = PaymentViewModel()
     private let repeatingTask = RepeatingTask()
-    
+    @State private var isWebViewClosedProgrammatically = false
     private var currencySymbol: String{
         checkOutViewModel.sessionData?.paymentDetails.money.currencySymbol ?? "₹"
         }
@@ -80,14 +80,18 @@ struct WalletPaymentScreen: View {
                 }
             }
             .sheet(isPresented: $showWebView, onDismiss: {
-                print("WebView closed by user!") // ✅ Detect if user closed manually
-                showFailureScreen = true // ✅ Custom function to handle dismissal
-                isLoading = false
+                if !isWebViewClosedProgrammatically {
+                    print("WebView closed by user!") // ✅ Detect if user closed manually
+                    showFailureScreen = true
+                    isLoading = false
+                }
+                isWebViewClosedProgrammatically = false // ✅ Reset the flag
             }) {
                 if let validURL = URL(string: dynamicURL) {
                     WebView(
                         url: validURL,
                         onDismiss: {
+                            isWebViewClosedProgrammatically = true
                             showWebView = false
                             print("WebView closed after action!") // ✅ Detect if closed after an action
                         }

@@ -22,6 +22,7 @@ public struct MainCheckoutSheet: View {
     @StateObject private var upiIntentViewModel = UPIIntentViewModel()
     @StateObject private var paymentViewModel = PaymentViewModel()
     @StateObject private var upiCollectViewModel = UpiCollectViewmodel()
+    @StateObject private var recommendedInstrumentViewModel = RecommendedInstrumentationViewModel()
     private let repeatingTask = RepeatingTask()
     let onPaymentResult: (PaymentResultObject) -> Void
     
@@ -60,6 +61,7 @@ public struct MainCheckoutSheet: View {
     @State private var showSuccessSheet = false
     @State private var showFailureScreen = false
     @State private var showSessionExpireScreen = false
+    @State private var showQuickPayModal = false
     @State private var moveToCardsPaymentScreen = false
     @State private var moveToWalletPaymentScreen = false
     @State private var moveToNetBankingScreen = false
@@ -74,15 +76,20 @@ public struct MainCheckoutSheet: View {
     @State private var countryCode: String = ""
     @State private var merchantId: String = ""
     @State private var legalEntity: String = ""
+    @State private var shopperToken: String = ""
     @State private var status: String = "PENDING"
     @State private var isFocused: Bool = false
     @State private var saveForFuture: Bool = false
     @State private var isUPIValid: Bool = false
     @State private var dynamicAmount: Double = 1500.00
     @State private var showCancelDialog = false
+    @State var selectedInstrument: RecommendedPaymentInstrument?
     // Timer state
     @State private var timeRemaining: Int = 300 // 5 minutes in seconds
     @State private var progress: CGFloat = 1.0
+    @State private var items: [RecommendedPaymentInstrument]? = []
+    
+    
     
     let baseUrlProd: String = "https://apis.boxpay.in/"
     let baseUrlSandbox: String = "https://sandbox-apis.boxpay.tech/"
@@ -90,7 +97,7 @@ public struct MainCheckoutSheet: View {
     
     
     // Custom initializer to accept the token
-    public init(token: String,baseUrlFlag: Int, onPaymentResult: @escaping (PaymentResultObject) -> Void) {
+    public init(token: String, shopperToken : String ,baseUrlFlag: Int, onPaymentResult: @escaping (PaymentResultObject) -> Void) {
         self.token = token
         self.onPaymentResult = onPaymentResult
         PaymentCallbackManager.shared.setCallback(onPaymentResult) // Store callback globally
@@ -104,6 +111,11 @@ public struct MainCheckoutSheet: View {
         }
         if(!token.isEmpty){
             apiManager.setMainToken(token)
+        }
+        if(!shopperToken.isEmpty){
+            apiManager.setShopperToken(shopperToken)
+            self.shopperToken = shopperToken
+            
         }
     }
     
@@ -179,6 +191,11 @@ public struct MainCheckoutSheet: View {
                         let address = viewModel.sessionData?.paymentDetails.shopper.deliveryAddress
                         AddressSectionView(address: address ?? nil)
                         
+                        
+                        RecommendedUpiSection(items: items ?? [],upiCollectViewModel: upiCollectViewModel, selectedInstrument: $selectedInstrument,showSuccessSheet: $showSuccessSheet,showFailureScreen: $showFailureScreen, showUpiTimerSheet: $showUpiTimerSheet, isUpiIntentProcessing: $isUpiIntentProcessing,repeatingTask: repeatingTask, totalAmountValue: totalAmountValue, upiID : $upiID)
+                        
+                        
+                        
                         // UPI Section
                         UPIPaymentOptionsView(
                             upiIntentMethod: upiIntentMethod,
@@ -241,20 +258,27 @@ public struct MainCheckoutSheet: View {
                     .onAppear {
                         
                         viewModel.getCheckoutSession(token : token)
-                        DismissManager.shared.register("MainCheckoutSheet") { dismiss() }
+                        DismissManager.shared.register("MainCheckoutSheet") {
+                            dismiss()
+                            print("MainScreenDismissed")
+                        }
                         repeatingTask.paymentViewModel = paymentViewModel
                         NotificationCenter.default.addObserver(forName: .paymentTimerExpired, object: nil, queue: .main) { _ in
                             showSessionExpireScreen = true
                         }
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            recommendedInstrumentViewModel.fetchRecommendedInstruments(token: token, shopperToken: apiManager.getShopperToken(), shopperReference : viewModel.sessionData?.paymentDetails.shopper.deliveryAddress?.shopperRef ?? "")
+                            
+                            items = recommendedInstrumentViewModel.recommendedInstruments
                             TimerManager.shared.startTimer(duration: 900)
                             dynamicAmount = viewModel.sessionData?.paymentDetails.money.amount ?? 0
                             countryCode = viewModel.sessionData?.paymentDetails.context.countryCode ?? ""
                             merchantId = viewModel.sessionData?.merchantId ?? ""
                             legalEntity = viewModel.sessionData?.paymentDetails.context.legalEntity.code ?? ""
                             status = viewModel.sessionData?.status ?? "PENDING"
-                            if(status == "PAID" || status == "FAILED" || status == "EXPIRED"){
+                            
+                            if(status == "FAILED" || status == "EXPIRED"){
                                 showSessionExpireScreen = true
                             }
                             self.processPaymentOptions()
@@ -264,8 +288,15 @@ public struct MainCheckoutSheet: View {
                     .onDisappear {
                         repeatingTask.stopRepeatingTask()
                     }
+                    .onReceive(recommendedInstrumentViewModel.$recommendedInstruments) { newInstruments in
+                        items = newInstruments
+                        if(!(items?.isEmpty ?? true)){
+                            showQuickPayModal = true
+                        }
+                        print("✅ Updated items: \(items?.map { $0.displayValue ?? "N/A" } ?? [])")
+                    }
                 
-                // Success Sheet
+                     // Success Sheet
                     .sheet(isPresented: $showSuccessSheet) {
                         if #available(iOS 16.0, *) {
                             GeneralSuccessScreen(
@@ -318,30 +349,30 @@ public struct MainCheckoutSheet: View {
                     }
                 
                     .sheet(isPresented: $showUpiTimerSheet) {
-                                if #available(iOS 16.0, *) {
-                                    UpiTimerSheet(
-                                        vpa: $upiID,
-                                        timeRemaining: $timeRemaining,
-                                        progress: $progress,
-                                        onCancelButton: {
-                                            showCancelDialog = true
-                                            // Temporarily close the sheet
-                                            showUpiTimerSheet = false
-                                        }
-                                    )
-                                    .presentationDetents([.height(450)])
-                                    .presentationDragIndicator(.visible)
-                                    .interactiveDismissDisabled(true)
-                                    .onAppear {
-                                                showUpiTimerSheetOpened = true // ✅ Set when sheet appears
-                                            }
-                                } else {
-                                    // Fallback for earlier iOS versions
+                        if #available(iOS 16.0, *) {
+                            UpiTimerSheet(
+                                vpa: $upiID,
+                                timeRemaining: $timeRemaining,
+                                progress: $progress,
+                                onCancelButton: {
+                                    showCancelDialog = true
+                                    // Temporarily close the sheet
+                                    showUpiTimerSheet = false
                                 }
+                            )
+                            .presentationDetents([.height(450)])
+                            .presentationDragIndicator(.visible)
+                            .interactiveDismissDisabled(true)
+                            .onAppear {
+                                showUpiTimerSheetOpened = true // ✅ Set when sheet appears
                             }
-                            .onDisappear {
-                                repeatingTask.stopRepeatingTask()
-                            }
+                        } else {
+                            // Fallback for earlier iOS versions
+                        }
+                    }
+                    .onDisappear {
+                        repeatingTask.stopRepeatingTask()
+                    }
                 
                     .sheet(isPresented: $showSessionExpireScreen) {
                         if #available(iOS 16.0, *) {
@@ -354,7 +385,39 @@ public struct MainCheckoutSheet: View {
                                     dismiss()
                                 }
                             )
-                            .presentationDetents([.height(350)])
+                            .presentationDetents([.height(320)])
+                            .presentationDragIndicator(.visible)
+                            .interactiveDismissDisabled(true)
+                        } else {
+                            
+                        }
+                    }
+                    .sheet(isPresented: $showQuickPayModal) {
+                        if #available(iOS 16.0, *) {
+                            PaymentModalView(price: totalAmountValue, selectedPaymentMethod : items?.first?.value ?? "", onPressOtherOptions: {
+                                showQuickPayModal = false
+                            }, onProceedToPay: {
+                                showQuickPayModal = false
+                                showUpiTimerSheet = true
+                                upiID = items?.first?.value ?? ""
+                                repeatingTask.startRepeatingTask(
+                                    showSuccesScreen: $showSuccessSheet,
+                                    showFailureScreen: $showFailureScreen,
+                                    isLoading: $isUpiIntentProcessing
+                                )
+                                upiCollectViewModel.initializeUpiCollectPayment(dynamicshopperVpa: items?.first?.value ?? "") { result in
+                                    switch result {
+                                    case .success(let response):
+                                        print("Transaction ID: \(response.transactionId)")
+                                        print("Status: \(response.status.status)")
+                                        // Handle success
+                                    case .failure(let error):
+                                        print("Error: \(error.localizedDescription)")
+                                        // Handle error
+                                    }
+                                }
+                            })
+                            .presentationDetents([.height(230)])
                             .presentationDragIndicator(.visible)
                             .interactiveDismissDisabled(true)
                         } else {
@@ -842,7 +905,7 @@ struct UPITextField: View {
     var body: some View {
         VStack(alignment: .leading) {
             
-            TextField("Enter UPI ID", text: $upiID, onEditingChanged: { editing in
+            TextField("UPI ID", text: $upiID, onEditingChanged: { editing in
                 isFocused = editing
             })
             .padding(12)
@@ -910,7 +973,7 @@ struct VerifyAndPayButton: View {
         Button(action: onPay) {
             Text("Verify & Pay \(currencySymbol) " + formattedAmount)
                 .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(isUPIValid ? Color.white : Color(hex: "#ADACB0"))
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(isUPIValid ? Color.green : Color(hex: "#E6E6E6"))
@@ -1381,6 +1444,175 @@ struct ItemsListView: View {
     }
 }
 
+struct RecommendedUpiSection: View {
+    let items: [RecommendedPaymentInstrument]
+    var upiCollectViewModel: UpiCollectViewmodel
+    @Binding var selectedInstrument: RecommendedPaymentInstrument?
+    @Binding var showSuccessSheet: Bool
+    @Binding var showFailureScreen: Bool
+    @Binding var showUpiTimerSheet: Bool
+    @Binding var isUpiIntentProcessing: Bool
+    var repeatingTask: RepeatingTask
+    var totalAmountValue : String
+    @Binding var upiID : String
+    
+    var body: some View {
+        if !items.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("Recommended")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                RecommendedUpiListView(items: items, upiCollectViewModel: upiCollectViewModel, selectedInstrument: $selectedInstrument, showSuccessSheet: $showSuccessSheet,showFailureScreen: $showFailureScreen, showUpiTimerSheet: $showUpiTimerSheet, isUpiIntentProcessing: $isUpiIntentProcessing, repeatingTask: repeatingTask, totalAmountValue : totalAmountValue, upiID : $upiID)
+                    .padding(.top, 10)
+            }
+            .padding()
+        }
+    }
+}
+
+struct RecommendedUpiListView: View {
+    let items: [RecommendedPaymentInstrument]
+    var upiCollectViewModel: UpiCollectViewmodel
+    @Binding var selectedInstrument: RecommendedPaymentInstrument?
+    @Binding var showSuccessSheet: Bool
+    @Binding var showFailureScreen: Bool
+    @Binding var showUpiTimerSheet: Bool
+    @Binding var isUpiIntentProcessing: Bool
+    var repeatingTask: RepeatingTask
+    var totalAmountValue : String
+    @Binding var upiID : String
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ScrollView {
+                VStack(spacing: 0) {
+                    ForEach(Array(items.prefix(2).enumerated()), id: \.element.id) { index, item in
+                        VStack(spacing: 0) {
+                            PaymentInstrumentRow(
+                                item: item,
+                                selectedInstrument: $selectedInstrument,
+                                showLastUsed: index == 0 // ✅ Show "Last Used" only on the first item
+                            )
+                            
+                            if selectedInstrument == item {
+                                Button(action: {
+                                    print("Proceeding with \(item.value ?? "")")
+                                    initializePayment(item: item)
+                                    
+                                }) {
+                                    Text("Proceed to Pay ₹" + totalAmountValue)
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.green)
+                                        .cornerRadius(8)
+                                }
+                                .padding(.horizontal)
+                                .padding(.bottom, 10)
+                            }
+                        }
+                        .background(selectedInstrument == item ? Color.green.opacity(0.1) : Color.clear)
+                        
+                        if item != items.prefix(2).last {
+                            Divider()
+                                .background(Color.gray.opacity(0.3))
+                        }
+                    }
+                }
+                .background(Color.white)
+            }
+        }
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(radius: 1)
+    }
+    
+    private func initializePayment(item : RecommendedPaymentInstrument){
+        
+        dismissKeyboard()
+        showUpiTimerSheet = true
+        repeatingTask.startRepeatingTask(
+            showSuccesScreen: $showSuccessSheet,
+            showFailureScreen: $showFailureScreen,
+            isLoading: $isUpiIntentProcessing
+        )
+        upiID = item.value ?? ""
+        upiCollectViewModel.initializeUpiCollectPayment(dynamicshopperVpa: item.value ?? "") { result in
+            switch result {
+            case .success(let response):
+                print("Transaction ID: \(response.transactionId)")
+                print("Status: \(response.status.status)")
+                // Handle success
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
+                // Handle error
+            }
+        }
+    }
+    
+}
+
+struct PaymentInstrumentRow: View {
+    let item: RecommendedPaymentInstrument
+    @Binding var selectedInstrument: RecommendedPaymentInstrument?
+    let showLastUsed: Bool
+    
+    var body: some View {
+        Button(action: {
+            selectedInstrument = item
+        }) {
+            
+                HStack {
+                    Image(frameworkAsset: "upi_logo")
+                        .resizable()
+                        .frame(width: 20, height: 20)
+                        .scaledToFit()
+                        .padding(.leading, 15)
+                    
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(item.value ?? "")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color(hex: "#4F4D55"))
+                            .padding(.leading, 5)
+                        
+                        // ✅ Show "Last Used" tag only on the first item
+                        if showLastUsed {
+                            Text("Last Used")
+                                .font(.system(size: 10, weight: .semibold))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.pink.opacity(0.1)) // ✅ Pink background
+                                .foregroundColor(.pink)
+                                .cornerRadius(5)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(Color.pink, lineWidth: 1)
+                                )
+                                .padding(.leading, 5)
+                        }
+                        
+                    }
+                    
+                    
+                    Spacer()
+                    
+                    Image(systemName: selectedInstrument == item ? "largecircle.fill.circle" : "circle")
+                        .foregroundColor(selectedInstrument == item ? .green : .gray)
+                        .font(.system(size: 22))
+                        .padding(.trailing, 15)
+                }
+                .padding(.top, 15)
+                .contentShape(Rectangle())
+                .padding(.bottom, 15)
+            
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+
 struct FooterView: View{
     var body: some View {
         HStack {
@@ -1470,6 +1702,7 @@ struct MainSheetPreviewNew: PreviewProvider {
         if #available(iOS 15.0, *) {
             MainCheckoutSheet(
                 token: "a8102cb2-f937-44cc-9469-15f3f864b273",
+                shopperToken: "",
                 baseUrlFlag: 0,
                 onPaymentResult: { result in
                     print("Preview Payment Result: \(result.status)")
