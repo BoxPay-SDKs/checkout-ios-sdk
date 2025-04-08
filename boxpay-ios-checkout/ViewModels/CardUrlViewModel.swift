@@ -197,6 +197,81 @@ class CardUrlViewModel: ObservableObject {
             .store(in: &cancellables)
 
     }
+    
+    
+    func fetchDCCQuotation(
+        isLoading: Binding<Bool>,
+        dccRequest: DCCRequest,
+        completion: @escaping (Result<DCCResponse, Error>) -> Void
+    ) {
+        isLoading.wrappedValue = true
+        let apiManager = APIManager()
+        guard let url = URL(string: "\(apiManager.getBaseURL())v0/checkout/sessions/\(apiManager.getMainToken())/dcc/quotations") else {
+            errorMessage = "Invalid URL"
+            isLoading.wrappedValue = false
+            completion(.failure(URLError(.badURL)))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue(generateRandomAlphanumericString(length: 10), forHTTPHeaderField: "X-Request-Id")
+        request.addValue("iOS SDK", forHTTPHeaderField: "X-Client-Connector-Name")
+        request.addValue("1.0.0", forHTTPHeaderField: "X-Client-Connector-Version")
+
+        // ✅ Convert `DCCRequest` object to JSON data using JSONEncoder
+        do {
+            let jsonData = try JSONEncoder().encode(dccRequest)
+            request.httpBody = jsonData
+            
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("✅ DCC Request JSON: \(jsonString)")
+            }
+        } catch {
+            print("❌ Error encoding JSON: \(error.localizedDescription)")
+            errorMessage = "Failed to encode request data"
+            isLoading.wrappedValue = false
+            completion(.failure(error))
+            return
+        }
+
+        URLSession.shared.dataTaskPublisher(for: request)
+            .tryMap { data, response -> Data in
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    print("❌ Invalid HTTP Response")
+                    throw URLError(.badServerResponse)
+                }
+
+                print("🔹 HTTP Status Code: \(httpResponse.statusCode)")
+                guard httpResponse.statusCode == 200 else {
+                    let responseString = String(data: data, encoding: .utf8) ?? "No response body"
+                    print("❌ Error Response Body: \(responseString)")
+                    throw URLError(.badServerResponse)
+                }
+
+                return data
+            }
+            .decode(type: DCCResponse.self, decoder: JSONDecoder())
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completionStatus in
+                switch completionStatus {
+                case .failure(let error):
+                    print("❌ DCC Request failed with error: \(error.localizedDescription)")
+                    self.errorMessage = error.localizedDescription
+                    isLoading.wrappedValue = false
+                    completion(.failure(error))
+                case .finished:
+                    print("✅ DCC Request finished successfully")
+                    isLoading.wrappedValue = false
+                }
+            }, receiveValue: { response in
+                print("✅ DCC Response: \(response)")
+                isLoading.wrappedValue = false
+                completion(.success(response))
+            })
+            .store(in: &cancellables)
+    }
 
     func getDeviceDetails() -> DeviceDetails {
         let device = UIDevice.current
@@ -218,4 +293,60 @@ class CardUrlViewModel: ObservableObject {
         let charPool = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
         return String((0..<length).compactMap { _ in charPool.randomElement() })
     }
+    
+    struct DCCResponse: Codable {
+        let dccQuotationId: String?
+        let merchantId: String?
+        let context: ContextResponse?
+        let baseMoney: BaseMoney?
+        let dccQuotationDetails: DccQuotationDetails?
+        let brand: String?
+        let supportedPsps: [String]?
+        let addedOn: String?
+        let updatedOn: String?
+        let addedOnLocale: String?
+        let updatedOnLocale: String?
+    }
+
+    struct ContextResponse: Codable {
+        let legalEntity: LegalEntityResponse?
+        let countryCode: String?
+        let localeCode: String?
+        let clientPosId: String?
+        let orderId: String?
+        let clientOrgIP: String?
+    }
+
+    struct LegalEntityResponse: Codable {
+        let code: String?
+    }
+
+    struct BaseMoney: Codable {
+        let amount: Int?
+        let currencyCode: String?
+        let amountLocale: String?
+        let amountLocaleFull: String?
+        let currencySymbol: String?
+    }
+
+    struct DccQuotationDetails: Codable {
+        let dccMoney: DccMoney?
+        let fxRate: Double?
+        let marginPercent: Double?
+        let commissionPercent: Int?
+        let source: String?
+        let dspCode: String?
+        let dspQuotationReference: String?
+    }
+
+    struct DccMoney: Codable {
+        let amount: Double?
+        let currencyCode: String?
+        let amountLocale: String?
+        let amountLocaleFull: String?
+        let currencySymbol: String?
+    }
+
+
+
 }

@@ -16,6 +16,7 @@ class PaymentViewModel: ObservableObject {
     @Published var status: String = ""
     @Published var statusReason: String = ""
     @Published var reasonCode: String = ""
+    @Published var currencySymbol: String = ""
     
     // New properties for success screen
     @Published var transactionDate: String = "" // Store the transaction date
@@ -56,7 +57,7 @@ class PaymentViewModel: ObservableObject {
         status = response.status ?? ""
         statusReason = response.statusReason ?? ""
         reasonCode = response.reasonCode ?? ""
-        
+        currencySymbol = response.currencySymbol ?? ""
         // Populate additional details for success screen
         transactionDate = formatDate(response.transactionTimestampLocale ?? "") // You can customize this method for your date format
         transactionTime = formatTime(response.transactionTimestampLocale ?? "") // You can customize this method for your time format
@@ -139,10 +140,10 @@ class PaymentViewModel: ObservableObject {
         // Convert the amount to a formatted string (e.g., ₹2,590)
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.currencySymbol = "₹"
+        formatter.currencySymbol = ""
         if let formattedAmount = formatter.string(from: NSNumber(value: amount)) {
             return formattedAmount
         }
-        return "₹0.00"
+        return "0.00"
     }
 }

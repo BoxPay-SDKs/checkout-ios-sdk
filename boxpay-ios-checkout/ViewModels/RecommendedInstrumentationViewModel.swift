@@ -1,90 +1,70 @@
+//
+//  RecommendedInstrumentationViewModel.swift
+//  boxpay-ios-checkout
+//
+//  Created by ankush on 10/03/25.
+//
+
+
 import Foundation
 import Combine
 
 class RecommendedInstrumentationViewModel: ObservableObject {
-    @Published var recommendedInstrumentationList: [RecommendedPaymentInstrument] = []
-    @Published var isLoading = false
+    @Published var recommendedInstruments: [RecommendedPaymentInstrument] = []
     @Published var errorMessage: String?
-
+    private var apiManager = APIManager()
+    
     private var cancellables = Set<AnyCancellable>()
     
-    private let apiManager = APIManager()
-    private let token: String
-    private let shopperRef: String
-    
-    init(token: String, shopperRef: String) {
-        self.token = token
-        self.shopperRef = shopperRef
-    }
-    
-    func getRecommendedInstrumentation() {
-        guard let url = URL(string: "\(apiManager.getBaseURL())\(token)/shoppers/\(shopperRef)/recommended-instruments") else {
+    func fetchRecommendedInstruments(token: String, shopperToken: String, shopperReference: String) {
+        guard !token.isEmpty, !shopperToken.isEmpty else {
+            errorMessage = "Invalid token or shopper token"
+            return
+        }
+
+        guard let url = URL(string: getRecommendedInstrumentEndpoint(token: token, shopperToken: shopperToken, shopperReference: shopperReference)) else {
             print("❌ Invalid URL")
             return
         }
-        
-        isLoading = true
-        
+
+    
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.addValue("Session \(apiManager.getCustomerShopperToken())", forHTTPHeaderField: "Authorization")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        print("➡️ Request URL: \(url)")
-        
+        request.addValue("Session \(shopperToken)", forHTTPHeaderField: "Authorization")
+
         URLSession.shared.dataTaskPublisher(for: request)
             .tryMap { data, response -> Data in
-                guard let httpResponse = response as? HTTPURLResponse else {
+                guard let httpResponse = response as? HTTPURLResponse,
+                      httpResponse.statusCode == 200 else {
                     throw URLError(.badServerResponse)
                 }
-                
-                print("🔹 HTTP Status Code: \(httpResponse.statusCode)")
-                print("🔹 HTTP Headers: \(httpResponse.allHeaderFields)")
-                
-                guard httpResponse.statusCode == 200 else {
-                    let responseString = String(data: data, encoding: .utf8) ?? "No response body"
-                    print("❌ Error Response: \(responseString)")
-                    throw URLError(.badServerResponse)
-                }
-                
                 return data
             }
             .decode(type: [RecommendedPaymentInstrument].self, decoder: JSONDecoder())
             .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { [weak self] completion in
+            .sink(receiveCompletion: { completion in
                 switch completion {
                 case .failure(let error):
-                    self?.errorMessage = error.localizedDescription
-                    print("❌ Request Failed: \(error.localizedDescription)")
+                    self.errorMessage = error.localizedDescription
+                    print("❌ Error: \(error.localizedDescription)")
                 case .finished:
-                    print("✅ Request Succeeded")
+                    print("✅ Successfully fetched instruments")
                 }
-                self?.isLoading = false
-            }, receiveValue: { [weak self] response in
-                print("✅ Response: \(response)")
+            }, receiveValue: { instruments in
+                self.recommendedInstruments = instruments
                 
-                // ✅ Limit to max 2 items
-                self?.recommendedInstrumentationList = Array(response.prefix(2))
-                
-                // ✅ Handle UI State Based on Results
-                if let list = self?.recommendedInstrumentationList, !list.isEmpty {
-                    print("✅ Recommended Instruments: \(list)")
-                    self?.handleSuccess()
-                } else {
-                    print("✅ No recommended instruments found")
-                    self?.handleFailure()
-                }
+                // ✅ Print fetched items
+                print("🔹 Fetched Recommended Instruments:")
             })
             .store(in: &cancellables)
+
     }
     
-    private func handleSuccess() {
-        // ✅ Handle success state (like showing buttons or views)
-        print("✅ Success - Showing options")
+    func getRecommendedInstrumentEndpoint(token: String, shopperToken: String , shopperReference: String) -> String {
+        let apiManager = APIManager()
+        let baseURL = apiManager.getBaseURL()
+        return baseURL + "v0/checkout/sessions/\(token)/shoppers/\(shopperReference)/recommended-instruments"
     }
-    
-    private func handleFailure() {
-        // ✅ Handle failure state (like showing alternative options)
-        print("✅ No instruments available - Showing UPI Options")
-    }
+
 }
+

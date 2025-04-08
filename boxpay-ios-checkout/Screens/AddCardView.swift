@@ -23,6 +23,7 @@ struct AddCardView: View {
     @State private var cvv: String = ""
     @State private var cardHolderName: String = ""
     @State private var cardBrand: String = ""
+    @State private var quotationID: String = ""
     
     @State private var isLoading = false
     
@@ -36,12 +37,25 @@ struct AddCardView: View {
     @State private var isCardHolderNameValid: Bool = true
     @State private var isCardHolderNameTypedOnce: Bool = false
     @State private var showFailureScreen: Bool = false
+    @State private var showDccSuccessScreen: Bool = false
     @State private var showSuccessSheet: Bool = false
     @State private var showFieldErrorToast: Bool = false
+    @State private var isDccfetched: Bool = false
+    @State private var isQuotationRequired: Bool = false
+    @State private var isCurrencySelected: Bool = false
     @State private var keyboardHeight: CGFloat = 0 // Tracks the keyboard height
     
     @State private var showWebView = false
     @State private var dynamicURL: String = ""
+    @State private var dccTotal: String = ""
+    @State private var dccEexchangeRate: String = ""
+    @State private var dccmargin: String = ""
+    @State private var dcctransactionCurrency: String = ""
+    @State private var dccpaymentMethod: String = ""
+    @State private var dcctotalAmount: String = ""
+    @State private var dccCurrency: String = ""
+    @State private var baseMoneyCurrency: String = ""
+    @State private var dccDspCode: String = ""
     
     @FocusState private var focusedField: FocusField? // Enum to track the focused field
     
@@ -49,6 +63,13 @@ struct AddCardView: View {
     @StateObject private var paymentViewModel = PaymentViewModel()
     @StateObject private var checkOutViewModel = CheckoutViewModel()
     @StateObject private var repeatingTask = RepeatingTask()
+    @State private var selectedCurrency: CurrencyOption? = nil
+    @State private var currencyOptions: [CurrencyOption] = []
+    @State private var sessionData: CheckoutSession?
+    @State private var currencyOption1 : CurrencyOption? = nil
+    @State private var currencyOption2 : CurrencyOption? = nil
+    @State private var isWebViewClosedProgrammatically = false
+
     private var currencySymbol: String{
         checkOutViewModel.sessionData?.paymentDetails.money.currencySymbol ?? "₹"
     }
@@ -79,7 +100,12 @@ struct AddCardView: View {
                         expiryAndCvvFields
                         cardHolderNameField
                         noteView
-                        checkboxView
+                        if(!isDccfetched){
+                            checkboxView
+                        }
+                        if(isDccfetched){
+                            currencySelectionView()
+                        }
                         Spacer()
                     }.hideKeyboardOnTap()
                         .padding(.horizontal)
@@ -101,6 +127,9 @@ struct AddCardView: View {
             let apiManager = APIManager()
             checkOutViewModel.getCheckoutSession(token: apiManager.getMainToken())
             repeatingTask.paymentViewModel = paymentViewModel
+        }
+        .onReceive(checkOutViewModel.$sessionData) { newSessionData in
+            self.sessionData = newSessionData
         }
         .onDisappear {
             repeatingTask.stopRepeatingTask()
@@ -140,14 +169,19 @@ struct AddCardView: View {
             }
         }
         .sheet(isPresented: $showWebView, onDismiss: {
-            print("WebView closed by user!") // ✅ Detect if user closed manually
-            showFailureScreen = true // ✅ Custom function to handle dismissal
-            isLoading = false
-        }) {
+            if !isWebViewClosedProgrammatically {
+                print("WebView closed by user!") // ✅ Detect if user closed manually
+                showFailureScreen = true
+                isLoading = false
+            }
+            isWebViewClosedProgrammatically = false // ✅ Reset the flag
+        })
+ {
             if let validURL = URL(string: dynamicURL) {
                 WebView(
                     url: validURL,
                     onDismiss: {
+                        isWebViewClosedProgrammatically = true
                         showWebView = false
                         print("WebView closed after action!") // ✅ Detect if closed after an action
                     }
@@ -180,13 +214,8 @@ struct AddCardView: View {
         }
         .sheet(isPresented: $showSuccessSheet) {
             if #available(iOS 16.0, *) {
-                GeneralSuccessScreen(
-                    transactionID: paymentViewModel.transactionId,
-                    date: paymentViewModel.transactionDate, // Directly access the value
-                    time: paymentViewModel.transactionTime, // Directly access the value
-                    paymentMethod: paymentViewModel.paymentMethod, // Directly access the value
-                    totalAmount: paymentViewModel.totalAmount // Directly access the value
-                ) {
+                DccSuccessScreen(transactionID: paymentViewModel.transactionId, cardType: cardBrand, cardHolderName: cardHolderName, total: dccTotal, exchangeRate: dccEexchangeRate, margin: dccmargin, transactionCurrency: dcctransactionCurrency, paymentMethod: dccpaymentMethod, totalAmount: dcctotalAmount, baseMoneyCurrency: baseMoneyCurrency ,dccCurrency: dccCurrency, dspCode: dccDspCode, isDccEnabled: isQuotationRequired, date: paymentViewModel.transactionDate, time: paymentViewModel.transactionTime, amountpaymentViewModel : paymentViewModel.totalAmount, currencypaymentViewModel: paymentViewModel.currencySymbol)
+                {
                     // Define result before triggering the callback
                     let result = PaymentResultObject(status: paymentViewModel.status,transactionId: paymentViewModel.transactionId,operationId: "")
                     
@@ -201,7 +230,7 @@ struct AddCardView: View {
                     showSuccessSheet = false
                     dismiss()
                 }
-                .presentationDetents([.height(500)]) // Optional: Set height dynamically
+                .presentationDetents([.height(750)]) // Optional: Set height dynamically
                 .presentationDragIndicator(.visible)
                 .interactiveDismissDisabled(true)
             } else {
@@ -209,6 +238,9 @@ struct AddCardView: View {
             }
         }.onAppear {
             isLoading = false
+        }
+        .onChange(of: isQuotationRequired) { newValue in
+            print("isQuotationRequired updated: \(newValue)")
         }
         .toast(isPresenting: $showFieldErrorToast, duration: 2, tapToDismiss: true, alert: {
             AlertToast(displayMode: .banner(.pop), type: .regular, title: "Please fill all the fields")
@@ -239,7 +271,7 @@ struct AddCardView: View {
                 Image(systemName: "chevron.left")
             }
             
-            Text("Card Payment")
+            Text("Pay via Card")
                 .font(.system(size: 16, weight: .semibold))
             
             Spacer()
@@ -322,7 +354,7 @@ struct AddCardView: View {
     private var cardNumberField: some View {
         VStack(alignment: .leading, spacing: 5) {
             HStack {
-                TextField("Enter card number", text: $cardNumber)
+                TextField("Card Number", text: $cardNumber)
                     .keyboardType(.numberPad)
                     .focused($focusedField, equals: .cardNumber)
                     .onChange(of: cardNumber) { newValue in
@@ -340,6 +372,9 @@ struct AddCardView: View {
                                 if let brands = brands, let currBrand = currBrand {
                                     DispatchQueue.main.async {
                                         cardBrand = currBrand
+                                        if(!isDccfetched){
+                                            requestDCCQuotation(cardNumber: cleanedCardNumber, cardBrand : cardBrand)
+                                        }
                                         print("Updated card network with brands: \(brands)" + currBrand)
                                     }
                                 } else {
@@ -348,6 +383,7 @@ struct AddCardView: View {
                             }
                         } else {
                             cardBrand = ""
+                            isDccfetched = false
                         }
                     }
                     .onSubmit {
@@ -405,6 +441,103 @@ struct AddCardView: View {
             }
         }
         .padding(.top, 1)
+    }
+
+    func requestDCCQuotation(cardNumber: String, cardBrand : String) {
+        let dccRequest = DCCRequest(
+            context: ContextDcc(
+                countryCode: sessionData?.paymentDetails.context.countryCode,
+                legalEntity: LegalEntityDcc(code: sessionData?.paymentDetails.context.legalEntity.code),
+                clientPosId: "",
+                orderId: "",
+                localCode: sessionData?.paymentDetails.context.localeCode
+            ),
+            money: MoneyDcc(
+                amount: sessionData?.paymentDetails.money.amount,
+                currencyCode: sessionData?.paymentDetails.money.currencyCode
+            ),
+            shopper: ShopperDcc(
+                firstName: "Testing",
+                email: "testing@boxpay.tech",
+                uniqueReference: "x123y",
+                phoneNumber: "+919999999999"
+            ),
+            instrument: Instrument(
+                brand: cardBrand,
+                accountNumber: cardNumber
+            )
+        )
+
+        cardUrlViewModel.fetchDCCQuotation(
+            isLoading: $isLoading,
+            dccRequest: dccRequest
+        ) { result in
+            switch result {
+            case .success(let response):
+                print("DCC Quotation ID: \(response.dccQuotationId ?? "N/A")")
+                
+                if let baseMoney = response.baseMoney,
+                   let dccMoney = response.dccQuotationDetails?.dccMoney,
+                   baseMoney.amount != nil {
+                    
+                    if quotationID != response.dccQuotationId {
+                        // ✅ First Currency Option (Dynamic Data)
+                        currencyOption1 = CurrencyOption(
+                            code: dccMoney.currencyCode ?? "",
+                            flagImage: "",
+                            exchangeRate: "1 \(baseMoney.currencyCode ?? "") = \(String(format: "%.2f", response.dccQuotationDetails?.fxRate ?? 0)) \(dccMoney.currencyCode ?? "")",
+                            amount: "\(dccMoney.currencyCode ?? "") \(String(format: "%.2f", dccMoney.amount ?? 0))",
+                            amountComplete: String(dccMoney.amount ?? 0),
+                            margin: String(response.dccQuotationDetails?.marginPercent ?? 0.0)
+                        )
+                        
+                        // ✅ Second Currency Option (Base Money)
+                        currencyOption2 = CurrencyOption(
+                            code: baseMoney.currencyCode ?? "",
+                            flagImage: "",
+                            exchangeRate: "Exchange rate will be determined by the card issuer.",
+                            amount: "\(baseMoney.currencyCode ?? "") \(baseMoney.amount != nil ? String(baseMoney.amount!) : (baseMoney.amountLocaleFull ?? ""))",
+                            amountComplete: String(baseMoney.amount ?? 0),
+                            margin: ""
+                        )
+
+                        if response.brand?.lowercased() == "visa" {
+                            print("Visa card detected")
+                            selectedCurrency = nil
+                            isCurrencySelected = false
+                            isDccfetched = true
+                            isQuotationRequired = false
+                            updateDccSuccessScreen()
+                        } else {
+                            print("Non-Visa card detected")
+                            selectedCurrency = currencyOption1
+                            isCurrencySelected = true
+                            isDccfetched = true
+                            isQuotationRequired = true
+                            updateDccSuccessScreen()
+
+                        }
+                        // ✅ Save Quotation ID
+                        quotationID = response.dccQuotationId ?? ""
+                        dccmargin = String(response.dccQuotationDetails?.marginPercent ?? 0.0)
+                        dccTotal = String(response.baseMoney?.amount ?? 0)
+                        dcctotalAmount = String(response.dccQuotationDetails?.dccMoney?.amount ?? 0)
+                        dccEexchangeRate = String(response.dccQuotationDetails?.fxRate  ?? 0)
+                        dccpaymentMethod = cardBrand
+                        dcctransactionCurrency = response.dccQuotationDetails?.dccMoney?.currencyCode ?? ""
+                        baseMoneyCurrency = response.baseMoney?.currencyCode ?? ""
+                        dccDspCode = response.dccQuotationDetails?.dspCode ?? ""
+                    }
+                } else {
+                    print("Invalid base money")
+                    selectedCurrency = nil
+                }
+            case .failure(let error):
+                print("Error fetching DCC Quotation: \(error.localizedDescription)")
+                isDccfetched = false
+            }
+        }
+
     }
 
     private var expiryAndCvvFields: some View {
@@ -466,7 +599,7 @@ struct AddCardView: View {
             // CVV
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    SecureField("Enter CVV", text: $cvv)
+                    SecureField("CVV", text: $cvv)
                         .keyboardType(.numberPad)
                         .focused($focusedField, equals: .cvv)
                         .onChange(of: cvv) { newValue in
@@ -557,7 +690,7 @@ struct AddCardView: View {
     
     private var cardHolderNameField: some View {
         VStack(alignment: .leading, spacing: 8) {
-            TextField("Enter name on the card", text: $cardHolderName)
+            TextField("Name on the Card", text: $cardHolderName)
                 .focused($focusedField, equals: .cardHolderName)
                 .onChange(of: cardHolderName) { _ in
                     // Update Pay Now button state as the user types
@@ -650,16 +783,140 @@ struct AddCardView: View {
                 showFieldErrorToast = true
             }
         }) {
-            Text("Proceed to Pay " + currencySymbol + (checkOutViewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "0"))
+            payNowButtonText
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(isPayNowEnabled ? Color.white : Color(hex: "#ADACB0"))
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(isPayNowEnabled ? Color.green : Color.gray) // Toggle background color
+                .background(isPayNowEnabled ? Color.green : Color(hex: "#E6E6E6"))
                 .cornerRadius(8)
         }
-
     }
+
+    private var payNowButtonText: Text {
+        if !isDccfetched {
+            return Text("Proceed to Pay \(currencySymbol) \(checkOutViewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "0")")
+        } else {
+            return Text("Proceed to Pay \(selectedCurrency?.code ?? "") \(selectedCurrency?.amountComplete ?? "")")
+        }
+    }
+
+    
+    
+    @ViewBuilder
+    private func currencySelectionView() -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            if cardBrand == "Mastercard" {
+                Text("Please choose the currency to be charged to your account.")
+                    .font(.system(size: 14, weight: .regular))
+                    .padding(.bottom, 10)
+            } else if cardBrand == "VISA" {
+                Text("Please select currency.")
+                    .font(.system(size: 14, weight: .regular))
+                    .padding(.bottom, 10)
+            }
+            
+            currencyOptionView(option: currencyOption1)
+            currencyOptionView(option: currencyOption2)
+            
+            if cardBrand == "Mastercard" {
+                Text("Make sure you understand the costs of currency conversion as they may be different depending on whether you select your home currency or the transaction currency.")
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+                    .padding(.top, 10)
+                    .padding(.bottom, 40)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func currencyOptionView(option: CurrencyOption?) -> some View {
+        if let option = option {
+            HStack {
+                HStack {
+                    // ✅ Green radio button when selected
+                    Image(systemName: selectedCurrency?.code == option.code ? "largecircle.fill.circle" : "circle")
+                        .foregroundColor(selectedCurrency?.code == option.code ? .green : .gray)
+                    
+                    dccImageView(imageUrl: option.flagImage)
+                        .frame(width: 30, height: 30)
+                        .clipShape(Circle())
+                        .padding(.leading, 2)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                    
+                    Text(option.code)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                
+                VStack(alignment: .leading) {
+                    Text(option.exchangeRate)
+                        .font(.footnote)
+                    if((option.margin != "" || option.margin != "0.0") && cardBrand == "visa"){
+                        Text("Includes Margin: " + option.margin + "%")
+                            .font(.footnote)
+                    }
+                    Text(option.amount)
+                        .font(.footnote)
+                        .foregroundColor(.gray)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding()
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(8)
+            .onTapGesture {
+                selectedCurrency = option
+                isCurrencySelected = true
+                if selectedCurrency?.code == currencyOption1?.code {
+                    print("User selected currencyOption1")
+                    isQuotationRequired = true
+                    updateDccSuccessScreen()
+
+                } else if selectedCurrency?.code == currencyOption2?.code {
+                    print("User selected currencyOption2")
+                    isQuotationRequired = false
+                    updateDccSuccessScreen()
+
+                }
+                selectedCurrency = selectedCurrency
+                updatePayNowButtonState()
+            }
+        }
+    }
+
+
+
+
+    private func dccImageView(imageUrl: String) -> some View {
+        Group {
+            if let imageURL = URL(string: imageUrl) {
+                SVGImageView(url: imageURL.absoluteString)
+                    .frame(width: 30, height: 30)
+            } else {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .frame(width: 30, height: 30)
+                    .clipShape(Circle())
+                    .foregroundColor(.red)
+            }
+        }
+    }
+    
+    private func updateDccSuccessScreen() {
+        showDccSuccessScreen = showSuccessSheet && isQuotationRequired
+    }
+
+    struct CurrencyOption: Identifiable {
+        var id: String { code } // ✅ Use `code` as ID
+        let code: String
+        let flagImage: String
+        let exchangeRate: String
+        let amount: String
+        let amountComplete: String
+        let margin: String
+    }
+
     
     // MARK: - Update Pay Now Button State
     private func updatePayNowButtonState() {
@@ -691,9 +948,16 @@ struct AddCardView: View {
         isCVVValid = cvv.count == 3 && Int(cvv) != nil
         isCardHolderNameValid = !cardHolderName.isEmpty
         
-        // Update the Pay Now button state
-        isPayNowEnabled = isCardNumberValid && isExpiryDateValid && isCVVValid && isCardHolderNameValid
+        // ✅ Handle DCC check
+        if isDccfetched {
+            // If DCC is fetched, currency must also be selected
+            isPayNowEnabled = isCardNumberValid && isExpiryDateValid && isCVVValid && isCardHolderNameValid && isCurrencySelected
+        } else {
+            // If DCC is not fetched, ignore the currency check
+            isPayNowEnabled = isCardNumberValid && isExpiryDateValid && isCVVValid && isCardHolderNameValid
+        }
     }
+
 
     
     

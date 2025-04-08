@@ -396,3 +396,63 @@ struct WalletDataClass : Equatable {
     let walletBrand: String
     let walletInstrumentTypeValue: String
 }
+
+
+struct RecommendedPaymentInstrument: Identifiable, Codable, Equatable {
+    var id: String? { instrumentRef } // Optional identifier
+    
+    // All properties are now optional
+    let shopperRef: String?
+    let type: String?
+    let brand: String?
+    let instrumentType: String?
+    let instrumentRef: String?
+    let value: String?
+    let displayValue: String?
+    let lastUsed: String?
+    let requiredInputs: String?
+    let orgId: String?
+    let ttlInSeconds: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case shopperRef, type, brand, instrumentType, instrumentRef, value, displayValue, lastUsed, requiredInputs, orgId, ttlInSeconds
+    }
+}
+
+
+
+struct DCCRequest: Codable {
+    let context: ContextDcc?
+    let money: MoneyDcc?
+    let shopper: ShopperDcc?
+    let instrument: Instrument?
+}
+
+struct ContextDcc: Codable {
+    let countryCode: String?
+    let legalEntity: LegalEntityDcc?
+    let clientPosId: String?
+    let orderId: String?
+    let localCode: String?
+}
+
+struct LegalEntityDcc: Codable {
+    let code: String?
+}
+
+struct MoneyDcc: Codable {
+    let amount: Double?
+    let currencyCode: String?
+}
+
+struct ShopperDcc: Codable {
+    let firstName: String?
+    let email: String?
+    let uniqueReference: String?
+    let phoneNumber: String?
+}
+
+struct Instrument: Codable {
+    let brand: String?
+    let accountNumber: String?
+}

@@ -41,6 +41,7 @@ struct EMIOptionsView: View {
     @State private var creditCardEmiOptionBool: Bool = false
     @State private var debitCardEmiOptionBool: Bool = false
     @State private var othersCardEmiOptionBool: Bool = false
+    @State private var isWebViewClosedProgrammatically = false
     
     private var paymentOptionList: [PaymentMethod] {
         checkOutViewModel.paymentOptionList
@@ -180,7 +181,7 @@ struct EMIOptionsView: View {
             .animation(.easeInOut, value: selectedTab)
             .background(Color(UIColor.systemGray6).ignoresSafeArea())
             .preferredColorScheme(.light)
-
+            
         }.onAppear{
             if(allEmiPaymentOptions.isEmpty){
                 let apiManager = APIManager()
@@ -205,14 +206,18 @@ struct EMIOptionsView: View {
             }
         }
         .sheet(isPresented: $showWebView, onDismiss: {
-            print("WebView closed by user!") // ✅ Detect if user closed manually
-            showFailureScreen = true // ✅ Custom function to handle dismissal
-            isLoading = false
+            if !isWebViewClosedProgrammatically {
+                print("WebView closed by user!") // ✅ Detect if user closed manually
+                showFailureScreen = true
+                isLoading = false
+            }
+            isWebViewClosedProgrammatically = false // ✅ Reset the flag
         }) {
             if let validURL = URL(string: dynamicURL) {
                 WebView(
                     url: validURL,
                     onDismiss: {
+                        isWebViewClosedProgrammatically = true
                         showWebView = false
                         print("WebView closed after action!") // ✅ Detect if closed after an action
                     }
@@ -222,17 +227,17 @@ struct EMIOptionsView: View {
         .sheet(isPresented: $showFailureScreen) {
             if #available(iOS 16.0, *) {
                 PaymentFailureScreen(transactionID: paymentViewModel.transactionId, reasonCode: paymentViewModel.reasonCode, reason: paymentViewModel.statusReason,
-                    onRetryPayment: {
-                        print("Retry Payment action from sheet")
-                        showFailureScreen = false
-                        repeatingTask.stopRepeatingTask()
-                        //dismiss()
-                    },
-                    onReturnToPaymentOptions: {
-                        showFailureScreen = false
-                        repeatingTask.stopRepeatingTask()
-                        print("Return to Payment Options action from sheet")
-                    }
+                                     onRetryPayment: {
+                    print("Retry Payment action from sheet")
+                    showFailureScreen = false
+                    repeatingTask.stopRepeatingTask()
+                    //dismiss()
+                },
+                                     onReturnToPaymentOptions: {
+                    showFailureScreen = false
+                    repeatingTask.stopRepeatingTask()
+                    print("Return to Payment Options action from sheet")
+                }
                 )
                 .presentationDetents([.height(400)])
                 .presentationDragIndicator(.visible)
@@ -271,6 +276,11 @@ struct EMIOptionsView: View {
                 // Fallback on earlier versions
             }
         }
+        .onChange(of: selectedEMIOptions) { newOptions in
+            if !newOptions.isEmpty {
+                navigateToDetails = true
+            }
+        }
         .navigate(to: EMIDetailsView(emiOptions: selectedEMIOptions), when: $navigateToDetails)
         .toast(isPresenting: $isLoading, duration: 100, tapToDismiss: false, alert: {
             AlertToast(type: .loading)
@@ -286,12 +296,12 @@ struct EMIOptionsView: View {
             print("Switched to tab: \(tabs[newValue])")
             // If a tab is disabled, reset selectedTab to the next available tab:
             if (newValue == 0 && !creditCardEmiOptionBool) {
-                    selectedTab = debitCardEmiOptionBool ? 1 : (othersCardEmiOptionBool ? 2 : 0)
-                } else if (newValue == 1 && !debitCardEmiOptionBool) {
-                    selectedTab = othersCardEmiOptionBool ? 2 : (creditCardEmiOptionBool ? 0 : 1)
-                } else if (newValue == 2 && !othersCardEmiOptionBool) {
-                    selectedTab = creditCardEmiOptionBool ? 0 : (debitCardEmiOptionBool ? 1 : 2)
-                }
+                selectedTab = debitCardEmiOptionBool ? 1 : (othersCardEmiOptionBool ? 2 : 0)
+            } else if (newValue == 1 && !debitCardEmiOptionBool) {
+                selectedTab = othersCardEmiOptionBool ? 2 : (creditCardEmiOptionBool ? 0 : 1)
+            } else if (newValue == 2 && !othersCardEmiOptionBool) {
+                selectedTab = creditCardEmiOptionBool ? 0 : (debitCardEmiOptionBool ? 1 : 2)
+            }
             
             if(newValue == 2){
                 isOthersTabSelected = true
@@ -540,8 +550,8 @@ struct EMIOptionsView: View {
         let allEmiPaymentOptions: [PaymentMethod]
         let othersEmiOptionsWithTags: [PaymentMethod]
         let currencySymbol: String
-
-
+        
+        
         
         var filteredOptions: [PaymentMethod] {
             var options = searchText.isEmpty ? othersEmiOptions : othersEmiOptions.filter {
@@ -586,9 +596,9 @@ struct EMIOptionsView: View {
                             commonInitializePaymentViewModel: commonInitializePaymentViewModel,
                             allEmiPaymentOptions: allEmiPaymentOptions,
                             currencySymbol: currencySymbol
-                        
+                            
                         )
-
+                        
                         FooterView()
                             .padding(.top, 10)
                     }
@@ -658,7 +668,7 @@ struct EMIOptionsView: View {
             }
             
             // Navigate to EMI details screen
-            navigateToDetails = true
+            //navigateToDetails = true
         }
         
     }
@@ -780,8 +790,8 @@ struct OthersListView: View {
     var commonInitializePaymentViewModel: CommonInitializePaymentViewModel
     let allEmiPaymentOptions: [PaymentMethod]
     let currencySymbol: String
-
-
+    
+    
     
     var body: some View {
         VStack(alignment: .leading) {
