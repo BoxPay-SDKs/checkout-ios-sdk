@@ -32,7 +32,7 @@ struct ContentViewTest: View {
     var body: some View {
         NavigationView {
             VStack {
-                Text("Boxpay Testing")
+                Text("Boxpay  Testing")
                     .font(.largeTitle)
                     .padding()
 
