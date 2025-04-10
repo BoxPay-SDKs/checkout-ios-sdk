@@ -213,7 +213,7 @@ class APIViewModel: ObservableObject {
     @Published var baseUrlTest: String = "https://test-apis.boxpay.tech"
     
     //replace baseUrl for token generation
-    private lazy var url = baseUrlTest + "/v0/merchants/oh3mnorsME/sessions"
+    private lazy var url = baseUrlTest + "/v0/merchants/lGfqzNSKKA/sessions"
     
     
     func generateToken(completion: @escaping (Bool) -> Void) {
@@ -229,8 +229,8 @@ class APIViewModel: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.addValue("Bearer i8zuZD3mR9SYvT29z3p4DHRigXBcL5Cu5H2Lpl5M9w1LP7BVqj79YE09vhrskbXTbJjtZ5HsLFfivNjtdCZZZk", forHTTPHeaderField: "Authorization")
-        request.addValue("Android SDK", forHTTPHeaderField: "X-Client-Connector-Name")
+        request.addValue("Bearer 3z3G6PT8vDhxQCKRQzmRsujsO5xtsQAYLUR3zcKrPwVrphfAqfyS20bvvCg2X95APJsT5UeeS5YdD41aHbz6mg", forHTTPHeaderField: "Authorization")
+        request.addValue("IOS SDK", forHTTPHeaderField: "X-Client-Connector-Name")
         request.addValue("1.0.0", forHTTPHeaderField: "X-Client-Connector-Version")
         
         //token generation json
