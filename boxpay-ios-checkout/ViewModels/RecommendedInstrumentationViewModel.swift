@@ -34,10 +34,17 @@ class RecommendedInstrumentationViewModel: ObservableObject {
 
         URLSession.shared.dataTaskPublisher(for: request)
             .tryMap { data, response -> Data in
-                guard let httpResponse = response as? HTTPURLResponse,
-                      httpResponse.statusCode == 200 else {
+                guard let httpResponse = response as? HTTPURLResponse else {
                     throw URLError(.badServerResponse)
                 }
+
+                print("🔍 Status Code: \(httpResponse.statusCode)")
+                if httpResponse.statusCode != 200 {
+                    let body = String(data: data, encoding: .utf8) ?? "No response body"
+                    print("❌ Server Response Body: \(body)")
+                    throw URLError(.badServerResponse)
+                }
+
                 return data
             }
             .decode(type: [RecommendedPaymentInstrument].self, decoder: JSONDecoder())
