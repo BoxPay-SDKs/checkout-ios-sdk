@@ -1,44 +1,125 @@
 //
 //  CheckoutViewModel.swift
-//  boxpay-ios-checkout
+//  checkout-ios-sdk
 //
-//  Created by ankush on 30/01/25.
+//  Created by Ishika Bansal on 15/04/25.
 //
 
+import Foundation
+import UIKit
 
 class CheckoutViewModel: ObservableObject {
-    @Published var isLoading: Bool = false
+    @Published var isFirstLoad : Bool = true
+    @Published var upiCollectMethod:Bool = false
+    @Published var upiIntentMethod : Bool = false
+    @Published var upiQrMethod : Bool = false
+    @Published var cardsMethod: Bool = false
+    @Published var walletsMethod : Bool = false
+    @Published var netBankingMethod : Bool = false
+    @Published var emiMethod: Bool = false
+    @Published var bnplMethod : Bool = false
+    @Published var actions : PaymentAction?
+    
+    let checkoutManager = CheckoutManager.shared
+    let userDataManager = UserDataManager.shared
+    let apiManager = ApiService.shared
     @Published var sessionData: CheckoutSession? {
         didSet {
-            if let paymentOptions = sessionData?.configs.paymentMethods, !paymentOptions.isEmpty {
-                print("Payment options loaded: \(paymentOptions)")
+            if let items = sessionData?.paymentDetails.order?.items {
+                            let total = items.reduce(0) { sum, item in
+                                sum + (item.quantity > 0 ? item.quantity : 1)
+                            }
+                            itemsCount = total
+                checkoutManager.setItemsCount(total)
+                            print("Total items count: \(itemsCount)")
+                        }
+            if let data = sessionData?.paymentDetails.money {
+                checkoutManager.setCurrencySymbol(getCurrencySymbol(from: data.currencyCode))
+                checkoutManager.setAmount(data.amountLocaleFull ?? "")
+            }
+            if let data = sessionData?.configs.paymentMethods {
+                for paymentMethod in data {
+                    if(paymentMethod.brand == "UpiQr" && !upiQrMethod) {
+                        upiQrMethod = true
+                    }
+                    if(paymentMethod.type == "Wallet" && !walletsMethod) {
+                        walletsMethod = true
+                    }
+                    if(paymentMethod.type == "Card" && !cardsMethod) {
+                        cardsMethod = true
+                    }
+                    if(paymentMethod.type == "NetBanking" && !netBankingMethod) {
+                        netBankingMethod = true
+                    }
+                    if(paymentMethod.brand == "UpiCollect" && !upiCollectMethod) {
+                        upiCollectMethod = true
+                    }
+                    if(paymentMethod.brand == "UpiIntent" && !upiIntentMethod) {
+                        upiIntentMethod = true
+                    }
+                    if(paymentMethod.type == "BuyNowPayLater" && !bnplMethod) {
+                        bnplMethod = true
+                    }
+                    if(paymentMethod.type == "Emi" && !emiMethod) {
+                        emiMethod = true
+                    }
+                }
+            }
+            if let userData = sessionData?.paymentDetails.shopper {
+                userDataManager.setFirstName(userData.firstName)
+                userDataManager.setLastName(userData.lastName)
+                userDataManager.setEmail(userData.email)
+                userDataManager.setPhone(userData.phoneNumber)
+                userDataManager.setUniqueId(userData.uniqueReference)
+                userDataManager.setAddress1(userData.deliveryAddress?.address1)
+                userDataManager.setAddress2(userData.deliveryAddress?.address2)
+                userDataManager.setCity(userData.deliveryAddress?.city)
+                userDataManager.setState(userData.deliveryAddress?.state)
+                userDataManager.setCountryCode(userData.deliveryAddress?.countryCode)
+                userDataManager.setPinCode(userData.deliveryAddress?.postalCode)
+                userDataManager.setLabelType(userData.deliveryAddress?.labelType)
+                userDataManager.setLabelName(userData.deliveryAddress?.labelName)
+                userDataManager.setDOB(userData.dateOfBirth)
+                userDataManager.setPan(userData.panNumber)
             }
         }
     }
-    @Published var errorMessage: String = "Something Went Wrong"
-    
+    @Published var errorReason: String = ""
+    @Published var itemsCount : Int = 0
+
     var paymentOptionList: [PaymentMethod] {
         sessionData?.configs.paymentMethods ?? []
     }
-    
-    func getCheckoutSession(token: String) {
-        isLoading = true
-        let apiService = APIServiceSessionApi()
-        
-        apiService.getCheckoutSession(token: token) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.isLoading = false
-                switch result {
-                case .success(let data):
-                    self?.sessionData = data
-                    print("API Response: \(data)")
-                case .failure(let error):
-                    self?.errorMessage = error.localizedDescription
-                    print("API Error: \(error)")
+
+    /// Fetches the checkout session using the main token
+    func getCheckoutSession() {
+        apiManager.request(
+                responseType: CheckoutSession.self
+            ) { [weak self] result in
+                DispatchQueue.main.async {
+                    self?.isFirstLoad = false
+                    switch result {
+                    case .success(let data):
+                        self?.checkoutManager.setStatus(data.status?.uppercased() ?? "")
+                        self?.checkoutManager.setTransactionId(data.lastTransactionId ?? "")
+                        self?.actions = CommonFunctions.handle(timeStamp: data.sessionExpiryTimestampLocale, reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
+                        self?.sessionData = data
+                    case .failure(let error):
+                        self?.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
+                        print("=======errorr \(error)")
+                    }
                 }
             }
         }
+    
+    func getCurrencySymbol(from currencyCode: String?) -> String {
+        guard let code = currencyCode else { return "₹" }
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = code
+        
+        // This will return the symbol for the currency, e.g., "$", "€", "₹", etc.
+        return formatter.currencySymbol ?? "₹"
     }
-    
-    
 }

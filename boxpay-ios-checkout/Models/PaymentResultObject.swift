@@ -1,13 +1,12 @@
 //
 //  PaymentResultObject.swift
-//  boxpay-ios-checkout
+//  checkout-ios-sdk
 //
-//  Created by ankush on 29/01/25.
+//  Created by Ishika Bansal on 15/04/25.
 //
 
 
 public struct PaymentResultObject {
     public let status: String
-    public let transactionId: String?
-    public let operationId: String?
+    public let transactionId: String
 }
