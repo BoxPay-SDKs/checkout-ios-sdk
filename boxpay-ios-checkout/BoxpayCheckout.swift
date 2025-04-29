@@ -25,6 +25,8 @@ public struct BoxpayCheckout : View {
     @State private var showCancelPopup = false
     @State private var isUserIntentProcessing = false
     
+    @State private var navigateToCardScreen = false
+    
     public init(
         token: String,
         shopperToken: String,
@@ -83,6 +85,7 @@ public struct BoxpayCheckout : View {
                                 if(viewModel.cardsMethod) {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to cards screen
+                                        navigateToCardScreen = true
                                     }, image: "ic_card", title: "Cards")
                                     if(viewModel.netBankingMethod || viewModel.walletsMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                                         Divider()
@@ -128,6 +131,9 @@ public struct BoxpayCheckout : View {
                 }
                 .background(Color(hex: "#F5F6FB"))
             }
+            NavigationLink(destination: CardScreen(), isActive: $navigateToCardScreen) {
+                        EmptyView()
+                    }
         }
         .onAppear {
             viewModel.getCheckoutSession()
@@ -193,7 +199,6 @@ public struct BoxpayCheckout : View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             print("App is now active again!")
             fetchStatusViewModel.startFetchingStatus()
-            // Do whatever you need to here (like check if user returned from intent)
         }
 
     }

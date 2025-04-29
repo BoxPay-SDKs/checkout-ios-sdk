@@ -63,12 +63,18 @@ public class ApiService {
                 let decoded = try JSONDecoder().decode(responseType, from: data)
                 completion(.success(decoded))
             } catch {
-                print("Decoding error: \(error)")
-                if let raw = String(data: data, encoding: .utf8) {
-                    print("Raw response: \(raw)")
+                // Try to parse the error message from the response
+                if let errorMessage = try? JSONDecoder().decode(ApiErrorResponse.self, from: data) {
+                    print("API Error Message: \(errorMessage.message)")
+                    completion(.failure(NSError(domain: errorMessage.message, code: -3)))
+                } else {
+                    if let raw = String(data: data, encoding: .utf8) {
+                        print("Raw response: \(raw)")
+                    }
+                    completion(.failure(error))
                 }
-                completion(.failure(error))
             }
+
         }.resume()
     }
 }

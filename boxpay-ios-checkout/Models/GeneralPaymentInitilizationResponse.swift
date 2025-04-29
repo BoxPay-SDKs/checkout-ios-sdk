@@ -7,6 +7,7 @@
 
 
 struct GeneralPaymentInitilizationResponse: Codable {
+    let message : String?
     let transactionId: String
     let status: GeneralStatusResponse
     let actions: [GeneralActionResponse]
@@ -90,3 +91,9 @@ struct DeviceDetails: Codable {
     let deviceBrandName: String
 }
 
+
+
+struct ApiErrorResponse : Codable {
+    let errorCode : String
+    let message:String
+}

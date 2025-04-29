@@ -118,7 +118,10 @@ struct UpiScreen: View {
                                 onChange: { newText in
                                     handleTextChange(newText)
                                 },
-                                isFocused: $isFocused
+                                isFocused: $isFocused,
+                                trailingIcon: .constant(""),
+                                leadingIcon: .constant(""),
+                                isSecureText: .constant(false)
                             )
 
                             if upiCollectError {
