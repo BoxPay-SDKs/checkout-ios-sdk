@@ -191,6 +191,7 @@ struct CardScreen : View {
             updateCardInfo(with: cardResponse)
         }
         .onReceive(viewModel.$actions.compactMap{$0},perform: handlePaymentAction)
+        .onReceive(fetchStatusViewModel.$actions.compactMap{$0},perform: handlePaymentAction)
         .bottomSheet(isPresented: $sessionExpireScreen) {
             SessionExpireScreen(
                 brandColor: viewModel.checkoutManager.getBrandColor(),
@@ -488,25 +489,32 @@ struct CardScreen : View {
         switch action {
         case .showFailed(let message):
             print("❌ Failed: - \(message)")
+            viewModel.checkoutManager.setStatus("FAILED")
             viewModel.isLoading = false
             fetchStatusViewModel.stopFetchingStatus()
             errorReason = message
             sessionFailedScreen = true
         case .showSuccess(let time):
             print("✅ Success: - \(time)")
+            viewModel.checkoutManager.setStatus("SUCCESS")
+            viewModel.isLoading = false
             fetchStatusViewModel.stopFetchingStatus()
             timeStamp = time
             sessionCompleteScreen = true
         case .showExpired:
             print("⌛ Expired:")
+            viewModel.checkoutManager.setStatus("EXPIRED")
+            viewModel.isLoading = false
             fetchStatusViewModel.stopFetchingStatus()
             sessionExpireScreen = true
         case .openWebViewUrl(let url):
             print("🌐 WebView URL: \(url)")
             paymentUrl = url
+            showWebView = true
         case .openWebViewHTML(let htmlContent):
             print("📄 HTML: \(htmlContent)")
             paymentHtmlString = htmlContent
+            showWebView = true
         case .openIntentUrl(let base64Url):
             print("📦 Base64: \(base64Url)")
         case .openUpiTimer( _) :

@@ -1,51 +1,61 @@
-import Foundation
+//
+//  WalletViewModel.swift
+//  boxpay-ios-checkout
+//
+//  Created by Ishika Bansal on 29/04/25.
+//
+
 import UIKit
 
-class CardViewModel: ObservableObject {
-    @Published var actions: PaymentAction?
-    @Published var isLoading : Bool = false
-    @Published var checkoutManager = CheckoutManager.shared
-    private let apiManager = ApiService.shared
-    @Published var cardResponse : CardInfoResponse?
-    let userDataManager = UserDataManager.shared
+class WalletViewModel : ObservableObject {
 
+    @Published var isFirstLoad = true
+    @Published var isLoading = false
+    @Published var actions : PaymentAction?
+    @Published var checkoutManager = CheckoutManager.shared
+    @Published var apiService = ApiService.shared
+    @Published var userDataManager = UserDataManager.shared
     
-    func fetchCardInfo(_ cardNumber:String) {
-        apiManager.request(
-            endpoint: "bank-identification-numbers/\(cardNumber)",
-            method: .POST,
-            headers: [
-                "Content-Type": "application/json",
-                "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
-            ],
-            responseType: CardInfoResponse.self
-        ) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let data):
-                    print("==========data: \(data)")
-                    self?.cardResponse = data
-                case .failure(let error):
-                    print("=======error: \(error)")
+    @Published var walletDataClass : [CommonDataClass] = []
+    
+    func getWalletPaymentMethods() {
+        apiService.request(
+            endpoint: "payment-methods",
+            responseType: [PaymentMethod].self
+            ) { [weak self] result in
+                DispatchQueue.main.async {
+                    self?.isFirstLoad = false
+                    switch result {
+                    case .success(let data):
+                        self?.walletDataClass = data
+                            .filter { $0.type == "Wallet" }
+                            .map { item in
+                                CommonDataClass(
+                                    id: item.id ?? "",
+                                    title: item.title ?? "",
+                                    image: item.logoUrl ?? "",
+                                    instrumentTypeValue: item.instrumentTypeValue ?? "",
+                                    isLastUsed: nil
+                                )
+                            }
+
+                    case .failure(let error):
+                        self?.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
+                        print("=======errorr \(error)")
+                    }
                 }
             }
-        }
     }
     
-    func initiateCardPostRequest(cardNumber:String, cardExpiry:String, cardCvv:String, cardHolderName:String) {
+    func initiateWalletPostRequest(instrumentValue:String) {
         // Construct instrumentDetails
         self.isLoading = true
-        var expiry = formatExpiry(cardExpiry)
-            var instrumentDetails: [String: Any] = [
-                "type": "card/plain",
-                "card" : [
-                    "number" : cardNumber,
-                    "expiry": expiry,
-                    "cvc": cardCvv,
-                    "holderName": cardHolderName
+            let instrumentDetails: [String: Any] = [
+                "type": instrumentValue,
+                "wallet" : [
+                    "token" : checkoutManager.getMainToken()
                 ]
             ]
-
 
             // Construct delivery address
             let deliveryAddress: [String: Any?] = [
@@ -109,7 +119,7 @@ class CardViewModel: ObservableObject {
         }
 
         
-        apiManager.request(
+        apiService.request(
             method : .POST,
             headers: [
                 "Content-Type": "application/json",
@@ -119,12 +129,11 @@ class CardViewModel: ObservableObject {
             responseType: GeneralPaymentInitilizationResponse.self
             ) { [weak self] result in
                 DispatchQueue.main.async {
-                    self?.isLoading = false
                     switch result {
                     case .success(let data):
                         self?.checkoutManager.setStatus(data.status.status.uppercased())
                         self?.checkoutManager.setTransactionId(data.transactionId)
-                        self?.actions = CommonFunctions.handle(timeStamp: data.transactionTimestampLocale, reasonCode: data.status.reasonCode, reason: data.status.reason, methodType: "CARD", response: PaymentActionResponse(action: data.actions), shopperVpa:"")
+                        self?.actions = CommonFunctions.handle(timeStamp: data.transactionTimestampLocale, reasonCode: data.status.reasonCode, reason: data.status.reason, methodType: "WALLET", response: PaymentActionResponse(action: data.actions), shopperVpa:"")
                     case .failure(let error):
                         self?.checkoutManager.setStatus("FAILED")
                         self?.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
@@ -133,16 +142,4 @@ class CardViewModel: ObservableObject {
                 }
             }
     }
-    
-    func formatExpiry(_ input: String) -> String {
-        let components = input.split(separator: "/")
-        guard components.count == 2,
-              let month = components.first,
-              let year = components.last else {
-            return input // or return "" if you prefer a default on invalid input
-        }
-        
-        return "20\(year)-\(month)"
-    }
-
 }

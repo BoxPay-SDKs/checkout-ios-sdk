@@ -1,14 +1,6 @@
 import SwiftUICore
 import SwiftUI
 
-extension Image {
-    init(frameworkAsset name: String, isTemplate: Bool = false) {
-        let bundle = Bundle(for: TestClass.self)
-        let image = Image(name, bundle: bundle)
-        self = isTemplate ? image.renderingMode(.template) : image.renderingMode(.original)
-    }
-}
-
 public struct BoxpayCheckout : View {
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel = CheckoutViewModel()
@@ -26,6 +18,7 @@ public struct BoxpayCheckout : View {
     @State private var isUserIntentProcessing = false
     
     @State private var navigateToCardScreen = false
+    @State private var navigateToWalletScreen = false
     
     public init(
         token: String,
@@ -51,7 +44,7 @@ public struct BoxpayCheckout : View {
     
     public var body: some View {
         // Replace this with your actual SDK UI
-        VStack {
+        ZStack {
             if viewModel.isFirstLoad {
                 ShimmerPlaceholderScreen()
             } else if upiViewModel.isLoading {
@@ -81,7 +74,7 @@ public struct BoxpayCheckout : View {
                         
                         if(viewModel.cardsMethod || viewModel.walletsMethod || viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                             TitleHeaderView(text: "More Payment Options")
-                            VStack {
+                            VStack(spacing: 0) {
                                 if(viewModel.cardsMethod) {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to cards screen
@@ -94,6 +87,7 @@ public struct BoxpayCheckout : View {
                                 if(viewModel.walletsMethod) {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to wallets screen
+                                        navigateToWalletScreen = true
                                     }, image: "ic_wallet", title: "Wallet")
                                     if(viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                                         Divider()
@@ -121,7 +115,6 @@ public struct BoxpayCheckout : View {
                                     }, image: "ic_bnpl", title: "Pay Later")
                                 }
                             }
-                            .padding(.vertical, 12)
                             .background(Color.white)
                             .cornerRadius(12)
                             .shadow(radius: 1)
@@ -132,6 +125,9 @@ public struct BoxpayCheckout : View {
                 .background(Color(hex: "#F5F6FB"))
             }
             NavigationLink(destination: CardScreen(), isActive: $navigateToCardScreen) {
+                        EmptyView()
+                    }
+            NavigationLink(destination: WalletScreen(), isActive: $navigateToWalletScreen) {
                         EmptyView()
                     }
         }
@@ -228,6 +224,7 @@ public struct BoxpayCheckout : View {
         switch action {
         case .showFailed(let message):
             print("❌ Failed: - \(message)")
+            viewModel.checkoutManager.setStatus("FAILED")
             showTimerSheet = false
             upiViewModel.isLoading = false
             fetchStatusViewModel.stopFetchingStatus()
@@ -235,12 +232,14 @@ public struct BoxpayCheckout : View {
             sessionFailedScreen = true
         case .showSuccess(let time):
             print("✅ Success: - \(time)")
+            viewModel.checkoutManager.setStatus("SUCCESS")
             showTimerSheet = false
             fetchStatusViewModel.stopFetchingStatus()
             timeStamp = time
             sessionCompleteScreen = true
         case .showExpired:
             print("⌛ Expired:")
+            viewModel.checkoutManager.setStatus("EXPIRED")
             showTimerSheet = false
             fetchStatusViewModel.stopFetchingStatus()
             sessionExpireScreen = true
@@ -272,7 +271,7 @@ public struct BoxpayCheckout : View {
 
 }
 
-struct AddressSectionView: View {
+private struct AddressSectionView: View {
     let address : String
     var body: some View {
         if(address != ""){

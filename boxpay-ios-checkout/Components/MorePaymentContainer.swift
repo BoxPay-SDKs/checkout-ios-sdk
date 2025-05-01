@@ -19,8 +19,6 @@ struct MorePaymentContainer : View {
         }) {
             HStack(alignment: .center) {
                 Image(frameworkAsset: image)
-//                            .resizable()
-//                            .scaledToFit()
                     .frame(width: 32, height: 32) // Consistent icon size
 
                 VStack(alignment: .leading) {
@@ -37,6 +35,7 @@ struct MorePaymentContainer : View {
                     .rotationEffect(.degrees(90))
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 12)
     }
 }

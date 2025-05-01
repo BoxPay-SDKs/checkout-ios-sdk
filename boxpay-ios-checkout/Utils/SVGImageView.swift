@@ -1,57 +1,73 @@
-////
-////  SVGImageView.swift
-////  boxpay-ios-checkout
-////
-////  Created by ankush on 05/02/25.
-////
 //
+//  SVGImageView.swift
+//  boxpay-ios-checkout
 //
-//import SVGKit
-//import SwiftUICore
-//import SwiftUI
-//import SVGKit
+//  Created by Ishika Bansal on 29/04/25.
 //
-//struct SVGImageView: View {
-//    let url: String
-//    @State private var svgImage: SVGKImage?
-//    
-//    var body: some View {
-//        Group {
-//            if let svgImage = svgImage {
-//                Image(uiImage: svgImage.uiImage)
-//                    .resizable()
-//                    .frame(width: 30, height: 30)
-//                    .clipShape(Circle())
-//            } else {
-//                ProgressView()
-//                    .frame(width: 30, height: 30)
-//                    .clipShape(Circle())
-//            }
-//        }
-//        .onAppear {
-//            #if DEBUG
-//            // Disable async loading in preview mode
-//            if !isPreview {
-//                loadSVG()
-//            }
-//            #endif
-//        }
-//    }
-//    
-//    private func loadSVG() {
-//        guard let url = URL(string: url) else { return }
-//        DispatchQueue.global().async {
-//            if let data = try? Data(contentsOf: url),
-//               let svg = SVGKImage(data: data) {
-//                DispatchQueue.main.async {
-//                    self.svgImage = svg
-//                }
-//            }
-//        }
-//    }
-//    
-//    private var isPreview: Bool {
-//        return ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] != nil
-//    }
-//}
-//
+
+import SwiftUICore
+import SwiftUI
+import WebKit
+import SVGKit
+
+
+struct SVGImageView: View {
+    let url: String
+    var fallbackImage: String
+
+    @State private var svgImage: SVGKImage?
+    @State private var didFail: Bool = false
+
+    var body: some View {
+        Group {
+            if let svgImage = svgImage {
+                Image(uiImage: svgImage.uiImage)
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .clipShape(Circle())
+            } else if didFail {
+                Image(frameworkAsset: fallbackImage, isTemplate: false)
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .clipShape(Circle())
+            } else {
+                ShimmerView(height: 30, width: 30)
+                    .clipShape(Circle())
+            }
+        }
+        .onAppear {
+            #if DEBUG
+            if !isPreview {
+                loadSVG()
+            }
+            #else
+            loadSVG()
+            #endif
+        }
+    }
+
+    private func loadSVG() {
+        guard let svgURL = URL(string: url) else {
+            didFail = true
+            return
+        }
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            if let data = try? Data(contentsOf: svgURL),
+               let svg = SVGKImage(data: data) {
+                svg.size = CGSize(width: 30, height: 30)
+                DispatchQueue.main.async {
+                    self.svgImage = svg
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.didFail = true
+                }
+            }
+        }
+    }
+
+    private var isPreview: Bool {
+        return ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] != nil
+    }
+}

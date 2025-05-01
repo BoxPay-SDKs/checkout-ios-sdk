@@ -112,6 +112,7 @@ class UpiViewModel : ObservableObject {
                         self?.checkoutManager.setTransactionId(data.transactionId)
                         self?.actions = CommonFunctions.handle(timeStamp: data.transactionTimestampLocale, reasonCode: data.status.reasonCode, reason: data.status.reason, methodType: "UPI", response: PaymentActionResponse(action: data.actions), shopperVpa: shopperVpa ?? "")
                     case .failure(let error):
+                        self?.checkoutManager.setStatus("FAILED")
                         self?.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
                         print("=======errorr \(error)")
                     }

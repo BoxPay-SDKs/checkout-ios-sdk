@@ -11,7 +11,7 @@ import Lottie
 struct BoxpayLoaderView: View {
     var body: some View {
         VStack(spacing: 8) {
-            LottieView(animation: .named("payment_successful"))
+            LottieView(animation: .named("boxpayLogo"))
                 .playbackMode(.playing(.toProgress(1, loopMode: .loop)))
                 .frame(width: 100, height: 100)
             Text("Secured by")
