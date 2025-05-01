@@ -1,6 +1,24 @@
 import SwiftUI
 import UIKit
 
+// MARK: - Custom UITextField with padding adjustment
+class PaddedTextField: UITextField {
+    var leftPadding: CGFloat = 0
+
+    override func textRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.inset(by: UIEdgeInsets(top: 0, left: leftPadding, bottom: 0, right: 0))
+    }
+
+    override func editingRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.inset(by: UIEdgeInsets(top: 0, left: leftPadding, bottom: 0, right: 0))
+    }
+
+    override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
+        return bounds.inset(by: UIEdgeInsets(top: 0, left: leftPadding, bottom: 0, right: 0))
+    }
+}
+
+// MARK: - SwiftUI UIViewRepresentable Wrapper
 struct CustomTextFieldRepresentable: UIViewRepresentable {
     class Coordinator: NSObject, UITextFieldDelegate {
         var parent: CustomTextFieldRepresentable
@@ -28,6 +46,7 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
         }
     }
 
+    // MARK: - Props
     @Binding var text: String
     @Binding var isFocused: Bool
     var placeholder: String
@@ -40,28 +59,26 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
     var keyboardType: UIKeyboardType = .default
 
     @Binding var trailingIconName: String?
-    @Binding var leadingIconName: String?  // <- Add this
+    @Binding var leadingIconName: String?
     var onTrailingIconTap: (() -> Void)? = nil
-    
+
     @Binding var isSecureText: Bool
 
+    // MARK: - makeUIView
     func makeUIView(context: Context) -> UITextField {
-        let textField = UITextField()
+        let textField = PaddedTextField()
         textField.delegate = context.coordinator
         textField.borderStyle = .none
-        textField.placeholder = placeholder
         textField.font = font
         textField.textColor = textColor
         textField.tintColor = accentColor
         textField.keyboardType = keyboardType
         textField.addTarget(context.coordinator, action: #selector(Coordinator.textFieldDidChangeSelection(_:)), for: .editingChanged)
-        
         textField.isSecureTextEntry = isSecureText
 
-        // Add trailing icon if provided
         let bundle = Bundle(for: TestClass.self)
-        
-        // Add leading icon (if provided)
+
+        // Leading icon
         if let leadingIconName = leadingIconName, !leadingIconName.isEmpty {
             let leadingImage = UIImage(named: leadingIconName, in: bundle, compatibleWith: nil)
             let leadingButton = UIButton(type: .custom)
@@ -71,9 +88,13 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
             leadingButton.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
             textField.leftView = leadingButton
             textField.leftViewMode = .always
-        }
 
-        // Add trailing icon (if provided)
+            textField.leftPadding = 36
+        } else {
+            textField.leftPadding = 12
+        }
+        
+        // Trailing icon
         if let trailingIconName = trailingIconName, !trailingIconName.isEmpty {
             let trailingImage = UIImage(named: trailingIconName, in: bundle, compatibleWith: nil)
             let trailingButton = UIButton(type: .custom)
@@ -82,7 +103,6 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
             trailingButton.imageView?.contentMode = .scaleAspectFit
             trailingButton.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
             trailingButton.addTarget(context.coordinator, action: #selector(Coordinator.trailingIconTapped), for: .touchUpInside)
-
             textField.rightView = trailingButton
             textField.rightViewMode = .always
         }
@@ -90,14 +110,18 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
         return textField
     }
 
+    // MARK: - updateUIView
     func updateUIView(_ uiView: UITextField, context: Context) {
         uiView.text = text
         uiView.textColor = textColor
         uiView.tintColor = accentColor
         uiView.keyboardType = keyboardType
         uiView.isSecureTextEntry = isSecureText
+        uiView.font = font
+        uiView.placeholder = placeholder
     }
 
+    // MARK: - Coordinator
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }

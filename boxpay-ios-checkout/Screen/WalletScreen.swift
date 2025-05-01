@@ -48,7 +48,10 @@ struct WalletScreen: View {
                                 presentationMode.wrappedValue.dismiss()
                             }
                         )
-                        FloatingLabelTextField(placeholder: "Search for wallet", text: $searchTextField, isValid: .constant(true), isFocused: $isSearchTextFieldFocused, trailingIcon: .constant(""), leadingIcon: .constant("ic_search"), isSecureText: .constant(false))
+                        FloatingLabelTextField(placeholder: "Search for wallet", text: $searchTextField, isValid: .constant(true), onChange : { newText in
+                            searchTextField = newText
+                            filterWallets(matching: newText)
+                        },isFocused: $isSearchTextFieldFocused, trailingIcon: .constant(""), leadingIcon: .constant("ic_search"), isSecureText: .constant(false))
                             .frame(height: 40)
                             .padding(16)
                     }
@@ -63,25 +66,41 @@ struct WalletScreen: View {
                     
                     ScrollView {
                         VStack(spacing: 0) {
-                            ForEach(Array(viewModel.walletDataClass.enumerated()), id: \.element.id) { index, item in
-                                PaymentOptionView(
-                                    isSelected: selectedInstrumentValue == item.instrumentTypeValue,
-                                    imageUrl: item.image,
-                                    title: item.title,
-                                    currencySymbol: viewModel.checkoutManager.getCurrencySymbol(),
-                                    amount: viewModel.checkoutManager.getTotalAmount(),
-                                    instrumentValue: item.instrumentTypeValue,
-                                    brandColor: viewModel.checkoutManager.getBrandColor(),
-                                    onClick: { string in
-                                        selectedInstrumentValue = string
-                                    },
-                                    onProceedButton: {
-                                        viewModel.initiateWalletPostRequest(instrumentValue: selectedInstrumentValue)
-                                    }
-                                )
-                                if index < viewModel.walletDataClass.count - 1 {
-                                        Divider()// Remove extra padding around Divider
-                                    }
+                            if(viewModel.walletDataClass.isEmpty) {
+                                VStack(alignment: .center, spacing: 16){
+                                    Image(frameworkAsset: "ic_search_not_found", isTemplate: false)
+                                        .frame(width: 60, height: 60)
+                                    Text("Oops!! No results found")
+                                        .font(.custom("Poppins-SemiBold", size: 16))
+                                        .foregroundColor(Color(hex: "#212426"))
+                                    Text("Please try another search")
+                                        .font(.custom("Poppins-Regular", size: 14))
+                                        .foregroundColor(Color(hex: "#4F4D55"))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 300) // Set your desired limited height here
+                                .frame(maxHeight: .infinity, alignment: .center)
+                            } else {
+                                ForEach(Array(viewModel.walletDataClass.enumerated()), id: \.element.id) { index, item in
+                                    PaymentOptionView(
+                                        isSelected: selectedInstrumentValue == item.instrumentTypeValue,
+                                        imageUrl: item.image,
+                                        title: item.title,
+                                        currencySymbol: viewModel.checkoutManager.getCurrencySymbol(),
+                                        amount: viewModel.checkoutManager.getTotalAmount(),
+                                        instrumentValue: item.instrumentTypeValue,
+                                        brandColor: viewModel.checkoutManager.getBrandColor(),
+                                        onClick: { string in
+                                            selectedInstrumentValue = string
+                                        },
+                                        onProceedButton: {
+                                            viewModel.initiateWalletPostRequest(instrumentValue: selectedInstrumentValue)
+                                        }
+                                    )
+                                    if index < viewModel.walletDataClass.count - 1 {
+                                            Divider()// Remove extra padding around Divider
+                                        }
+                                }
                             }
                         }
                         .background(Color.white)
@@ -172,5 +191,22 @@ struct WalletScreen: View {
             print("⌛ timer opened:")
         }
     }
+    
+    func filterWallets(matching text: String) {
+        selectedInstrumentValue = ""
+        if(text.isEmpty) {
+            viewModel.walletDataClass = viewModel.defaultWalletDataClass
+            return
+        }
+        let list = viewModel.defaultWalletDataClass
+        let lowercasedText = text.lowercased()
+
+        viewModel.walletDataClass = list.filter { item in
+            let words = item.title.lowercased().split(separator: " ") // Split into words
+                return words.contains { word in
+                    word.hasPrefix(lowercasedText)
+                }
+            }
+        }
 }
 

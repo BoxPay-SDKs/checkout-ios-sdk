@@ -47,6 +47,9 @@ struct PaymentOptionView: View {
                     onClick(instrumentValue)
                 }
             }
+            .onTapGesture {
+                onClick(instrumentValue)
+            }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
             // Pay Button

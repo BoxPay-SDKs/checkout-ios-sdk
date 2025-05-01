@@ -29,7 +29,7 @@ struct FloatingLabelTextField: View {
                 .padding(.horizontal, 5)
                 .scaleEffect((isFocused || !text.isEmpty) ? 0.8 : 1.0, anchor: .leading)
                 .offset(y: (isFocused || !text.isEmpty) ? -22: 0)
-                .padding(.leading, 12)
+                .padding(.leading, (leadingIcon != nil && leadingIcon?.isEmpty == true) ? 12 : 36)
                 .animation(.easeOut(duration: 0.2), value: isFocused || !text.isEmpty)
                 .font(.custom("Poppins-Regular", size: isFocused ? 14 : 16))
 

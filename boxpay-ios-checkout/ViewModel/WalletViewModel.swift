@@ -17,6 +17,7 @@ class WalletViewModel : ObservableObject {
     @Published var userDataManager = UserDataManager.shared
     
     @Published var walletDataClass : [CommonDataClass] = []
+    @Published var defaultWalletDataClass : [CommonDataClass] = []
     
     func getWalletPaymentMethods() {
         apiService.request(
@@ -38,7 +39,17 @@ class WalletViewModel : ObservableObject {
                                     isLastUsed: nil
                                 )
                             }
-
+                        self?.defaultWalletDataClass = data
+                            .filter { $0.type == "Wallet" }
+                            .map { item in
+                                CommonDataClass(
+                                    id: item.id ?? "",
+                                    title: item.title ?? "",
+                                    image: item.logoUrl ?? "",
+                                    instrumentTypeValue: item.instrumentTypeValue ?? "",
+                                    isLastUsed: nil
+                                )
+                            }
                     case .failure(let error):
                         self?.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
                         print("=======errorr \(error)")
