@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Lottie
 
 
 struct PaymentFailureScreen: View {
@@ -17,11 +18,9 @@ struct PaymentFailureScreen: View {
     var body: some View {
         VStack(spacing: 20) {
             // Warning Icon
-            Image(frameworkAsset: "failure_alert_red")
-                .resizable()
-                .scaledToFit()
+            LottieView(animation: .named("PaymentFailed"))
+                .playbackMode(.playing(.toProgress(1, loopMode: .playOnce)))
                 .frame(width: 80, height: 80)
-                .foregroundColor(.red)
             
             // Title
             Text("Payment Failed")

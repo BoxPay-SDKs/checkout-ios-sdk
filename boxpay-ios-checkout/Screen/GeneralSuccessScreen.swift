@@ -1,4 +1,5 @@
 import SwiftUI
+import Lottie
 
 struct GeneralSuccessScreen: View {
     var transactionID: String
@@ -12,10 +13,9 @@ struct GeneralSuccessScreen: View {
     var body: some View {
         VStack(spacing: 20) {
             // Success Icon
-            Image(frameworkAsset: "green_success")
-                .resizable()
+            LottieView(animation: .named("PaymentSuccessful"))
+                .playbackMode(.playing(.toProgress(1, loopMode: .playOnce)))
                 .frame(width: 80, height: 80)
-                .foregroundColor(.green)
 
             // Payment Success Text
             Text("Payment Successful!")

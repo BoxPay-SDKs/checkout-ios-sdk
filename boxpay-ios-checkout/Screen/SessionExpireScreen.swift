@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import Lottie
 
 
 struct SessionExpireScreen: View {
@@ -17,10 +18,9 @@ struct SessionExpireScreen: View {
     var body: some View {
         VStack(spacing: 20) {
             // Warning Icon
-            Image(frameworkAsset: "session_expired_orange_timer")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 70, height: 70)
+            LottieView(animation: .named("SessionExpired"))
+                .playbackMode(.playing(.toProgress(1, loopMode: .playOnce)))
+                .frame(width: 80, height: 80)
             
             // Title
             Text("Payment session has expired.")

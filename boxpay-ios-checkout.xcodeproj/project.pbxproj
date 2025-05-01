@@ -7,7 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7819C29E2DC3829D00EED2AA /* payment_successful.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C29D2DC3829D00EED2AA /* payment_successful.json */; };
+		7819C2A02DC3847900EED2AA /* PaymentSuccessful.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C29F2DC3847900EED2AA /* PaymentSuccessful.json */; };
+		7819C2A22DC3849B00EED2AA /* SessionExpired.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C2A12DC3849B00EED2AA /* SessionExpired.json */; };
+		7819C2A42DC384C600EED2AA /* PaymentFailed.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C2A32DC384C600EED2AA /* PaymentFailed.json */; };
+		7819C2A62DC384DC00EED2AA /* BoxpayLogo.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C2A52DC384DC00EED2AA /* BoxpayLogo.json */; };
+		7819C2A72DC385E500EED2AA /* PaymentSuccessful.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C29F2DC3847900EED2AA /* PaymentSuccessful.json */; };
+		7819C2A82DC385EE00EED2AA /* SessionExpired.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C2A12DC3849B00EED2AA /* SessionExpired.json */; };
+		7819C2A92DC385F600EED2AA /* PaymentFailed.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C2A32DC384C600EED2AA /* PaymentFailed.json */; };
+		7819C2AA2DC385FD00EED2AA /* BoxpayLogo.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C2A52DC384DC00EED2AA /* BoxpayLogo.json */; };
 		783840A12DB643CB00F057DE /* BoxpayCheckout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 783840A02DB643CB00F057DE /* BoxpayCheckout.swift */; };
 		783840A42DB6461500F057DE /* UpiScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 783840A32DB6460F00F057DE /* UpiScreen.swift */; };
 		783840A62DB6521D00F057DE /* ApiViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 783840A52DB6521700F057DE /* ApiViewModel.swift */; };
@@ -96,7 +103,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		7819C29D2DC3829D00EED2AA /* payment_successful.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = payment_successful.json; sourceTree = "<group>"; };
+		7819C29F2DC3847900EED2AA /* PaymentSuccessful.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PaymentSuccessful.json; sourceTree = "<group>"; };
+		7819C2A12DC3849B00EED2AA /* SessionExpired.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SessionExpired.json; sourceTree = "<group>"; };
+		7819C2A32DC384C600EED2AA /* PaymentFailed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PaymentFailed.json; sourceTree = "<group>"; };
+		7819C2A52DC384DC00EED2AA /* BoxpayLogo.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = BoxpayLogo.json; sourceTree = "<group>"; };
 		783840A02DB643CB00F057DE /* BoxpayCheckout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoxpayCheckout.swift; sourceTree = "<group>"; };
 		783840A32DB6460F00F057DE /* UpiScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpiScreen.swift; sourceTree = "<group>"; };
 		783840A52DB6521700F057DE /* ApiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiViewModel.swift; sourceTree = "<group>"; };
@@ -311,7 +321,10 @@
 				783840A02DB643CB00F057DE /* BoxpayCheckout.swift */,
 				AC6A65F42D23B93400B4DAE5 /* Info.plist */,
 				AC6A65C72D22AE8100B4DAE5 /* Media.xcassets */,
-				7819C29D2DC3829D00EED2AA /* payment_successful.json */,
+				7819C29F2DC3847900EED2AA /* PaymentSuccessful.json */,
+				7819C2A12DC3849B00EED2AA /* SessionExpired.json */,
+				7819C2A32DC384C600EED2AA /* PaymentFailed.json */,
+				7819C2A52DC384DC00EED2AA /* BoxpayLogo.json */,
 			);
 			path = "boxpay-ios-checkout";
 			sourceTree = "<group>";
@@ -445,12 +458,16 @@
 			files = (
 				78F882062DA8E59200C6DAD8 /* Poppins-Bold.otf in Resources */,
 				AC59EF862D265A4900A12D2F /* Preview Assets.xcassets in Resources */,
+				7819C2A92DC385F600EED2AA /* PaymentFailed.json in Resources */,
 				78F8820F2DA8E66500C6DAD8 /* Poppins-Regular.otf in Resources */,
 				78F8821D2DA8E6B400C6DAD8 /* Inter-Medium.otf in Resources */,
 				AC59EF832D265A4900A12D2F /* Assets.xcassets in Resources */,
 				78F882082DA8E64500C6DAD8 /* Poppins-ExtraBold.otf in Resources */,
 				78F882212DA8E6C400C6DAD8 /* Inter-Regular.otf in Resources */,
+				7819C2A72DC385E500EED2AA /* PaymentSuccessful.json in Resources */,
+				7819C2A82DC385EE00EED2AA /* SessionExpired.json in Resources */,
 				78F8821B2DA8E6A000C6DAD8 /* Inter-ExtraBold.otf in Resources */,
+				7819C2AA2DC385FD00EED2AA /* BoxpayLogo.json in Resources */,
 				78F882182DA8E69100C6DAD8 /* Inter-Bold.otf in Resources */,
 				78F8820B2DA8E65500C6DAD8 /* Poppins-Medium.otf in Resources */,
 				78F882152DA8E67A00C6DAD8 /* Poppins-SemiBold.otf in Resources */,
@@ -463,11 +480,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				78F8820C2DA8E65500C6DAD8 /* Poppins-Medium.otf in Resources */,
+				7819C2A42DC384C600EED2AA /* PaymentFailed.json in Resources */,
 				78F882202DA8E6C400C6DAD8 /* Inter-Regular.otf in Resources */,
 				78F882232DA8E6D200C6DAD8 /* Inter-SemiBold.otf in Resources */,
+				7819C2A22DC3849B00EED2AA /* SessionExpired.json in Resources */,
 				78F882172DA8E69100C6DAD8 /* Inter-Bold.otf in Resources */,
-				7819C29E2DC3829D00EED2AA /* payment_successful.json in Resources */,
+				7819C2A02DC3847900EED2AA /* PaymentSuccessful.json in Resources */,
 				78F882052DA8E23B00C6DAD8 /* Poppins-Bold.otf in Resources */,
+				7819C2A62DC384DC00EED2AA /* BoxpayLogo.json in Resources */,
 				78F882142DA8E67A00C6DAD8 /* Poppins-SemiBold.otf in Resources */,
 				78F882112DA8E66500C6DAD8 /* Poppins-Regular.otf in Resources */,
 				78F882092DA8E64500C6DAD8 /* Poppins-ExtraBold.otf in Resources */,

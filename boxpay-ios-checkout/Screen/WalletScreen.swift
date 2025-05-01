@@ -32,7 +32,6 @@ struct WalletScreen: View {
         VStack {
             if viewModel.isFirstLoad {
                 ShimmerPlaceholderScreen()
-                    .transition(.opacity) // Add transition for smoother change when data loads
             } else if viewModel.isLoading {
                 BoxpayLoaderView()
             } else {
