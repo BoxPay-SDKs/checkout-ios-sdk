@@ -1,37 +1,76 @@
 //
-//  UpiViewModel.swift
+//  NetBankingViewModel.swift
 //  boxpay-ios-checkout
 //
-//  Created by Ishika Bansal on 24/04/25.
+//  Created by Ishika Bansal on 01/05/25.
 //
 
 import UIKit
 
-class UpiViewModel : ObservableObject {
-    @Published var isLoading: Bool = false
-    @Published var paymentUrl : String? = nil
-    @Published var status: String = "NOACTION"
-    @Published var transactionId : String = ""
-    @Published var errorReason: String = ""
+class NetBankingViewModel : ObservableObject {
+
+    @Published var isFirstLoad = true
+    @Published var isLoading = false
     @Published var actions : PaymentAction?
+    @Published var checkoutManager = CheckoutManager.shared
+    @Published var apiService = ApiService.shared
+    @Published var userDataManager = UserDataManager.shared
     
+    @Published var netBankingDataClass : [CommonDataClass] = []
+    @Published var defaultNetBankingDataClass : [CommonDataClass] = []
+    private var popularBanksList : [String] = [
+        "HDFC Bank","ICICI Bank","State Bank of India","Axis Bank","Punjab National Bank Retail"
+    ]
+    @Published var popularBankDataClass : [CommonDataClass] = []
     
-    let checkoutManager = CheckoutManager.shared
-    let userDataManager = UserDataManager.shared
-    let apiManager = ApiService.shared
+    func getWalletPaymentMethods() {
+        apiService.request(
+            endpoint: "payment-methods",
+            responseType: [PaymentMethod].self
+            ) { [weak self] result in
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    self.isFirstLoad = false
+                    switch result {
+                    case .success(let data):
+                        self.netBankingDataClass = data
+                            .filter { $0.type == "NetBanking" }
+                            .map { item in
+                                CommonDataClass(
+                                    id: item.id ?? "",
+                                    title: item.title ?? "",
+                                    image: item.logoUrl ?? "",
+                                    instrumentTypeValue: item.instrumentTypeValue ?? "",
+                                    isLastUsed: nil
+                                )
+                            }
+                        
+                        self.defaultNetBankingDataClass = self.netBankingDataClass
+                        
+                        self.popularBankDataClass = self.netBankingDataClass.filter { bank in
+                            self.popularBanksList.contains { popularName in
+                                bank.title.caseInsensitiveCompare(popularName) == .orderedSame
+                            }
+                        }
+
+                    case .failure(let error):
+                        self.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
+                        print("=======errorr \(error)")
+                    }
+                }
+
+            }
+    }
     
-    func initiateUpiPostRequest(_ selectedIntent : String? , _ shopperVpa : String?, methodType:String) {
+    func initiateNetBankingPostRequest(instrumentValue:String) {
         // Construct instrumentDetails
         self.isLoading = true
-            var instrumentDetails: [String: Any] = [
-                "type": selectedIntent != nil ? "upi/intent" : "upi/collect"
+            let instrumentDetails: [String: Any] = [
+                "type": instrumentValue,
+                "netBanking" : [
+                    "token" : checkoutManager.getMainToken()
+                ]
             ]
-
-            if let intent = selectedIntent {
-                instrumentDetails["upiAppDetails"] = ["upiApp": intent]
-            } else if let vpa = shopperVpa {
-                instrumentDetails["upi"] = ["shopperVpa": vpa]
-            }
 
             // Construct delivery address
             let deliveryAddress: [String: Any?] = [
@@ -95,7 +134,7 @@ class UpiViewModel : ObservableObject {
         }
 
         
-        apiManager.request(
+        apiService.request(
             method : .POST,
             headers: [
                 "Content-Type": "application/json",
@@ -105,12 +144,11 @@ class UpiViewModel : ObservableObject {
             responseType: GeneralPaymentInitilizationResponse.self
             ) { [weak self] result in
                 DispatchQueue.main.async {
-                    self?.isLoading = false
                     switch result {
                     case .success(let data):
                         self?.checkoutManager.setStatus(data.status.status.uppercased())
                         self?.checkoutManager.setTransactionId(data.transactionId)
-                        self?.actions = CommonFunctions.handle(timeStamp: data.transactionTimestampLocale, reasonCode: data.status.reasonCode, reason: data.status.reason, methodType: methodType, response: PaymentActionResponse(action: data.actions), shopperVpa: shopperVpa ?? "")
+                        self?.actions = CommonFunctions.handle(timeStamp: data.transactionTimestampLocale, reasonCode: data.status.reasonCode, reason: data.status.reason, methodType: "WALLET", response: PaymentActionResponse(action: data.actions), shopperVpa:"")
                     case .failure(let error):
                         self?.checkoutManager.setStatus("FAILED")
                         self?.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
@@ -119,5 +157,4 @@ class UpiViewModel : ObservableObject {
                 }
             }
     }
-    
 }

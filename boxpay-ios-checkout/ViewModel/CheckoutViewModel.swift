@@ -23,6 +23,7 @@ class CheckoutViewModel: ObservableObject {
     let checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
     let apiManager = ApiService.shared
+    private var hasFetechedCheckoutDetails = false
     @Published var sessionData: CheckoutSession? {
         didSet {
             if let items = sessionData?.paymentDetails.order?.items {
@@ -93,6 +94,7 @@ class CheckoutViewModel: ObservableObject {
 
     /// Fetches the checkout session using the main token
     func getCheckoutSession() {
+        guard !hasFetechedCheckoutDetails else { return }
         apiManager.request(
                 responseType: CheckoutSession.self
             ) { [weak self] result in
@@ -109,6 +111,7 @@ class CheckoutViewModel: ObservableObject {
                         print("=======errorr \(error)")
                     }
                 }
+                self?.hasFetechedCheckoutDetails = true
             }
         }
     

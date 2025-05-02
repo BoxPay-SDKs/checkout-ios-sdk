@@ -1,20 +1,19 @@
 //
-//  WalletScreen.swift
+//  NetBankingScreen.swift
 //  boxpay-ios-checkout
 //
-//  Created by Ishika Bansal on 29/04/25.
+//  Created by Ishika Bansal on 01/05/25.
 //
-
 import SwiftUICore
 import SwiftUI
 
-
-struct WalletScreen: View {
+struct NetBankingScreen: View {
     @Environment(\.presentationMode) private var presentationMode
-    @StateObject private var viewModel = WalletViewModel()
+    @StateObject private var viewModel = NetBankingViewModel()
     @State private var searchTextField: String = ""
     @State private var isSearchTextFieldFocused: Bool = false
     @State private var selectedInstrumentValue: String = ""
+    @State private var selectedPopularInstrumentVakue : String = ""
     
     @StateObject var fetchStatusViewModel = FetchStatusViewModel()
     
@@ -27,9 +26,8 @@ struct WalletScreen: View {
     @State private var paymentHtmlString: String? = nil
     @State private var showWebView = false
     
-    
     var body: some View {
-        ZStack {
+        VStack {
             if viewModel.isFirstLoad {
                 ShimmerPlaceholderScreen()
             } else if viewModel.isLoading {
@@ -38,7 +36,7 @@ struct WalletScreen: View {
                 VStack(alignment: .leading) {
                     VStack {
                         HeaderView(
-                            text: "Choose Wallet",
+                            text: "Select Bank",
                             showDesc: true,
                             showSecure: true,
                             itemCount: viewModel.checkoutManager.getItemsCount(),
@@ -48,25 +46,66 @@ struct WalletScreen: View {
                                 presentationMode.wrappedValue.dismiss()
                             }
                         )
-                        FloatingLabelTextField(placeholder: "Search for wallet", text: $searchTextField, isValid: .constant(true), onChange : { newText in
+                        FloatingLabelTextField(placeholder: "Search for bank", text: $searchTextField, isValid: .constant(true), onChange : { newText in
                             searchTextField = newText
-                            filterWallets(matching: newText)
+                            filterBanks(matching: newText)
                         },isFocused: $isSearchTextFieldFocused, trailingIcon: .constant(""), leadingIcon: .constant("ic_search"), isSecureText: .constant(false))
                             .frame(height: 40)
                             .padding(16)
                     }
                     .background(Color.white)
                     
-                    Text("Your Linked Wallets")
-                        .font(.custom("Poppins-SemiBold", size: 14))
-                        .foregroundColor(Color(hex: "#020815").opacity(0.71))
+                    ScrollView {
+                        if(searchTextField.isEmpty && !viewModel.popularBankDataClass.isEmpty) {
+                            HStack {
+                                Text("Popular Banks")
+                                    .font(.custom("Poppins-SemiBold", size: 14))
+                                    .foregroundColor(Color(hex: "#020815").opacity(0.71))
+                                Spacer()
+                            }
+                            .padding(.top, 12)
+                            .padding(.bottom, 8)
+                            .padding(.horizontal, 16)
+                            VStack(spacing : 0) {
+                                ForEach(Array(viewModel.popularBankDataClass.enumerated()), id: \.element.id) { index, item in
+                                    PaymentOptionView(
+                                        isSelected: selectedPopularInstrumentVakue == item.instrumentTypeValue,
+                                        imageUrl: item.image,
+                                        title: item.title,
+                                        currencySymbol: viewModel.checkoutManager.getCurrencySymbol(),
+                                        amount: viewModel.checkoutManager.getTotalAmount(),
+                                        instrumentValue: item.instrumentTypeValue,
+                                        brandColor: viewModel.checkoutManager.getBrandColor(),
+                                        onClick: { string in
+                                            selectedPopularInstrumentVakue = string
+                                            selectedInstrumentValue = ""
+                                        },
+                                        onProceedButton: {
+                                            viewModel.initiateNetBankingPostRequest(instrumentValue: selectedPopularInstrumentVakue.isEmpty ? selectedInstrumentValue : selectedPopularInstrumentVakue)
+                                        }
+                                    )
+                                    if index < viewModel.popularBankDataClass.count - 1 {
+                                            Divider()// Remove extra padding around Divider
+                                        }
+                                }
+                            }
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(radius: 1)
+                            .padding(.horizontal, 16)
+                        }
+                        HStack {
+                            Text("All Banks")
+                                .font(.custom("Poppins-SemiBold", size: 14))
+                                .foregroundColor(Color(hex: "#020815").opacity(0.71))
+                            Spacer()
+                        }
                         .padding(.top, 12)
                         .padding(.bottom, 8)
                         .padding(.horizontal, 16)
-                    
-                    ScrollView {
+
                         VStack(spacing: 0) {
-                            if(viewModel.walletDataClass.isEmpty) {
+                            if(viewModel.netBankingDataClass.isEmpty) {
                                 VStack(alignment: .center, spacing: 16){
                                     Image(frameworkAsset: "ic_search_not_found", isTemplate: false)
                                         .frame(width: 60, height: 60)
@@ -81,7 +120,7 @@ struct WalletScreen: View {
                                 .frame(height: 300) // Set your desired limited height here
                                 .frame(maxHeight: .infinity, alignment: .center)
                             } else {
-                                ForEach(Array(viewModel.walletDataClass.enumerated()), id: \.element.id) { index, item in
+                                ForEach(Array(viewModel.netBankingDataClass.enumerated()), id: \.element.id) { index, item in
                                     PaymentOptionView(
                                         isSelected: selectedInstrumentValue == item.instrumentTypeValue,
                                         imageUrl: item.image,
@@ -92,12 +131,13 @@ struct WalletScreen: View {
                                         brandColor: viewModel.checkoutManager.getBrandColor(),
                                         onClick: { string in
                                             selectedInstrumentValue = string
+                                            selectedPopularInstrumentVakue = ""
                                         },
                                         onProceedButton: {
-                                            viewModel.initiateWalletPostRequest(instrumentValue: selectedInstrumentValue)
+                                            viewModel.initiateNetBankingPostRequest(instrumentValue: selectedPopularInstrumentVakue.isEmpty ? selectedInstrumentValue : selectedPopularInstrumentVakue)
                                         }
                                     )
-                                    if index < viewModel.walletDataClass.count - 1 {
+                                    if index < viewModel.netBankingDataClass.count - 1 {
                                             Divider()// Remove extra padding around Divider
                                         }
                                 }
@@ -150,7 +190,7 @@ struct WalletScreen: View {
                 onDismiss: {
                     showWebView = false
                     viewModel.isLoading = true
-                    fetchStatusViewModel.startFetchingStatus(methodType: "Wallet")
+                    fetchStatusViewModel.startFetchingStatus(methodType: "NetBanking")
                 }
             )
         }
@@ -192,16 +232,16 @@ struct WalletScreen: View {
         }
     }
     
-    func filterWallets(matching text: String) {
+    func filterBanks(matching text: String) {
         selectedInstrumentValue = ""
         if(text.isEmpty) {
-            viewModel.walletDataClass = viewModel.defaultWalletDataClass
+            viewModel.netBankingDataClass = viewModel.defaultNetBankingDataClass
             return
         }
-        let list = viewModel.defaultWalletDataClass
+        let list = viewModel.defaultNetBankingDataClass
         let lowercasedText = text.lowercased()
 
-        viewModel.walletDataClass = list.filter { item in
+        viewModel.netBankingDataClass = list.filter { item in
             let words = item.title.lowercased().split(separator: " ") // Split into words
                 return words.contains { word in
                     word.hasPrefix(lowercasedText)
@@ -209,4 +249,3 @@ struct WalletScreen: View {
             }
         }
 }
-

@@ -37,7 +37,7 @@ struct CommonFunctions {
             if let actions = response.action , !actions.isEmpty, !methodType.isEmpty {
                 let type = actions.first?.type
                 
-                if methodType.uppercased() == "UPI" {
+                if methodType == "UpiIntent" {
                     let url = actions.first?.url
                     let base64 = decodeBase64(url: url ?? "")
                     return .openIntentUrl(url: base64 ?? "")
@@ -47,7 +47,7 @@ struct CommonFunctions {
                     }
                     return .openWebViewUrl(url: actions.first?.url ?? "")
                 }
-            } else if(methodType.uppercased() == "UPI") {
+            } else if(methodType == "UpiCollect") {
                 return .openUpiTimer(shopperVpa: shopperVpa)
             }
         }
@@ -70,7 +70,7 @@ struct CommonFunctions {
         else if checkoutManager.getStatus() == "EXPIRED" {
             return .showExpired
         }
-        else if checkoutManager.getStatus() == "PENDING" , methodType.uppercased() == "UPI" {
+        else if checkoutManager.getStatus() == "PENDING" , methodType.uppercased() == "UpiCollect" {
             let message: String
             if let code = reasonCode, !code.hasPrefix("UF") {
                 message = checkoutManager.getpaymentErrorMessage()

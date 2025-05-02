@@ -7,7 +7,7 @@ struct UpiScreen: View {
     var isPhonePeVisible: Bool
     @Binding var isUpiCollectVisible: Bool
     
-    let handleUpiPayment: (_ selectedIntent : String?, _ shopperVpa : String?) -> ()
+    let handleUpiPayment: (_ selectedIntent : String?, _ shopperVpa : String?, _ methodType:String) -> ()
 
     @State private var upiCollectVisible = false
     @State private var upiCollectError = false
@@ -50,7 +50,7 @@ struct UpiScreen: View {
 
                 if let intent = selectedIntent, !intent.isEmpty {
                     Button(action: {
-                        handleUpiPayment(selectedIntent,upiCollectTextInput)
+                        handleUpiPayment(selectedIntent,upiCollectTextInput, "UpiIntent")
                     }) {
                         (
                             Text("Pay")
@@ -132,7 +132,7 @@ struct UpiScreen: View {
 
                             Button(action: {
                                 if let valid = upiCollectValid {
-                                    handleUpiPayment(selectedIntent, upiCollectTextInput)
+                                    handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect")
                                 } else {
                                     upiCollectError = true
                                 }

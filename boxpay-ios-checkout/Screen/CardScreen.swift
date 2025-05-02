@@ -10,7 +10,7 @@ import SwiftUI
 
 struct CardScreen : View {
     @Environment(\.presentationMode) var presentationMode
-    @State private var viewModel = CardViewModel()
+    @StateObject private var viewModel = CardViewModel()
     
     @State private var isCardNumberFocused = false
     @State private var isCardExpiryFocused = false
@@ -50,6 +50,7 @@ struct CardScreen : View {
     @State private var paymentUrl : String? = nil
     @State private var paymentHtmlString: String? = nil
     @State private var showWebView = false
+    @State private var isCvvShowDetailsClicked = false
     
     var body: some View {
         VStack {
@@ -86,7 +87,6 @@ struct CardScreen : View {
                                     leadingIcon: .constant(""),
                                     isSecureText: .constant(false)
                                 )
-                            .id(cardImage)
                             if(isCardNumberValid == false) {
                                 Text("\(cardNumberErrorText)")
                                     .font(.custom("Poppins-Regular", size: 12))
@@ -132,6 +132,9 @@ struct CardScreen : View {
                                     onFocusEnd: handleCardCvvBlur,
                                     trailingIcon: .constant("ic_question_mark"),
                                     leadingIcon: .constant(""),
+                                    onClickIcon : {
+                                        isCvvShowDetailsClicked = true
+                                    },
                                     isSecureText: .constant(true)
                                 )
                                 .fixedSize(horizontal: false, vertical: true) // Prevents expanding height
@@ -165,6 +168,20 @@ struct CardScreen : View {
                                     .foregroundColor(Color(hex: "#E12121"))
                             }
                         }
+                        HStack {
+                            Image(frameworkAsset: "ic_info")
+                                .frame(width: 12, height: 12)
+
+                            Text("CVV will not be stored")
+                                .font(.custom("Poppins-Medium", size: 12))
+                                .foregroundColor(Color(hex: "#2D2B32"))
+                                .padding(.leading, 4) // small spacing between icon and text
+                        }
+                        .padding(4) // padding inside the box
+                        .frame(maxWidth: .infinity, alignment : .leading)
+                        .background(Color(hex: "#E8F6F1"))
+                        .cornerRadius(4)
+
                     }
                     .padding(.horizontal, 16)
                     Button(action: {
@@ -223,9 +240,14 @@ struct CardScreen : View {
                 onDismiss: {
                     showWebView = false
                     viewModel.isLoading = true
-                    fetchStatusViewModel.startFetchingStatus()
+                    fetchStatusViewModel.startFetchingStatus(methodType: "Card")
                 }
             )
+        }
+        .bottomSheet(isPresented: $isCvvShowDetailsClicked) {
+            CVVInfoView(onGoBack: {
+                isCvvShowDetailsClicked = false
+            },brandColor: viewModel.checkoutManager.getBrandColor())
         }
     }
     
@@ -240,7 +262,7 @@ struct CardScreen : View {
             maxCardCvvLength = 3
             maxCardNumberLength = 16
         case "Mastercard":
-            cardImage = "ic_masterCard"
+            cardImage = "ic_mastercard"
             maxCardCvvLength = 3
             maxCardNumberLength = 16
         case "RUPAY":

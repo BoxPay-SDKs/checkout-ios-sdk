@@ -9,13 +9,13 @@ class FetchStatusViewModel: ObservableObject {
 
     private var timer: AnyCancellable?
 
-    func startFetchingStatus() {
+    func startFetchingStatus(methodType:String) {
         // Start timer to fetch status every 4 seconds
         timer = Timer
             .publish(every: 4.0, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
-                self?.fetchStatus()
+                self?.fetchStatus(methodType: methodType)
             }
     }
 
@@ -25,7 +25,7 @@ class FetchStatusViewModel: ObservableObject {
         timer = nil
     }
 
-    private func fetchStatus() {
+    private func fetchStatus(methodType:String) {
         apiManager.request(
             endpoint: "status",
             responseType: FetchStatusResponse.self
@@ -40,9 +40,9 @@ class FetchStatusViewModel: ObservableObject {
                         timeStamp: data.transactionTimestampLocale,
                         reasonCode: data.reasonCode,
                         reason: data.statusReason,
-                        methodType: "UPI",
+                        methodType: methodType,
                         response: PaymentActionResponse(action: nil),
-                        shopperVpa: ""
+                        shopperVpa:""
                     )
                 case .failure(let error):
                     self?.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")

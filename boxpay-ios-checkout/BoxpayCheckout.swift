@@ -19,6 +19,7 @@ public struct BoxpayCheckout : View {
     
     @State private var navigateToCardScreen = false
     @State private var navigateToWalletScreen = false
+    @State private var navigateToNetBankingScreen = false
     
     public init(
         token: String,
@@ -96,6 +97,7 @@ public struct BoxpayCheckout : View {
                                 if(viewModel.netBankingMethod) {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to netbanking screen
+                                        navigateToNetBankingScreen = true
                                     }, image: "ic_netBanking", title: "Netbanking")
                                     if(viewModel.bnplMethod || viewModel.emiMethod) {
                                         Divider()
@@ -128,6 +130,10 @@ public struct BoxpayCheckout : View {
                         EmptyView()
                     }
             NavigationLink(destination: WalletScreen(), isActive: $navigateToWalletScreen) {
+                        EmptyView()
+                    }
+            
+            NavigationLink(destination: NetBankingScreen(), isActive: $navigateToNetBankingScreen) {
                         EmptyView()
                     }
         }
@@ -194,7 +200,7 @@ public struct BoxpayCheckout : View {
         )
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             print("App is now active again!")
-            fetchStatusViewModel.startFetchingStatus()
+            fetchStatusViewModel.startFetchingStatus(methodType: "UpiIntent")
         }
 
     }
@@ -253,7 +259,7 @@ public struct BoxpayCheckout : View {
             openURL(urlString: base64Url)
         case .openUpiTimer(let vpa) :
             print("⌛ timer opened:")
-            fetchStatusViewModel.startFetchingStatus()
+            fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
             shopperVpa = vpa
             showTimerSheet = true
         }
