@@ -20,6 +20,7 @@ public struct BoxpayCheckout : View {
     @State private var navigateToCardScreen = false
     @State private var navigateToWalletScreen = false
     @State private var navigateToNetBankingScreen = false
+    @State private var navigateToBnplScreen = false
     
     public init(
         token: String,
@@ -114,6 +115,7 @@ public struct BoxpayCheckout : View {
                                 if(viewModel.bnplMethod) {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to bnpl screen
+                                        navigateToBnplScreen = true
                                     }, image: "ic_bnpl", title: "Pay Later")
                                 }
                             }
@@ -134,6 +136,9 @@ public struct BoxpayCheckout : View {
                     }
             
             NavigationLink(destination: NetBankingScreen(), isActive: $navigateToNetBankingScreen) {
+                        EmptyView()
+                    }
+            NavigationLink(destination: BnplScreen(), isActive: $navigateToBnplScreen) {
                         EmptyView()
                     }
         }

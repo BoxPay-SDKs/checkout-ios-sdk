@@ -18,11 +18,12 @@ struct PaymentOptionView: View {
     var brandColor : String
     var onClick : (String) -> Void
     var onProceedButton : () -> Void
+    var fallbackImage : String
     
     var body: some View {
         VStack{
             HStack(alignment: .center) {
-                SVGImageView(url: imageUrl, fallbackImage: "ic_wallet_semi_bold")
+                SVGImageView(url: imageUrl, fallbackImage: fallbackImage)
                 VStack(alignment: .leading) {
                     Text(title)
                         .font(.custom("Poppins-SemiBold", size: 14))

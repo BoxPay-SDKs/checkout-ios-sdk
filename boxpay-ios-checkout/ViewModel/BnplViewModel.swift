@@ -1,13 +1,13 @@
 //
-//  NetBankingViewModel.swift
+//  BnplViewModel.swift
 //  boxpay-ios-checkout
 //
-//  Created by Ishika Bansal on 01/05/25.
+//  Created by Ishika Bansal on 02/05/25.
 //
 
 import UIKit
 
-class NetBankingViewModel : ObservableObject {
+class BnplViewModel : ObservableObject {
 
     @Published var isFirstLoad = true
     @Published var isLoading = false
@@ -16,25 +16,20 @@ class NetBankingViewModel : ObservableObject {
     @Published var apiService = ApiService.shared
     @Published var userDataManager = UserDataManager.shared
     
-    @Published var netBankingDataClass : [CommonDataClass] = []
-    @Published var defaultNetBankingDataClass : [CommonDataClass] = []
-    private var popularBanksList : [String] = [
-        "HDFC Bank","ICICI Bank","State Bank of India","Axis Bank","Punjab National Bank Retail"
-    ]
-    @Published var popularBankDataClass : [CommonDataClass] = []
+    @Published var bnplDataClass : [CommonDataClass] = []
+    @Published var defaultBnplDataClass : [CommonDataClass] = []
     
-    func getNetBankingPaymentMethods() {
+    func getBnplPaymentMethods() {
         apiService.request(
             endpoint: "payment-methods",
             responseType: [PaymentMethod].self
             ) { [weak self] result in
                 DispatchQueue.main.async {
-                    guard let self = self else { return }
-                    self.isFirstLoad = false
+                    self?.isFirstLoad = false
                     switch result {
                     case .success(let data):
-                        self.netBankingDataClass = data
-                            .filter { $0.type == "NetBanking" }
+                        self?.bnplDataClass = data
+                            .filter { $0.type == "BuyNowPayLater" }
                             .map { item in
                                 CommonDataClass(
                                     id: item.id ?? "",
@@ -44,30 +39,31 @@ class NetBankingViewModel : ObservableObject {
                                     isLastUsed: nil
                                 )
                             }
-                        
-                        self.defaultNetBankingDataClass = self.netBankingDataClass
-                        
-                        self.popularBankDataClass = self.netBankingDataClass.filter { bank in
-                            self.popularBanksList.contains { popularName in
-                                bank.title.caseInsensitiveCompare(popularName) == .orderedSame
+                        self?.defaultBnplDataClass = data
+                            .filter { $0.type == "BuyNowPayLater" }
+                            .map { item in
+                                CommonDataClass(
+                                    id: item.id ?? "",
+                                    title: item.title ?? "",
+                                    image: item.logoUrl ?? "",
+                                    instrumentTypeValue: item.instrumentTypeValue ?? "",
+                                    isLastUsed: nil
+                                )
                             }
-                        }
-
                     case .failure(let error):
-                        self.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
+                        self?.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
                         print("=======errorr \(error)")
                     }
                 }
-
             }
     }
     
-    func initiateNetBankingPostRequest(instrumentValue:String) {
+    func initiateBnplPostRequest(instrumentValue:String) {
         // Construct instrumentDetails
         self.isLoading = true
             let instrumentDetails: [String: Any] = [
                 "type": instrumentValue,
-                "netBanking" : [
+                "buynowpaylater" : [
                     "token" : checkoutManager.getMainToken()
                 ]
             ]

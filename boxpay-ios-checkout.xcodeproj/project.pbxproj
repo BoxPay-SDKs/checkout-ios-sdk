@@ -35,6 +35,8 @@
 		78B9AB692DB777080046645A /* CardScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B9AB682DB777020046645A /* CardScreen.swift */; };
 		78B9AB802DB7B80B0046645A /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = 78B9AB7F2DB7B80B0046645A /* AlertToast */; };
 		78B9AB872DB7BAC30046645A /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 78B9AB862DB7BAC30046645A /* Lottie */; };
+		78D6837C2DC4C0F1007FA64C /* BnplScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D6837B2DC4C0ED007FA64C /* BnplScreen.swift */; };
+		78D6837E2DC4C113007FA64C /* BnplViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D6837D2DC4C10D007FA64C /* BnplViewModel.swift */; };
 		78ED0AEF2DC0DD94007816D8 /* WalletViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78ED0AEE2DC0DD8D007816D8 /* WalletViewModel.swift */; };
 		78ED0AF12DC0DEE6007816D8 /* CommonDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78ED0AF02DC0DED4007816D8 /* CommonDataClass.swift */; };
 		78ED0AF32DC0E19B007816D8 /* WalletScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78ED0AF22DC0E198007816D8 /* WalletScreen.swift */; };
@@ -123,6 +125,8 @@
 		78B6CBF02DBB839700B380D3 /* CardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardViewModel.swift; sourceTree = "<group>"; };
 		78B6CBF42DBB966300B380D3 /* CardInfoResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardInfoResponse.swift; sourceTree = "<group>"; };
 		78B9AB682DB777020046645A /* CardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardScreen.swift; sourceTree = "<group>"; };
+		78D6837B2DC4C0ED007FA64C /* BnplScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BnplScreen.swift; sourceTree = "<group>"; };
+		78D6837D2DC4C10D007FA64C /* BnplViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BnplViewModel.swift; sourceTree = "<group>"; };
 		78ED0AEE2DC0DD8D007816D8 /* WalletViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletViewModel.swift; sourceTree = "<group>"; };
 		78ED0AF02DC0DED4007816D8 /* CommonDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonDataClass.swift; sourceTree = "<group>"; };
 		78ED0AF22DC0E198007816D8 /* WalletScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletScreen.swift; sourceTree = "<group>"; };
@@ -195,6 +199,7 @@
 		783840A22DB6460700F057DE /* Screen */ = {
 			isa = PBXGroup;
 			children = (
+				78D6837B2DC4C0ED007FA64C /* BnplScreen.swift */,
 				7855CE2F2DC48D56000D2A95 /* NetBankingScreen.swift */,
 				78ED0AF22DC0E198007816D8 /* WalletScreen.swift */,
 				78B9AB682DB777020046645A /* CardScreen.swift */,
@@ -221,6 +226,7 @@
 		78B6CBEF2DBB82C600B380D3 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				78D6837D2DC4C10D007FA64C /* BnplViewModel.swift */,
 				784F8FFE2DC39B6A008DA7C3 /* NetBankingViewModel.swift */,
 				78ED0AEE2DC0DD8D007816D8 /* WalletViewModel.swift */,
 				78B6CBF02DBB839700B380D3 /* CardViewModel.swift */,
@@ -510,6 +516,7 @@
 				ACA5AA222D4B777900FE72DB /* CheckoutViewModel.swift in Sources */,
 				AC7EA4802D3E294400E279FF /* GeneralSuccessScreen.swift in Sources */,
 				78ED0AF32DC0E19B007816D8 /* WalletScreen.swift in Sources */,
+				78D6837C2DC4C0F1007FA64C /* BnplScreen.swift in Sources */,
 				783840A12DB643CB00F057DE /* BoxpayCheckout.swift in Sources */,
 				AC7EA4892D4230D600E279FF /* SessionExpireScreen.swift in Sources */,
 				AC7EA4982D49EFD500E279FF /* WebViewScreen.swift in Sources */,
@@ -521,6 +528,7 @@
 				78B6CBE12DB9F18300B380D3 /* UpiViewModel.swift in Sources */,
 				AC82D1D12D549724005B55D2 /* GeneralPaymentInitilizationResponse.swift in Sources */,
 				783840A42DB6461500F057DE /* UpiScreen.swift in Sources */,
+				78D6837E2DC4C113007FA64C /* BnplViewModel.swift in Sources */,
 				7855CE302DC48D5B000D2A95 /* NetBankingScreen.swift in Sources */,
 				78B6CBEE2DBB561D00B380D3 /* FetchStatusResponse.swift in Sources */,
 				ACD7EC772D8C2E430091DDA6 /* DccSuccessScreen.swift in Sources */,

@@ -95,7 +95,8 @@ struct WalletScreen: View {
                                         },
                                         onProceedButton: {
                                             viewModel.initiateWalletPostRequest(instrumentValue: selectedInstrumentValue)
-                                        }
+                                        },
+                                        fallbackImage: "ic_wallet_semi_bold"
                                     )
                                     if index < viewModel.walletDataClass.count - 1 {
                                             Divider()// Remove extra padding around Divider

@@ -36,13 +36,7 @@ struct SVGImageView: View {
             }
         }
         .onAppear {
-            #if DEBUG
-            if !isPreview {
-                loadSVG()
-            }
-            #else
             loadSVG()
-            #endif
         }
     }
 
@@ -54,7 +48,8 @@ struct SVGImageView: View {
 
         DispatchQueue.global(qos: .userInitiated).async {
             if let data = try? Data(contentsOf: svgURL),
-               let svg = SVGKImage(data: data) {
+               let svg = SVGKImage(data: data),
+               svg.hasSize() || svg.domDocument != nil { // more defensive check
                 svg.size = CGSize(width: 30, height: 30)
                 DispatchQueue.main.async {
                     self.svgImage = svg
@@ -67,7 +62,4 @@ struct SVGImageView: View {
         }
     }
 
-    private var isPreview: Bool {
-        return ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] != nil
-    }
 }
