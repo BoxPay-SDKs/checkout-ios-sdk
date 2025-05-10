@@ -7,10 +7,11 @@
 
 
 struct GeneralPaymentInitilizationResponse: Codable {
+    let message : String?
     let transactionId: String
-    let transactionTimestamp: String
     let status: GeneralStatusResponse
     let actions: [GeneralActionResponse]
+    let transactionTimestampLocale : String
     
     struct GeneralStatusResponse: Codable {
         let operation: String
@@ -18,12 +19,13 @@ struct GeneralPaymentInitilizationResponse: Codable {
         let reason: String
         let reasonCode: String
     }
-    
-    struct GeneralActionResponse: Codable {
-        let method: String
-        let url: String
-        let type: String
-    }
+}
+
+struct GeneralActionResponse: Codable {
+    let method: String?
+    let url: String?
+    let type: String?
+    let htmlPageString : String?
 }
 
 
@@ -89,3 +91,9 @@ struct DeviceDetails: Codable {
     let deviceBrandName: String
 }
 
+
+
+struct ApiErrorResponse : Codable {
+    let errorCode : String
+    let message:String
+}

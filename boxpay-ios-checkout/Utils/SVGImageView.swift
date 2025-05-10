@@ -2,19 +2,22 @@
 //  SVGImageView.swift
 //  boxpay-ios-checkout
 //
-//  Created by ankush on 05/02/25.
+//  Created by Ishika Bansal on 29/04/25.
 //
 
-
-import SVGKit
 import SwiftUICore
 import SwiftUI
+import WebKit
 import SVGKit
+
 
 struct SVGImageView: View {
     let url: String
+    var fallbackImage: String
+
     @State private var svgImage: SVGKImage?
-    
+    @State private var didFail: Bool = false
+
     var body: some View {
         Group {
             if let svgImage = svgImage {
@@ -22,36 +25,41 @@ struct SVGImageView: View {
                     .resizable()
                     .frame(width: 30, height: 30)
                     .clipShape(Circle())
-            } else {
-                ProgressView()
+            } else if didFail {
+                Image(frameworkAsset: fallbackImage, isTemplate: false)
+                    .resizable()
                     .frame(width: 30, height: 30)
+                    .clipShape(Circle())
+            } else {
+                ShimmerView(height: 30, width: 30)
                     .clipShape(Circle())
             }
         }
         .onAppear {
-            #if DEBUG
-            // Disable async loading in preview mode
-            if !isPreview {
-                loadSVG()
-            }
-            #endif
+            loadSVG()
         }
     }
-    
+
     private func loadSVG() {
-        guard let url = URL(string: url) else { return }
-        DispatchQueue.global().async {
-            if let data = try? Data(contentsOf: url),
-               let svg = SVGKImage(data: data) {
+        guard let svgURL = URL(string: url) else {
+            didFail = true
+            return
+        }
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            if let data = try? Data(contentsOf: svgURL),
+               let svg = SVGKImage(data: data),
+               svg.hasSize() || svg.domDocument != nil { // more defensive check
+                svg.size = CGSize(width: 30, height: 30)
                 DispatchQueue.main.async {
                     self.svgImage = svg
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.didFail = true
                 }
             }
         }
     }
-    
-    private var isPreview: Bool {
-        return ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] != nil
-    }
-}
 
+}
