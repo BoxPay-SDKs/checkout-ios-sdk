@@ -119,7 +119,30 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
         uiView.isSecureTextEntry = isSecureText
         uiView.font = font
         uiView.placeholder = placeholder
+
+        // Update trailing icon
+        let currentIconName = (uiView.rightView as? UIButton)?.image(for: .normal)?.accessibilityIdentifier
+        if let trailingIconName = trailingIconName, !trailingIconName.isEmpty {
+            if currentIconName != trailingIconName {
+                let bundle = Bundle(for: TestClass.self)
+                let trailingImage = UIImage(named: trailingIconName, in: bundle, compatibleWith: nil)
+                trailingImage?.accessibilityIdentifier = trailingIconName // Set identifier to compare
+
+                let trailingButton = UIButton(type: .custom)
+                trailingButton.setImage(trailingImage?.withRenderingMode(.alwaysOriginal), for: .normal)
+                trailingButton.tintColor = textColor
+                trailingButton.imageView?.contentMode = .scaleAspectFit
+                trailingButton.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+                trailingButton.addTarget(context.coordinator, action: #selector(Coordinator.trailingIconTapped), for: .touchUpInside)
+
+                uiView.rightView = trailingButton
+                uiView.rightViewMode = .always
+            }
+        } else {
+            uiView.rightView = nil
+        }
     }
+
 
     // MARK: - Coordinator
     func makeCoordinator() -> Coordinator {

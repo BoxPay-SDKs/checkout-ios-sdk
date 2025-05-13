@@ -21,6 +21,7 @@ struct CardScreen : View {
     var interest  :String? = nil
     var cardType : String? = nil
     var emiIssuerBrand : String? = nil
+    var onClickBack : () -> Void = {}
     
     @StateObject private var viewModel = CardViewModel()
     
@@ -78,7 +79,11 @@ struct CardScreen : View {
                         currencySymbol: "",
                         amount: "",
                         onBackPress: {
-                            presentationMode.wrappedValue.dismiss()
+                            if(durationNumber != nil) {
+                                onClickBack()
+                            } else {
+                                presentationMode.wrappedValue.dismiss()
+                            }
                         }
                     )
                     .padding(.bottom, 20)
@@ -88,15 +93,18 @@ struct CardScreen : View {
                             if(durationNumber != nil) {
                                 HStack {
                                             // Left section (Bank logo + name)
-                                            HStack {
-                                                SVGImageView(url: bankUrl ?? "", fallbackImage: "ic_netbanking_semi_bold")
+                                    HStack {
+                                        SVGImageView(url: bankUrl ?? "", fallbackImage: "ic_netbanking_semi_bold")
 
-                                                Text(bankName ?? "")
-                                                    .font(.custom("Poppins-SemiBold", size: 14))
-                                                    .foregroundColor(Color(hex:"#2D2B32"))
-                                            }
-                                            .padding(14)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                        Text(bankName ?? "")
+                                            .font(.custom("Poppins-SemiBold", size: 14))
+                                            .foregroundColor(Color(hex: "#2D2B32"))
+                                            .lineLimit(1)
+                                            .truncationMode(.tail)
+                                    }
+                                    .padding(14)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+
 
                                             // Divider
                                             Rectangle()

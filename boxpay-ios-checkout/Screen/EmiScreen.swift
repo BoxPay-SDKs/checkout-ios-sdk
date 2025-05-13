@@ -57,7 +57,11 @@ struct EmiScreen : View {
                     emiAmount: selectedEMI?.amount,
                     interest: selectedEMI?.percent,
                     cardType: viewModel.selectedCardType,
-                    emiIssuerBrand: selectedBank?.issuerBrand
+                    emiIssuerBrand: selectedBank?.issuerBrand,
+                    onClickBack: {
+                        isCardScreenVisible = false
+                        isSelectTenureScreenVisible = true
+                    }
                 )
 
             } else {
