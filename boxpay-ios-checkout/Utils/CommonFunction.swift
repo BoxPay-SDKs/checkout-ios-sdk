@@ -70,7 +70,7 @@ struct CommonFunctions {
         else if checkoutManager.getStatus() == "EXPIRED" {
             return .showExpired
         }
-        else if checkoutManager.getStatus() == "PENDING" , methodType.uppercased() == "UpiCollect" {
+        else if checkoutManager.getStatus() == "PENDING" , methodType == "UpiIntent" {
             let message: String
             if let code = reasonCode, !code.hasPrefix("UF") {
                 message = checkoutManager.getpaymentErrorMessage()

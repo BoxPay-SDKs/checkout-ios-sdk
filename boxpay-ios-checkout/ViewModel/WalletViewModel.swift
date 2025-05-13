@@ -146,8 +146,23 @@ class WalletViewModel : ObservableObject {
                         self?.checkoutManager.setTransactionId(data.transactionId)
                         self?.actions = CommonFunctions.handle(timeStamp: data.transactionTimestampLocale, reasonCode: data.status.reasonCode, reason: data.status.reason, methodType: "WALLET", response: PaymentActionResponse(action: data.actions), shopperVpa:"")
                     case .failure(let error):
-                        self?.checkoutManager.setStatus("FAILED")
-                        self?.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
+                        let errorDescription = error.localizedDescription.lowercased()
+
+                        if errorDescription.contains("expired") {
+                            self?.checkoutManager.setStatus("EXPIRED")
+                        } else {
+                            self?.checkoutManager.setStatus("FAILED")
+                        }
+
+                        self?.actions = CommonFunctions.handle(
+                            timeStamp: "",
+                            reasonCode: "",
+                            reason: error.localizedDescription, // You can pass actual error for better debugging
+                            methodType: "",
+                            response: PaymentActionResponse(action: nil),
+                            shopperVpa: ""
+                        )
+
                         print("=======errorr \(error)")
                     }
                 }

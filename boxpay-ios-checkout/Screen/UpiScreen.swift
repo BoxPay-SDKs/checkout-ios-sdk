@@ -53,7 +53,7 @@ struct UpiScreen: View {
                         handleUpiPayment(selectedIntent,upiCollectTextInput, "UpiIntent")
                     }) {
                         (
-                            Text("Pay")
+                            Text("Pay ")
                                 .font(.custom("Poppins-SemiBold", size: 16)) +
                             Text(checkoutManager.getCurrencySymbol())
                                 .font(.custom("Inter-SemiBold", size: 16)) +
@@ -137,13 +137,20 @@ struct UpiScreen: View {
                                     upiCollectError = true
                                 }
                             }){
-                                Text("Verify & Pay \(checkoutManager.getCurrencySymbol())\(checkoutManager.getTotalAmount())")
+                                (
+                                    Text("Verify & Pay ")
+                                        .font(.custom("Poppins-Regular", size: 16)) +
+                                    Text(checkoutManager.getCurrencySymbol())
+                                        .font(.custom("Inter-Regular", size: 16)) +
+                                    Text(checkoutManager.getTotalAmount())
+                                        .font(.custom("Poppins-Regular", size: 16))
+                                )
                                     .foregroundColor(.white)
                                     .padding()
                                     .frame(maxWidth: .infinity)
                                     .background(upiCollectValid == true ? Color(hex: checkoutManager.getBrandColor()) : Color.gray.opacity(0.5))
                                     .cornerRadius(8)
-                                    .font(.custom("Poppins-Regular", size: 16))
+                                    
                             }
                             .padding(.top, 12)
                         }

@@ -9,6 +9,8 @@ import SwiftUI
 
 struct NetBankingScreen: View {
     @Environment(\.presentationMode) private var presentationMode
+    @Binding var isCheckoutFocused : Bool
+
     @StateObject private var viewModel = NetBankingViewModel()
     @State private var searchTextField: String = ""
     @State private var isSearchTextFieldFocused: Bool = false
@@ -166,7 +168,7 @@ struct NetBankingScreen: View {
                 brandColor: viewModel.checkoutManager.getBrandColor(),
                 onGoBackToHome: {
                     print("Okay from session expire screen")
-                    PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                    isCheckoutFocused = true
                     sessionExpireScreen = false
                     presentationMode.wrappedValue.dismiss()
                 }
@@ -182,7 +184,7 @@ struct NetBankingScreen: View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.checkoutManager.getTransactionId(), date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.checkoutManager.getTotalAmount(),currencySymbol: viewModel.checkoutManager.getCurrencySymbol(), onDone: {
                 sessionCompleteScreen = false
-                PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                isCheckoutFocused = true
                 presentationMode.wrappedValue.dismiss()
             },brandColor: viewModel.checkoutManager.getBrandColor())
         }

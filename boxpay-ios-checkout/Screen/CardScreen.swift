@@ -10,6 +10,18 @@ import SwiftUI
 
 struct CardScreen : View {
     @Environment(\.presentationMode) var presentationMode
+    @Binding var isCheckoutFocused : Bool
+    
+    // EMI Related params
+    var durationNumber : Int? = nil
+    var bankName : String? = nil
+    var bankUrl : String? = nil
+    var offerCode : String? = nil
+    var emiAmount : String? = nil
+    var interest  :String? = nil
+    var cardType : String? = nil
+    var emiIssuerBrand : String? = nil
+    
     @StateObject private var viewModel = CardViewModel()
     
     @State private var isCardNumberFocused = false
@@ -73,6 +85,49 @@ struct CardScreen : View {
                     ScrollView {
                         Spacer()
                         VStack(alignment: .leading) {
+                            if(durationNumber != nil) {
+                                HStack {
+                                            // Left section (Bank logo + name)
+                                            HStack {
+                                                SVGImageView(url: bankUrl ?? "", fallbackImage: "ic_netbanking_semi_bold")
+
+                                                Text(bankName ?? "")
+                                                    .font(.custom("Poppins-SemiBold", size: 14))
+                                                    .foregroundColor(Color(hex:"#2D2B32"))
+                                            }
+                                            .padding(14)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                                            // Divider
+                                            Rectangle()
+                                                .frame(width: 1, height: 40)
+                                                .foregroundColor(Color(hex: "#E6E6E6"))
+
+                                            // Right section (EMI details)
+                                            VStack(alignment: .leading) {
+                                                (
+                                                    Text("\(durationNumber ?? 0) months x ")
+                                                        .font(.custom("Poppins-SemiBold", size: 12)) +
+                                                    Text(viewModel.checkoutManager.getCurrencySymbol())
+                                                        .font(.custom("Inter-SemiBold", size: 12)) +
+                                                    Text(emiAmount ?? "")
+                                                        .font(.custom("Poppins-SemiBold", size: 12))
+                                                )
+                                                    .foregroundColor(Color(hex: "#2D2B32"))
+
+                                                Text("@\(interest ?? "")% p.a.")
+                                                    .font(.custom("Poppins-Regular", size: 12))
+                                                    .foregroundColor(Color(hex: "#2D2B32"))
+                                            }
+                                            .padding(14)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                        }
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(Color(hex: "#E6E6E6"), lineWidth: 1)
+                                        )
+                                        .padding(.bottom, 20)
+                            }
                             FloatingLabelTextField(
                                     placeholder: "Card Number",
                                     text:$cardNumberTextInput,
@@ -185,8 +240,10 @@ struct CardScreen : View {
                     }
                     .padding(.horizontal, 16)
                     Button(action: {
-                        if checkCardValid() {
+                        if checkCardValid() && durationNumber == nil {
                             viewModel.initiateCardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput)
+                        } else if (checkCardValid() && durationNumber != nil) {
+                            viewModel.initiateEMICardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, cardType: cardType ?? "", offerCode: offerCode, duration: "\(durationNumber ?? 0)")
                         }
                     }){
                         Text("Make Payment")
@@ -214,7 +271,8 @@ struct CardScreen : View {
                 brandColor: viewModel.checkoutManager.getBrandColor(),
                 onGoBackToHome: {
                     print("Okay from session expire screen")
-                    PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+//                    PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                    isCheckoutFocused = true
                     sessionExpireScreen = false
                     presentationMode.wrappedValue.dismiss()
                 }
@@ -230,7 +288,7 @@ struct CardScreen : View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.checkoutManager.getTransactionId(), date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.checkoutManager.getTotalAmount(),currencySymbol: viewModel.checkoutManager.getCurrencySymbol(), onDone: {
                 sessionCompleteScreen = false
-                PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                isCheckoutFocused = true
                 presentationMode.wrappedValue.dismiss()
             },brandColor: viewModel.checkoutManager.getBrandColor())
         }

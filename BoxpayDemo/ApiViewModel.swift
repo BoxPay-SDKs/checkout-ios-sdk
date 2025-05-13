@@ -46,7 +46,7 @@ class APIViewModel: ObservableObject {
           },
           "paymentType" : "S",
           "money" : {
-            "amount" : "5000",
+            "amount" : "15000",
             "currencyCode" : "INR"
           },
           "descriptor" : {

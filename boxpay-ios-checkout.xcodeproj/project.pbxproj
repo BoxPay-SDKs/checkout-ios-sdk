@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7810BD812DCC746B00C28AC6 /* SelectTenureScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7810BD802DCC746400C28AC6 /* SelectTenureScreen.swift */; };
 		7819C2A02DC3847900EED2AA /* PaymentSuccessful.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C29F2DC3847900EED2AA /* PaymentSuccessful.json */; };
 		7819C2A22DC3849B00EED2AA /* SessionExpired.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C2A12DC3849B00EED2AA /* SessionExpired.json */; };
 		7819C2A42DC384C600EED2AA /* PaymentFailed.json in Resources */ = {isa = PBXBuildFile; fileRef = 7819C2A32DC384C600EED2AA /* PaymentFailed.json */; };
@@ -24,6 +25,7 @@
 		783F46722DAE61840037B0F4 /* CheckoutSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 783F46632DAE61840037B0F4 /* CheckoutSession.swift */; };
 		784F8FFF2DC39B6F008DA7C3 /* NetBankingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 784F8FFE2DC39B6A008DA7C3 /* NetBankingViewModel.swift */; };
 		7855CE302DC48D5B000D2A95 /* NetBankingScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7855CE2F2DC48D56000D2A95 /* NetBankingScreen.swift */; };
+		789CA4052DC88A4D006E32A3 /* EmiScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 789CA4042DC88A35006E32A3 /* EmiScreen.swift */; };
 		78B6CBDD2DB9F02000B380D3 /* FetchStatusViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B6CBDC2DB9F01900B380D3 /* FetchStatusViewModel.swift */; };
 		78B6CBDF2DB9F0DB00B380D3 /* CommonFunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B6CBDE2DB9F0C600B380D3 /* CommonFunction.swift */; };
 		78B6CBE12DB9F18300B380D3 /* UpiViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78B6CBE02DB9F18000B380D3 /* UpiViewModel.swift */; };
@@ -37,6 +39,8 @@
 		78B9AB872DB7BAC30046645A /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 78B9AB862DB7BAC30046645A /* Lottie */; };
 		78D6837C2DC4C0F1007FA64C /* BnplScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D6837B2DC4C0ED007FA64C /* BnplScreen.swift */; };
 		78D6837E2DC4C113007FA64C /* BnplViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D6837D2DC4C10D007FA64C /* BnplViewModel.swift */; };
+		78E9FBB92DC8BC2300D5AA2A /* EmiViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78E9FBB82DC8BC1D00D5AA2A /* EmiViewModel.swift */; };
+		78E9FBBB2DC8C44900D5AA2A /* EmiDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78E9FBBA2DC8C44300D5AA2A /* EmiDataClass.swift */; };
 		78ED0AEF2DC0DD94007816D8 /* WalletViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78ED0AEE2DC0DD8D007816D8 /* WalletViewModel.swift */; };
 		78ED0AF12DC0DEE6007816D8 /* CommonDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78ED0AF02DC0DED4007816D8 /* CommonDataClass.swift */; };
 		78ED0AF32DC0E19B007816D8 /* WalletScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78ED0AF22DC0E198007816D8 /* WalletScreen.swift */; };
@@ -74,7 +78,6 @@
 		AC7EA4982D49EFD500E279FF /* WebViewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC7EA4972D49EFD300E279FF /* WebViewScreen.swift */; };
 		AC82D1C52D53873F005B55D2 /* SVGKit in Frameworks */ = {isa = PBXBuildFile; productRef = AC82D1C42D53873F005B55D2 /* SVGKit */; };
 		AC82D1C72D53873F005B55D2 /* SVGKitSwift in Frameworks */ = {isa = PBXBuildFile; productRef = AC82D1C62D53873F005B55D2 /* SVGKitSwift */; };
-		AC82D1CD2D5481CB005B55D2 /* BNPLPaymentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC82D1CC2D5481CB005B55D2 /* BNPLPaymentScreen.swift */; };
 		AC82D1D12D549724005B55D2 /* GeneralPaymentInitilizationResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC82D1D02D549724005B55D2 /* GeneralPaymentInitilizationResponse.swift */; };
 		ACA5AA222D4B777900FE72DB /* CheckoutViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACA5AA212D4B777400FE72DB /* CheckoutViewModel.swift */; };
 		ACA5AA2B2D4B89AE00FE72DB /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = ACA5AA2A2D4B89AE00FE72DB /* AlertToast */; };
@@ -103,6 +106,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7810BD802DCC746400C28AC6 /* SelectTenureScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectTenureScreen.swift; sourceTree = "<group>"; };
 		7819C29F2DC3847900EED2AA /* PaymentSuccessful.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PaymentSuccessful.json; sourceTree = "<group>"; };
 		7819C2A12DC3849B00EED2AA /* SessionExpired.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = SessionExpired.json; sourceTree = "<group>"; };
 		7819C2A32DC384C600EED2AA /* PaymentFailed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = PaymentFailed.json; sourceTree = "<group>"; };
@@ -116,6 +120,7 @@
 		783F466A2DAE61840037B0F4 /* ApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiService.swift; sourceTree = "<group>"; };
 		784F8FFE2DC39B6A008DA7C3 /* NetBankingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetBankingViewModel.swift; sourceTree = "<group>"; };
 		7855CE2F2DC48D56000D2A95 /* NetBankingScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetBankingScreen.swift; sourceTree = "<group>"; };
+		789CA4042DC88A35006E32A3 /* EmiScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmiScreen.swift; sourceTree = "<group>"; };
 		78B6CBDC2DB9F01900B380D3 /* FetchStatusViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchStatusViewModel.swift; sourceTree = "<group>"; };
 		78B6CBDE2DB9F0C600B380D3 /* CommonFunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonFunction.swift; sourceTree = "<group>"; };
 		78B6CBE02DB9F18000B380D3 /* UpiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpiViewModel.swift; sourceTree = "<group>"; };
@@ -127,6 +132,8 @@
 		78B9AB682DB777020046645A /* CardScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardScreen.swift; sourceTree = "<group>"; };
 		78D6837B2DC4C0ED007FA64C /* BnplScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BnplScreen.swift; sourceTree = "<group>"; };
 		78D6837D2DC4C10D007FA64C /* BnplViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BnplViewModel.swift; sourceTree = "<group>"; };
+		78E9FBB82DC8BC1D00D5AA2A /* EmiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmiViewModel.swift; sourceTree = "<group>"; };
+		78E9FBBA2DC8C44300D5AA2A /* EmiDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmiDataClass.swift; sourceTree = "<group>"; };
 		78ED0AEE2DC0DD8D007816D8 /* WalletViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletViewModel.swift; sourceTree = "<group>"; };
 		78ED0AF02DC0DED4007816D8 /* CommonDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonDataClass.swift; sourceTree = "<group>"; };
 		78ED0AF22DC0E198007816D8 /* WalletScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalletScreen.swift; sourceTree = "<group>"; };
@@ -156,7 +163,6 @@
 		AC7EA4882D4230CA00E279FF /* SessionExpireScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionExpireScreen.swift; sourceTree = "<group>"; };
 		AC7EA4932D47AD6000E279FF /* CVVInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CVVInfoView.swift; sourceTree = "<group>"; };
 		AC7EA4972D49EFD300E279FF /* WebViewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewScreen.swift; sourceTree = "<group>"; };
-		AC82D1CC2D5481CB005B55D2 /* BNPLPaymentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BNPLPaymentScreen.swift; sourceTree = "<group>"; };
 		AC82D1D02D549724005B55D2 /* GeneralPaymentInitilizationResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralPaymentInitilizationResponse.swift; sourceTree = "<group>"; };
 		ACA5AA212D4B777400FE72DB /* CheckoutViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutViewModel.swift; sourceTree = "<group>"; };
 		ACA5AA372D52085F00FE72DB /* UpiTimerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpiTimerSheet.swift; sourceTree = "<group>"; };
@@ -199,6 +205,8 @@
 		783840A22DB6460700F057DE /* Screen */ = {
 			isa = PBXGroup;
 			children = (
+				7810BD802DCC746400C28AC6 /* SelectTenureScreen.swift */,
+				789CA4042DC88A35006E32A3 /* EmiScreen.swift */,
 				78D6837B2DC4C0ED007FA64C /* BnplScreen.swift */,
 				7855CE2F2DC48D56000D2A95 /* NetBankingScreen.swift */,
 				78ED0AF22DC0E198007816D8 /* WalletScreen.swift */,
@@ -226,6 +234,7 @@
 		78B6CBEF2DBB82C600B380D3 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				78E9FBB82DC8BC1D00D5AA2A /* EmiViewModel.swift */,
 				78D6837D2DC4C10D007FA64C /* BnplViewModel.swift */,
 				784F8FFE2DC39B6A008DA7C3 /* NetBankingViewModel.swift */,
 				78ED0AEE2DC0DD8D007816D8 /* WalletViewModel.swift */,
@@ -258,6 +267,7 @@
 		AC27EA1D2D2FA8850012B47A /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				78E9FBBA2DC8C44300D5AA2A /* EmiDataClass.swift */,
 				78ED0AF02DC0DED4007816D8 /* CommonDataClass.swift */,
 				78B6CBF42DBB966300B380D3 /* CardInfoResponse.swift */,
 				78B6CBED2DBB561600B380D3 /* FetchStatusResponse.swift */,
@@ -340,7 +350,6 @@
 				ACB629642D6740F1003F67AC /* RBIGuidelinesView.swift */,
 				ACB629622D5DC7D9003F67AC /* EMIDetailsView.swift */,
 				ACB629602D5B09BA003F67AC /* EMIOptionsView.swift */,
-				AC82D1CC2D5481CB005B55D2 /* BNPLPaymentScreen.swift */,
 			);
 			path = Screens;
 			sourceTree = "<group>";
@@ -513,6 +522,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				78E9FBBB2DC8C44900D5AA2A /* EmiDataClass.swift in Sources */,
 				ACA5AA222D4B777900FE72DB /* CheckoutViewModel.swift in Sources */,
 				AC7EA4802D3E294400E279FF /* GeneralSuccessScreen.swift in Sources */,
 				78ED0AF32DC0E19B007816D8 /* WalletScreen.swift in Sources */,
@@ -524,7 +534,6 @@
 				78B6CBDF2DB9F0DB00B380D3 /* CommonFunction.swift in Sources */,
 				ACB629632D5DC7D9003F67AC /* EMIDetailsView.swift in Sources */,
 				AC7EA4842D40F6AC00E279FF /* PaymentFailureScreen.swift in Sources */,
-				AC82D1CD2D5481CB005B55D2 /* BNPLPaymentScreen.swift in Sources */,
 				78B6CBE12DB9F18300B380D3 /* UpiViewModel.swift in Sources */,
 				AC82D1D12D549724005B55D2 /* GeneralPaymentInitilizationResponse.swift in Sources */,
 				783840A42DB6461500F057DE /* UpiScreen.swift in Sources */,
@@ -532,8 +541,10 @@
 				7855CE302DC48D5B000D2A95 /* NetBankingScreen.swift in Sources */,
 				78B6CBEE2DBB561D00B380D3 /* FetchStatusResponse.swift in Sources */,
 				ACD7EC772D8C2E430091DDA6 /* DccSuccessScreen.swift in Sources */,
+				789CA4052DC88A4D006E32A3 /* EmiScreen.swift in Sources */,
 				784F8FFF2DC39B6F008DA7C3 /* NetBankingViewModel.swift in Sources */,
 				78ED0AF52DC0E401007816D8 /* SVGImageView.swift in Sources */,
+				78E9FBB92DC8BC2300D5AA2A /* EmiViewModel.swift in Sources */,
 				78ED0AF12DC0DEE6007816D8 /* CommonDataClass.swift in Sources */,
 				78B6CBE62DB9F84A00B380D3 /* PaymentAction.swift in Sources */,
 				ACB629612D5B09BA003F67AC /* EMIOptionsView.swift in Sources */,
@@ -546,6 +557,7 @@
 				78B6CBF12DBB839D00B380D3 /* CardViewModel.swift in Sources */,
 				78B6CBF52DBB967200B380D3 /* CardInfoResponse.swift in Sources */,
 				78B6CBDD2DB9F02000B380D3 /* FetchStatusViewModel.swift in Sources */,
+				7810BD812DCC746B00C28AC6 /* SelectTenureScreen.swift in Sources */,
 				783F46712DAE61840037B0F4 /* ConfigurationOption.swift in Sources */,
 				78B9AB692DB777080046645A /* CardScreen.swift in Sources */,
 				783F46722DAE61840037B0F4 /* CheckoutSession.swift in Sources */,

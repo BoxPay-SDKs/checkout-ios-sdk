@@ -21,6 +21,9 @@ public struct BoxpayCheckout : View {
     @State private var navigateToWalletScreen = false
     @State private var navigateToNetBankingScreen = false
     @State private var navigateToBnplScreen = false
+    @State private var navigateToEmiScreen = false
+    
+    @State private var isCheckoutMainScreenFocused = false
     
     public init(
         token: String,
@@ -107,6 +110,7 @@ public struct BoxpayCheckout : View {
                                 if(viewModel.emiMethod) {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to emi screen
+                                        navigateToEmiScreen = true
                                     }, image: "ic_emi", title: "EMI")
                                     if(viewModel.bnplMethod) {
                                         Divider()
@@ -128,17 +132,20 @@ public struct BoxpayCheckout : View {
                 }
                 .background(Color(hex: "#F5F6FB"))
             }
-            NavigationLink(destination: CardScreen(), isActive: $navigateToCardScreen) {
+            NavigationLink(destination: CardScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToCardScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: WalletScreen(), isActive: $navigateToWalletScreen) {
+            NavigationLink(destination: WalletScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToWalletScreen) {
                         EmptyView()
                     }
             
-            NavigationLink(destination: NetBankingScreen(), isActive: $navigateToNetBankingScreen) {
+            NavigationLink(destination: NetBankingScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToNetBankingScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: BnplScreen(), isActive: $navigateToBnplScreen) {
+            NavigationLink(destination: BnplScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToBnplScreen) {
+                        EmptyView()
+                    }
+            NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
         }
@@ -207,7 +214,12 @@ public struct BoxpayCheckout : View {
             print("App is now active again!")
             fetchStatusViewModel.startFetchingStatus(methodType: "UpiIntent")
         }
-
+        .onChange(of: isCheckoutMainScreenFocused) { focused in
+            if(focused) {
+                PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                presentationMode.wrappedValue.dismiss()
+            }
+        }
     }
     
     private func formattedAddress() -> String {

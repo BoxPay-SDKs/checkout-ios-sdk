@@ -10,6 +10,8 @@ import SwiftUI
 
 struct BnplScreen: View {
     @Environment(\.presentationMode) private var presentationMode
+    @Binding var isCheckoutFocused : Bool
+
     @StateObject private var viewModel = BnplViewModel()
     @State private var selectedInstrumentValue: String = ""
     
@@ -92,6 +94,7 @@ struct BnplScreen: View {
                         .cornerRadius(12)
                         .shadow(radius: 1)
                         .padding(.horizontal, 16)
+                        .padding(.top, 8)
                     }
                 }
                 .background(Color(hex: "#F5F6FB"))
@@ -109,7 +112,7 @@ struct BnplScreen: View {
                 brandColor: viewModel.checkoutManager.getBrandColor(),
                 onGoBackToHome: {
                     print("Okay from session expire screen")
-                    PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                    isCheckoutFocused = true
                     sessionExpireScreen = false
                     presentationMode.wrappedValue.dismiss()
                 }
@@ -125,7 +128,7 @@ struct BnplScreen: View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.checkoutManager.getTransactionId(), date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.checkoutManager.getTotalAmount(),currencySymbol: viewModel.checkoutManager.getCurrencySymbol(), onDone: {
                 sessionCompleteScreen = false
-                PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                isCheckoutFocused = true
                 presentationMode.wrappedValue.dismiss()
             },brandColor: viewModel.checkoutManager.getBrandColor())
         }

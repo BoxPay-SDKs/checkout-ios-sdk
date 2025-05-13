@@ -12,11 +12,3 @@ struct CommonDataClass {
     let instrumentTypeValue : String
     let isLastUsed : Bool?
 }
-
-
-//id: string;
-//    title: string;
-//    image: string;
-//    instrumentTypeValue: string;
-//    isSelected: boolean,
-//    isLastUsed?: boolean | null

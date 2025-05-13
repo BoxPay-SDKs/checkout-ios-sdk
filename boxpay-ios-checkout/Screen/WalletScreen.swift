@@ -11,6 +11,8 @@ import SwiftUI
 
 struct WalletScreen: View {
     @Environment(\.presentationMode) private var presentationMode
+    @Binding var isCheckoutFocused : Bool
+
     @StateObject private var viewModel = WalletViewModel()
     @State private var searchTextField: String = ""
     @State private var isSearchTextFieldFocused: Bool = false
@@ -61,7 +63,6 @@ struct WalletScreen: View {
                         .font(.custom("Poppins-SemiBold", size: 14))
                         .foregroundColor(Color(hex: "#020815").opacity(0.71))
                         .padding(.top, 12)
-                        .padding(.bottom, 8)
                         .padding(.horizontal, 16)
                     
                     ScrollView {
@@ -108,6 +109,7 @@ struct WalletScreen: View {
                         .cornerRadius(12)
                         .shadow(radius: 1)
                         .padding(.horizontal, 16)
+                        .padding(.top, 8)
                     }
                 }
                 .background(Color(hex: "#F5F6FB"))
@@ -125,7 +127,7 @@ struct WalletScreen: View {
                 brandColor: viewModel.checkoutManager.getBrandColor(),
                 onGoBackToHome: {
                     print("Okay from session expire screen")
-                    PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                    isCheckoutFocused = true
                     sessionExpireScreen = false
                     presentationMode.wrappedValue.dismiss()
                 }
@@ -141,7 +143,7 @@ struct WalletScreen: View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.checkoutManager.getTransactionId(), date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.checkoutManager.getTotalAmount(),currencySymbol: viewModel.checkoutManager.getCurrencySymbol(), onDone: {
                 sessionCompleteScreen = false
-                PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                isCheckoutFocused = true
                 presentationMode.wrappedValue.dismiss()
             },brandColor: viewModel.checkoutManager.getBrandColor())
         }

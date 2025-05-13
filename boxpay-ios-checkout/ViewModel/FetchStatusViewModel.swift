@@ -35,17 +35,33 @@ class FetchStatusViewModel: ObservableObject {
                 case .success(let data):
                     print("=======data \(data)")
                     self?.checkoutManager.setStatus(data.status.uppercased())
-                    self?.checkoutManager.setTransactionId(data.transactionId)
+                    self?.checkoutManager.setTransactionId(data.transactionId ?? "")
                     self?.actions = CommonFunctions.handle(
-                        timeStamp: data.transactionTimestampLocale,
-                        reasonCode: data.reasonCode,
-                        reason: data.statusReason,
+                        timeStamp: data.transactionTimestampLocale ?? "",
+                        reasonCode: data.reasonCode ?? "",
+                        reason: data.statusReason ?? "",
                         methodType: methodType,
                         response: PaymentActionResponse(action: nil),
                         shopperVpa:""
                     )
                 case .failure(let error):
-                    self?.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
+                    let errorDescription = error.localizedDescription.lowercased()
+
+                    if errorDescription.contains("expired") {
+                        self?.checkoutManager.setStatus("EXPIRED")
+                    } else {
+                        self?.checkoutManager.setStatus("FAILED")
+                    }
+
+                    self?.actions = CommonFunctions.handle(
+                        timeStamp: "",
+                        reasonCode: "",
+                        reason: error.localizedDescription, // You can pass actual error for better debugging
+                        methodType: "",
+                        response: PaymentActionResponse(action: nil),
+                        shopperVpa: ""
+                    )
+
                     print("=======errorr \(error)")
                 }
             }

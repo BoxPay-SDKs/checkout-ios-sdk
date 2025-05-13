@@ -106,6 +106,7 @@ public struct EmiMethod: Decodable {
     let logoUrl: String?
     let issuerTitle: String?
     let effectiveInterestRate: Double?
+    let merchantBorneInterestRate : Double?
     let emiAmountLocaleFull: String?
     let totalAmountLocaleFull: String?
     let interestChargedAmountLocaleFull: String?

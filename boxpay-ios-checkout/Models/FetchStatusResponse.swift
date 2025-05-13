@@ -7,8 +7,8 @@
 
 struct FetchStatusResponse : Codable {
     let status : String
-    let statusReason:String
-    let reasonCode:String
-    let transactionId : String
-    let transactionTimestampLocale : String
+    let statusReason:String?
+    let reasonCode:String?
+    let transactionId : String?
+    let transactionTimestampLocale : String?
 }

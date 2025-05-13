@@ -27,7 +27,6 @@ struct ContentViewTest: View {
     @State private var baseUrlFlag: Int = 0
     @State private var selectedOption: String = "Test" // Default selected item
     let options = ["Test", "Production"] // Spinner items
-    @State private var navigateToCheckoutUsingCustomToken = false
     @State private var selectedToken: String? // For passing token to destination
     @State private var selectedShopperToken: String? // For passing token to destination
     @State private var status:String = ""
@@ -91,7 +90,7 @@ struct ContentViewTest: View {
                     Button(action: {
                         if !inputToken.isEmpty {
                             selectedToken = inputToken
-                            navigateToCheckoutUsingCustomToken = true
+                            navigateToCheckout = true
                         }
                     }) {
                         Text("Use custom token")
@@ -153,6 +152,7 @@ struct ContentViewTest: View {
                                     ConfigurationOption.showBoxpaySuccessScreen : true
                                 ],
                                 onPaymentResult: { result in
+                                    navigateToCheckout = false
                                     status = result.status
                                     transactionId = result.transactionId
                                     showAlert = true
@@ -166,33 +166,6 @@ struct ContentViewTest: View {
                 ) {
                     EmptyView()
                 }
-
-                
-                NavigationLink(
-                    destination: Group {
-                        if let token = selectedToken {
-                            BoxpayCheckout(
-                                token: token,
-                                shopperToken: inputShopperToken,
-                                configurationOptions: [
-                                    ConfigurationOption.enableTextEnv : true,
-                                    ConfigurationOption.showBoxpaySuccessScreen : true
-                                ],
-                                onPaymentResult: { result in
-                                    status = result.status
-                                    transactionId = result.transactionId
-                                    showAlert = true
-                                }
-                            )
-                        } else {
-                            EmptyView()
-                        }
-                    },
-                    isActive: $navigateToCheckoutUsingCustomToken
-                ) {
-                    EmptyView()
-                }
-
             }
             .navigationBarTitle("", displayMode: .inline)
             .navigationBarHidden(true)
