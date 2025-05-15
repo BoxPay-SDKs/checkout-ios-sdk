@@ -11,7 +11,6 @@ enum HTTPMethod: String {
     case GET, POST, PUT, DELETE
 }
 
-@MainActor
 public class ApiService {
     
     static let shared = ApiService()

@@ -30,7 +30,10 @@ let package = Package(
             ],
             path: "Sources/iosCheckoutSdk",
             resources: [
-                .process("BoxpayLogo.json")
+                .process("BoxpayLogo.json"),
+                .process("PaymentFailed.json"),
+                .process("PaymentSuccessful.json"),
+                .process("SessionExpired.json")
             ]
         ),
 
