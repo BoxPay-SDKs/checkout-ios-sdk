@@ -5,8 +5,7 @@
 //  Created by Ishika Bansal on 13/05/25.
 //
 
-@MainActor
-public class CheckoutManager {
+public actor CheckoutManager {
     static let shared = CheckoutManager()
 
     private let baseUrlProd: String = "https://apis.boxpay.in"

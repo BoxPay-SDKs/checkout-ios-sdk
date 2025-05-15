@@ -43,9 +43,9 @@ struct NetBankingScreen: View {
                             text: "Select Bank",
                             showDesc: true,
                             showSecure: true,
-                            itemCount: viewModel.checkoutManager.getItemsCount(),
-                            currencySymbol: viewModel.checkoutManager.getCurrencySymbol(),
-                            amount: viewModel.checkoutManager.getTotalAmount(),
+                            itemCount: viewModel.itemsCount,
+                            currencySymbol: viewModel.currencySymbol,
+                            amount: viewModel.totalAmount,
                             onBackPress: {
                                 presentationMode.wrappedValue.dismiss()
                             }
@@ -76,10 +76,10 @@ struct NetBankingScreen: View {
                                         isSelected: selectedPopularInstrumentVakue == item.instrumentTypeValue,
                                         imageUrl: item.image,
                                         title: item.title,
-                                        currencySymbol: viewModel.checkoutManager.getCurrencySymbol(),
-                                        amount: viewModel.checkoutManager.getTotalAmount(),
+                                        currencySymbol: viewModel.currencySymbol,
+                                        amount: viewModel.totalAmount,
                                         instrumentValue: item.instrumentTypeValue,
-                                        brandColor: viewModel.checkoutManager.getBrandColor(),
+                                        brandColor: viewModel.brandColor,
                                         onClick: { string in
                                             selectedPopularInstrumentVakue = string
                                             selectedInstrumentValue = ""
@@ -130,10 +130,10 @@ struct NetBankingScreen: View {
                                         isSelected: selectedInstrumentValue == item.instrumentTypeValue,
                                         imageUrl: item.image,
                                         title: item.title,
-                                        currencySymbol: viewModel.checkoutManager.getCurrencySymbol(),
-                                        amount: viewModel.checkoutManager.getTotalAmount(),
+                                        currencySymbol: viewModel.currencySymbol,
+                                        amount: viewModel.totalAmount,
                                         instrumentValue: item.instrumentTypeValue,
-                                        brandColor: viewModel.checkoutManager.getBrandColor(),
+                                        brandColor: viewModel.brandColor,
                                         onClick: { string in
                                             selectedInstrumentValue = string
                                             selectedPopularInstrumentVakue = ""
@@ -167,7 +167,7 @@ struct NetBankingScreen: View {
         .onReceive(fetchStatusViewModel.$actions.compactMap{$0},perform: handlePaymentAction)
         .bottomSheet(isPresented: $sessionExpireScreen) {
             SessionExpireScreen(
-                brandColor: viewModel.checkoutManager.getBrandColor(),
+                brandColor: viewModel.brandColor,
                 onGoBackToHome: {
                     print("Okay from session expire screen")
                     isCheckoutFocused = true
@@ -181,14 +181,14 @@ struct NetBankingScreen: View {
                 sessionFailedScreen = false
             }, onReturnToPaymentOptions: {
                 sessionFailedScreen = false
-            },brandColor: viewModel.checkoutManager.getBrandColor())
+            },brandColor: viewModel.brandColor)
         }
         .bottomSheet(isPresented: $sessionCompleteScreen) {
-            GeneralSuccessScreen(transactionID: viewModel.checkoutManager.getTransactionId(), date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.checkoutManager.getTotalAmount(),currencySymbol: viewModel.checkoutManager.getCurrencySymbol(), onDone: {
+            GeneralSuccessScreen(transactionID: viewModel.transactionId, date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
                 sessionCompleteScreen = false
                 isCheckoutFocused = true
                 presentationMode.wrappedValue.dismiss()
-            },brandColor: viewModel.checkoutManager.getBrandColor())
+            },brandColor: viewModel.brandColor)
         }
         .sheet(isPresented: $showWebView) {
             WebView(
@@ -203,38 +203,40 @@ struct NetBankingScreen: View {
     }
     
     private func handlePaymentAction(_ action: PaymentAction) {
-        switch action {
-        case .showFailed(let message):
-            print("❌ Failed: - \(message)")
-            viewModel.isLoading = false
-            viewModel.checkoutManager.setStatus("FAILED")
-            fetchStatusViewModel.stopFetchingStatus()
-            errorReason = message
-            sessionFailedScreen = true
-        case .showSuccess(let time):
-            print("✅ Success: - \(time)")
-            viewModel.checkoutManager.setStatus("SUCCESS")
-            viewModel.isLoading = false
-            fetchStatusViewModel.stopFetchingStatus()
-            timeStamp = time
-            sessionCompleteScreen = true
-        case .showExpired:
-            print("⌛ Expired:")
-            viewModel.checkoutManager.setStatus("EXPIRED")
-            fetchStatusViewModel.stopFetchingStatus()
-            sessionExpireScreen = true
-        case .openWebViewUrl(let url):
-            print("🌐 WebView URL: \(url)")
-            paymentUrl = url
-            showWebView = true
-        case .openWebViewHTML(let htmlContent):
-            print("📄 HTML: \(htmlContent)")
-            paymentHtmlString = htmlContent
-            showWebView = true
-        case .openIntentUrl(let base64Url):
-            print("📦 Base64: \(base64Url)")
-        case .openUpiTimer(_) :
-            print("⌛ timer opened:")
+        Task {
+            switch action {
+            case .showFailed(let message):
+                print("❌ Failed: - \(message)")
+                viewModel.isLoading = false
+                await viewModel.checkoutManager.setStatus("FAILED")
+                fetchStatusViewModel.stopFetchingStatus()
+                errorReason = message
+                sessionFailedScreen = true
+            case .showSuccess(let time):
+                print("✅ Success: - \(time)")
+                await viewModel.checkoutManager.setStatus("SUCCESS")
+                viewModel.isLoading = false
+                fetchStatusViewModel.stopFetchingStatus()
+                timeStamp = time
+                sessionCompleteScreen = true
+            case .showExpired:
+                print("⌛ Expired:")
+                await viewModel.checkoutManager.setStatus("EXPIRED")
+                fetchStatusViewModel.stopFetchingStatus()
+                sessionExpireScreen = true
+            case .openWebViewUrl(let url):
+                print("🌐 WebView URL: \(url)")
+                paymentUrl = url
+                showWebView = true
+            case .openWebViewHTML(let htmlContent):
+                print("📄 HTML: \(htmlContent)")
+                paymentHtmlString = htmlContent
+                showWebView = true
+            case .openIntentUrl(let base64Url):
+                print("📦 Base64: \(base64Url)")
+            case .openUpiTimer(_) :
+                print("⌛ timer opened:")
+            }
         }
     }
     

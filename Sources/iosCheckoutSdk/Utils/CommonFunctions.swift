@@ -33,58 +33,63 @@ struct CommonFunctions {
         shopperVpa:String
     ) -> PaymentAction? {
         let checkoutManager = CheckoutManager.shared
-
-        if checkoutManager.getStatus() == "REQUIRESACTION"{
-            if let actions = response.action , !actions.isEmpty, !methodType.isEmpty {
-                let type = actions.first?.type
-                
-                if methodType == "UpiIntent" {
-                    let url = actions.first?.url
-                    let base64 = decodeBase64(url: url ?? "")
-                    return .openIntentUrl(url: base64 ?? "")
-                } else {
-                    if(type == "html") {
-                        return .openWebViewHTML(htmlString: actions.first?.htmlPageString ?? "")
+        var paymentAction : PaymentAction? = nil
+        
+        Task {
+            let status = await checkoutManager.getStatus()
+            let paymentErrorMessage = await checkoutManager.getpaymentErrorMessage()
+            if status == "REQUIRESACTION"{
+                if let actions = response.action , !actions.isEmpty, !methodType.isEmpty {
+                    let type = actions.first?.type
+                    
+                    if methodType == "UpiIntent" {
+                        let url = actions.first?.url
+                        let base64 = decodeBase64(url: url ?? "")
+                        paymentAction = .openIntentUrl(url: base64 ?? "")
+                    } else {
+                        if(type == "html") {
+                            paymentAction =  .openWebViewHTML(htmlString: actions.first?.htmlPageString ?? "")
+                        }
+                        paymentAction =  .openWebViewUrl(url: actions.first?.url ?? "")
                     }
-                    return .openWebViewUrl(url: actions.first?.url ?? "")
+                } else if(methodType == "UpiCollect") {
+                    paymentAction =  .openUpiTimer(shopperVpa: shopperVpa)
                 }
-            } else if(methodType == "UpiCollect") {
-                return .openUpiTimer(shopperVpa: shopperVpa)
             }
-        }
-        else if ["FAILED", "REJECTED"].contains(checkoutManager.getStatus()) {
-            let message: String
-            if let code = reasonCode, !code.hasPrefix("UF") {
-                message = checkoutManager.getpaymentErrorMessage()
-            } else {
-                if let reason = reason, reason.contains(":") {
-                    message = reason.split(separator: ":").dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
+            else if ["FAILED", "REJECTED"].contains(status) {
+                let message: String
+                if let code = reasonCode, !code.hasPrefix("UF") {
+                    message = paymentErrorMessage
                 } else {
-                    message = reason ?? checkoutManager.getpaymentErrorMessage()
+                    if let reason = reason, reason.contains(":") {
+                        message = reason.split(separator: ":").dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
+                    } else {
+                        message = reason ?? paymentErrorMessage
+                    }
                 }
+                paymentAction = .showFailed(message: message)
             }
-            return .showFailed(message: message)
-        }
-        else if ["APPROVED", "SUCCESS", "PAID"].contains(checkoutManager.getStatus()) {
-            return .showSuccess(timestamp: timeStamp ?? "")
-        }
-        else if checkoutManager.getStatus() == "EXPIRED" {
-            return .showExpired
-        }
-        else if checkoutManager.getStatus() == "PENDING" , methodType == "UpiIntent" {
-            let message: String
-            if let code = reasonCode, !code.hasPrefix("UF") {
-                message = checkoutManager.getpaymentErrorMessage()
-            } else {
-                if let reason = reason, reason.contains(":") {
-                    message = reason.split(separator: ":").dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
+            else if ["APPROVED", "SUCCESS", "PAID"].contains(status) {
+                paymentAction =  .showSuccess(timestamp: timeStamp ?? "")
+            }
+            else if status == "EXPIRED" {
+                paymentAction =  .showExpired
+            }
+            else if status == "PENDING" , methodType == "UpiIntent" {
+                let message: String
+                if let code = reasonCode, !code.hasPrefix("UF") {
+                    message = paymentErrorMessage
                 } else {
-                    message = reason ?? checkoutManager.getpaymentErrorMessage()
+                    if let reason = reason, reason.contains(":") {
+                        message = reason.split(separator: ":").dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
+                    } else {
+                        message = reason ?? paymentErrorMessage
+                    }
                 }
+                paymentAction =  .showFailed(message: message)
             }
-            return .showFailed(message: message)
         }
-        return nil
+        return paymentAction
     }
 
     private static func decodeBase64(url: String) -> String? {

@@ -1,30 +1,23 @@
-//
-//  UpiViewModel.swift
-//  checkout-ios-sdk
-//
-//  Created by Ishika Bansal on 13/05/25.
-//
-
-
+import Foundation
 import UIKit
+import Combine
 
 @MainActor
-class UpiViewModel : ObservableObject {
+class UpiViewModel: ObservableObject {
     @Published var isLoading: Bool = false
-    @Published var paymentUrl : String? = nil
+    @Published var paymentUrl: String? = nil
     @Published var status: String = "NOACTION"
-    @Published var transactionId : String = ""
+    @Published var transactionId: String = ""
     @Published var errorReason: String = ""
-    @Published var actions : PaymentAction?
-    
-    
+    @Published var actions: PaymentAction?
+
     let checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
     let apiManager = ApiService.shared
-    
-    func initiateUpiPostRequest(_ selectedIntent : String? , _ shopperVpa : String?, methodType:String) {
-        // Construct instrumentDetails
+
+    func initiateUpiPostRequest(_ selectedIntent: String?, _ shopperVpa: String?, methodType: String) {
         self.isLoading = true
+        Task {
             var instrumentDetails: [String: Any] = [
                 "type": selectedIntent != nil ? "upi/intent" : "upi/collect"
             ]
@@ -35,8 +28,7 @@ class UpiViewModel : ObservableObject {
                 instrumentDetails["upi"] = ["shopperVpa": vpa]
             }
 
-            // Construct delivery address
-            let deliveryAddress: [String: Any?] = [
+            let deliveryAddress: [String: Any?] = await[
                 "address1": userDataManager.getAddress1(),
                 "address2": userDataManager.getAddress2(),
                 "city": userDataManager.getCity(),
@@ -47,12 +39,9 @@ class UpiViewModel : ObservableObject {
                 "labelName": userDataManager.getLabelName()
             ]
 
-            let isDeliveryEmpty = deliveryAddress.values.allSatisfy { value in
-                (value as? String)?.isEmpty ?? true
-            }
-        
+            let isDeliveryEmpty = deliveryAddress.values.allSatisfy { ($0 as? String)?.isEmpty ?? true }
 
-            let payload: [String: Any] = [
+            let payload: [String: Any] = await[
                 "browserData": [
                     "screenHeight": Int(UIScreen.main.bounds.height),
                     "screenWidth": Int(UIScreen.main.bounds.width),
@@ -84,57 +73,55 @@ class UpiViewModel : ObservableObject {
                     "deviceBrandName": "Apple"
                 ]
             ]
-        
-        guard JSONSerialization.isValidJSONObject(payload) else {
-            print("❌ Invalid JSON")
-            return
-        }
 
-        let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: [])
-        
-        if let json = jsonData, let jsonString = String(data: json, encoding: .utf8) {
-            print("📤 JSON Payload:\n\(jsonString)")
-        }
-
-        
-        apiManager.request(
-            method : .POST,
-            headers: [
-                "Content-Type": "application/json",
-                "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
-            ],
-            body: jsonData,
-            responseType: GeneralPaymentInitilizationResponse.self
-            ) { [weak self] result in
-                DispatchQueue.main.async {
-                    self?.isLoading = false
-                    switch result {
-                    case .success(let data):
-                        self?.checkoutManager.setStatus(data.status.status.uppercased())
-                        self?.checkoutManager.setTransactionId(data.transactionId)
-                        self?.actions = CommonFunctions.handle(timeStamp: data.transactionTimestampLocale, reasonCode: data.status.reasonCode, reason: data.status.reason, methodType: methodType, response: PaymentActionResponse(action: data.actions), shopperVpa: shopperVpa ?? "")
-                    case .failure(let error):
-                        let errorDescription = error.localizedDescription.lowercased()
-
-                        if errorDescription.contains("expired") {
-                            self?.checkoutManager.setStatus("EXPIRED")
-                        } else {
-                            self?.checkoutManager.setStatus("FAILED")
-                        }
-
-                        self?.actions = CommonFunctions.handle(
-                            timeStamp: "",
-                            reasonCode: "",
-                            reason: error.localizedDescription, // You can pass actual error for better debugging
-                            methodType: "",
-                            response: PaymentActionResponse(action: nil),
-                            shopperVpa: ""
-                        )
-
-                        print("=======errorr \(error)")
-                    }
-                }
+            guard JSONSerialization.isValidJSONObject(payload),
+                  let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
+                print("❌ Invalid JSON")
+                await MainActor.run { self.isLoading = false }
+                return
             }
+
+            do {
+                let response: GeneralPaymentInitilizationResponse = try await apiManager.request(
+                    method: .POST,
+                    headers: [
+                        "Content-Type": "application/json",
+                        "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
+                    ],
+                    body: jsonData,
+                    responseType: GeneralPaymentInitilizationResponse.self
+                )
+
+                await self.checkoutManager.setStatus(response.status.status.uppercased())
+                await self.checkoutManager.setTransactionId(response.transactionId)
+                self.actions = CommonFunctions.handle(
+                    timeStamp: response.transactionTimestampLocale,
+                    reasonCode: response.status.reasonCode,
+                    reason: response.status.reason,
+                    methodType: methodType,
+                    response: PaymentActionResponse(action: response.actions),
+                    shopperVpa: shopperVpa ?? ""
+                )
+
+            } catch {
+                let errorDescription = error.localizedDescription.lowercased()
+                if errorDescription.contains("expired") {
+                    await self.checkoutManager.setStatus("EXPIRED")
+                } else {
+                    await self.checkoutManager.setStatus("FAILED")
+                }
+
+                self.actions = CommonFunctions.handle(
+                    timeStamp: "",
+                    reasonCode: "",
+                    reason: error.localizedDescription,
+                    methodType: "",
+                    response: PaymentActionResponse(action: nil),
+                    shopperVpa: ""
+                )
+                print("❌ Error occurred: \(error)")
+            }
+        }
+        self.isLoading = false
     }
-    
 }

@@ -43,7 +43,7 @@ struct EmiScreen : View {
             } else if viewModel.isLoading {
                 BoxpayLoaderView()
             } else if isSelectTenureScreenVisible {
-                SelectTenureScreen(selectedBank: selectedBank!, itemsCount: viewModel.checkoutManager.getItemsCount(), currencySymbol: viewModel.checkoutManager.getCurrencySymbol(), totalAmount: viewModel.checkoutManager.getTotalAmount(), brandColor: viewModel.checkoutManager.getBrandColor(),selectedCardType: viewModel.selectedCardType,fallBackImage: "ic_netbanking_semi_bold", isSelectScreenVisible: $isSelectTenureScreenVisible, onClickProceed : {emi in 
+                SelectTenureScreen(selectedBank: selectedBank!, itemsCount: viewModel.itemsCount, currencySymbol: viewModel.currencySymbol, totalAmount: viewModel.totalAmount, brandColor: viewModel.brandColor,selectedCardType: viewModel.selectedCardType,fallBackImage: "ic_netbanking_semi_bold", isSelectScreenVisible: $isSelectTenureScreenVisible, onClickProceed : {emi in
                     selectedEMI = emi
                     isCardScreenVisible = true
                     isSelectTenureScreenVisible = false
@@ -72,9 +72,9 @@ struct EmiScreen : View {
                             text: "Choose EMI Option",
                             showDesc: true,
                             showSecure: false,
-                            itemCount: viewModel.checkoutManager.getItemsCount(),
-                            currencySymbol: viewModel.checkoutManager.getCurrencySymbol(),
-                            amount: viewModel.checkoutManager.getTotalAmount(),
+                            itemCount: viewModel.itemsCount,
+                            currencySymbol: viewModel.currencySymbol,
+                            amount: viewModel.totalAmount,
                             onBackPress: {
                                 presentationMode.wrappedValue.dismiss()
                             }
@@ -84,7 +84,7 @@ struct EmiScreen : View {
                                 VStack(spacing: 4) {
                                     Text(viewModel.emiDataClass.cards[index].cardType)
                                         .font(.custom("Poppins-SemiBold", size: 14))
-                                        .foregroundColor(viewModel.selectedCardType == viewModel.emiDataClass.cards[index].cardType ? Color(hex: viewModel.checkoutManager.getBrandColor()) : Color(hex: "#010102").opacity(0.45))
+                                        .foregroundColor(viewModel.selectedCardType == viewModel.emiDataClass.cards[index].cardType ? Color(hex: viewModel.brandColor) : Color(hex: "#010102").opacity(0.45))
                                         .onTapGesture {
                                             viewModel.selectedCardType = viewModel.emiDataClass.cards[index].cardType
                                             searchTextField = ""
@@ -93,7 +93,7 @@ struct EmiScreen : View {
                                     if viewModel.selectedCardType == viewModel.emiDataClass.cards[index].cardType {
                                         Divider()
                                             .frame(height: 2)
-                                            .background(Color(hex: viewModel.checkoutManager.getBrandColor()))
+                                            .background(Color(hex: viewModel.brandColor))
                                     } else {
                                         Spacer().frame(height: 2)
                                     }
@@ -150,7 +150,7 @@ struct EmiScreen : View {
                                         ForEach(Array(banks.enumerated()), id: \.1.name) { index, bank in
                                             VStack(spacing: 0) {
                                                 if(viewModel.selectedCardType == "Others") {
-                                                    PaymentOptionView(isSelected: selectedOtherInstrumentValue == bank.cardLessEmiValue, imageUrl: bank.iconUrl, title: bank.name, currencySymbol: viewModel.checkoutManager.getCurrencySymbol(), amount: viewModel.checkoutManager.getTotalAmount(), instrumentValue: bank.cardLessEmiValue, brandColor: viewModel.checkoutManager.getBrandColor(), onClick: { string in
+                                                    PaymentOptionView(isSelected: selectedOtherInstrumentValue == bank.cardLessEmiValue, imageUrl: bank.iconUrl, title: bank.name, currencySymbol: viewModel.currencySymbol, amount: viewModel.totalAmount, instrumentValue: bank.cardLessEmiValue, brandColor: viewModel.brandColor, onClick: { string in
                                                         selectedOtherInstrumentValue = string
                                                     }, onProceedButton: {
                                                         viewModel.initiatedOtherEmiPostRequest(instrumentValue: selectedOtherInstrumentValue)
@@ -207,7 +207,7 @@ struct EmiScreen : View {
         .onReceive(fetchStatusViewModel.$actions.compactMap{$0},perform: handlePaymentAction)
         .bottomSheet(isPresented: $sessionExpireScreen) {
             SessionExpireScreen(
-                brandColor: viewModel.checkoutManager.getBrandColor(),
+                brandColor: viewModel.brandColor,
                 onGoBackToHome: {
                     print("Okay from session expire screen")
                     isCheckoutFocused = true
@@ -221,14 +221,14 @@ struct EmiScreen : View {
                 sessionFailedScreen = false
             }, onReturnToPaymentOptions: {
                 sessionFailedScreen = false
-            },brandColor: viewModel.checkoutManager.getBrandColor())
+            },brandColor: viewModel.brandColor)
         }
         .bottomSheet(isPresented: $sessionCompleteScreen) {
-            GeneralSuccessScreen(transactionID: viewModel.checkoutManager.getTransactionId(), date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.checkoutManager.getTotalAmount(),currencySymbol: viewModel.checkoutManager.getCurrencySymbol(), onDone: {
+            GeneralSuccessScreen(transactionID: viewModel.transactionId, date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
                 sessionCompleteScreen = false
                 isCheckoutFocused = true
                 presentationMode.wrappedValue.dismiss()
-            },brandColor: viewModel.checkoutManager.getBrandColor())
+            },brandColor: viewModel.brandColor)
         }
         .sheet(isPresented: $showWebView) {
             WebView(
@@ -270,38 +270,40 @@ struct EmiScreen : View {
     }
 
     private func handlePaymentAction(_ action: PaymentAction) {
-        switch action {
-        case .showFailed(let message):
-            print("❌ Failed: - \(message)")
-            viewModel.isLoading = false
-            viewModel.checkoutManager.setStatus("FAILED")
-            fetchStatusViewModel.stopFetchingStatus()
-            errorReason = message
-            sessionFailedScreen = true
-        case .showSuccess(let time):
-            print("✅ Success: - \(time)")
-            viewModel.checkoutManager.setStatus("SUCCESS")
-            viewModel.isLoading = false
-            fetchStatusViewModel.stopFetchingStatus()
-            timeStamp = time
-            sessionCompleteScreen = true
-        case .showExpired:
-            print("⌛ Expired:")
-            viewModel.checkoutManager.setStatus("EXPIRED")
-            fetchStatusViewModel.stopFetchingStatus()
-            sessionExpireScreen = true
-        case .openWebViewUrl(let url):
-            print("🌐 WebView URL: \(url)")
-            paymentUrl = url
-            showWebView = true
-        case .openWebViewHTML(let htmlContent):
-            print("📄 HTML: \(htmlContent)")
-            paymentHtmlString = htmlContent
-            showWebView = true
-        case .openIntentUrl(let base64Url):
-            print("📦 Base64: \(base64Url)")
-        case .openUpiTimer(_) :
-            print("⌛ timer opened:")
+        Task {
+            switch action {
+            case .showFailed(let message):
+                print("❌ Failed: - \(message)")
+                viewModel.isLoading = false
+                await viewModel.checkoutManager.setStatus("FAILED")
+                fetchStatusViewModel.stopFetchingStatus()
+                errorReason = message
+                sessionFailedScreen = true
+            case .showSuccess(let time):
+                print("✅ Success: - \(time)")
+                await viewModel.checkoutManager.setStatus("SUCCESS")
+                viewModel.isLoading = false
+                fetchStatusViewModel.stopFetchingStatus()
+                timeStamp = time
+                sessionCompleteScreen = true
+            case .showExpired:
+                print("⌛ Expired:")
+                await viewModel.checkoutManager.setStatus("EXPIRED")
+                fetchStatusViewModel.stopFetchingStatus()
+                sessionExpireScreen = true
+            case .openWebViewUrl(let url):
+                print("🌐 WebView URL: \(url)")
+                paymentUrl = url
+                showWebView = true
+            case .openWebViewHTML(let htmlContent):
+                print("📄 HTML: \(htmlContent)")
+                paymentHtmlString = htmlContent
+                showWebView = true
+            case .openIntentUrl(let base64Url):
+                print("📦 Base64: \(base64Url)")
+            case .openUpiTimer(_) :
+                print("⌛ timer opened:")
+            }
         }
     }
 }

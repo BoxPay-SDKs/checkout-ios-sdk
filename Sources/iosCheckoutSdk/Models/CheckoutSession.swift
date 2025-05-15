@@ -6,7 +6,7 @@
 //
 
 
-public struct CheckoutSession : Decodable {
+public struct CheckoutSession : Decodable,Sendable {
     let paymentDetails: PaymentDetails
     let merchantDetails: MerchantDetails
     let configs: Configs
@@ -15,12 +15,12 @@ public struct CheckoutSession : Decodable {
     let lastTransactionId : String?
 }
 
-public struct PaymentDetails: Decodable {
+public struct PaymentDetails: Decodable,Sendable {
     let money: Money
     let shopper: Shopper
     let order: OrderCheckOut?
 }
-public struct Shopper: Decodable {
+public struct Shopper: Decodable,Sendable {
     let firstName: String?
     let lastName: String?
     let gender: String?
@@ -32,7 +32,7 @@ public struct Shopper: Decodable {
     let panNumber: String?
 }
 
-public struct Money: Decodable {
+public struct Money: Decodable,Sendable {
     let amount: Double?
     let currencyCode: String?
     let amountLocale: String?
@@ -40,7 +40,7 @@ public struct Money: Decodable {
     let currencySymbol: String?
 }
 
-public struct DeliveryAddress: Decodable {
+public struct DeliveryAddress: Decodable,Sendable {
     let address1: String?
     let address2: String?
     let address3: String?
@@ -57,14 +57,14 @@ public struct DeliveryAddress: Decodable {
     let phoneNumber: String?
 }
 
-public struct OrderCheckOut: Decodable {
+public struct OrderCheckOut: Decodable,Sendable {
     let items: [OrderItem]?
     let shippingAmountLocaleFull: String?
     let taxAmountLocaleFull: String?
     let originalAmountLocaleFull: String?
 }
 
-public struct OrderItem: Identifiable,Decodable {
+public struct OrderItem: Identifiable,Decodable,Sendable {
     public let id: String
     let itemName: String
     let description: String?
@@ -74,21 +74,21 @@ public struct OrderItem: Identifiable,Decodable {
     let taxAmountLocaleFull: String?
 }
 
-public struct MerchantDetails: Decodable {
+public struct MerchantDetails: Decodable,Sendable {
     let checkoutTheme: CheckoutTheme
 }
 
-public struct CheckoutTheme: Decodable {
+public struct CheckoutTheme: Decodable,Sendable {
     let primaryButtonColor: String?
     let buttonTextColor: String?
 }
 
-public struct Configs: Decodable {
+public struct Configs: Decodable,Sendable {
     let paymentMethods: [PaymentMethod]
     let enabledFields: [EnabledField]
 }
 
-public struct PaymentMethod: Decodable {
+public struct PaymentMethod: Decodable,Sendable {
     let id: String?
     let type: String?
     let brand: String?
@@ -99,7 +99,7 @@ public struct PaymentMethod: Decodable {
     let emiMethod: EmiMethod?
 }
 
-public struct EmiMethod: Decodable {
+public struct EmiMethod: Decodable,Sendable {
     let brand: String?
     let issuer: String?
     let duration: Int?
@@ -119,20 +119,20 @@ public struct EmiMethod: Decodable {
     let cardlessEmiProviderValue: String?
 }
 
-public struct ProcessingFee: Decodable {
+public struct ProcessingFee: Decodable,Sendable {
     let amountLocaleFull: String?
 }
 
-public struct ApplicableOffer: Decodable {
+public struct ApplicableOffer: Decodable,Sendable {
     let code: String?
     let discount: DiscountDetails?
 }
 
-public struct DiscountDetails: Decodable {
+public struct DiscountDetails: Decodable,Sendable {
     let type: String?
 }
 
-public struct EnabledField: Decodable {
+public struct EnabledField: Decodable,Sendable {
     let field: String?
     let editable: Bool
     let mandatory: Bool

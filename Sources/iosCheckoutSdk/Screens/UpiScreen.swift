@@ -13,6 +13,9 @@ struct UpiScreen: View {
     var isGpayVisible: Bool
     var isPaytmVisible: Bool
     var isPhonePeVisible: Bool
+    var brandColor : String
+    var totalAmount : String
+    var currencySymbol : String
     @Binding var isUpiCollectVisible: Bool
     
     let handleUpiPayment: (_ selectedIntent : String?, _ shopperVpa : String?, _ methodType:String) -> ()
@@ -24,9 +27,6 @@ struct UpiScreen: View {
     @State private var isRotated = false
     @State private var isFocused = false
     @State private var selectedIntent: String? = nil
-    
-    
-    let checkoutManager = CheckoutManager.shared
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -63,15 +63,15 @@ struct UpiScreen: View {
                         (
                             Text("Pay ")
                                 .font(.custom("Poppins-SemiBold", size: 16)) +
-                            Text(checkoutManager.getCurrencySymbol())
+                            Text(currencySymbol)
                                 .font(.custom("Inter-SemiBold", size: 16)) +
-                            Text("\(checkoutManager.getTotalAmount()) via \(intent)")
+                            Text("\(totalAmount) via \(intent)")
                                 .font(.custom("Poppins-SemiBold", size: 16))
                         )
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color(hex: checkoutManager.getBrandColor()))
+                        .background(Color(hex: brandColor))
                         .cornerRadius(8)
                     }
                     .padding(.top, 8)
@@ -91,10 +91,10 @@ struct UpiScreen: View {
                     Button(action: toggleCollectSection) {
                         HStack {
                             Image(frameworkAsset: "add_green")
-                                .foregroundColor(Color(hex: checkoutManager.getBrandColor()))
+                                .foregroundColor(Color(hex: brandColor))
                                 .frame(width:16, height:16)
                             Text("Add new UPI Id")
-                                .foregroundColor(Color(hex: checkoutManager.getBrandColor()))
+                                .foregroundColor(Color(hex: brandColor))
                                 .font(.custom("Poppins-SemiBold", size: 14))
                             Spacer()
                             Image(frameworkAsset: "chevron")
@@ -148,15 +148,15 @@ struct UpiScreen: View {
                                 (
                                     Text("Verify & Pay ")
                                         .font(.custom("Poppins-Regular", size: 16)) +
-                                    Text(checkoutManager.getCurrencySymbol())
+                                    Text(currencySymbol)
                                         .font(.custom("Inter-Regular", size: 16)) +
-                                    Text(checkoutManager.getTotalAmount())
+                                    Text(totalAmount)
                                         .font(.custom("Poppins-Regular", size: 16))
                                 )
                                     .foregroundColor(.white)
                                     .padding()
                                     .frame(maxWidth: .infinity)
-                                    .background(upiCollectValid == true ? Color(hex: checkoutManager.getBrandColor()) : Color.gray.opacity(0.5))
+                                    .background(upiCollectValid == true ? Color(hex: brandColor) : Color.gray.opacity(0.5))
                                     .cornerRadius(8)
                                     
                             }
@@ -194,12 +194,12 @@ struct UpiScreen: View {
                 }
                 .overlay(
                     Circle()
-                        .stroke(isSelected ? Color(hex: checkoutManager.getBrandColor()) : Color.clear, lineWidth: 2)
+                        .stroke(isSelected ? Color(hex: brandColor) : Color.clear, lineWidth: 2)
                 )
             }
 
             Text(title)
-                .foregroundColor(isSelected ? Color(hex: checkoutManager.getBrandColor()) : .primary)
+                .foregroundColor(isSelected ? Color(hex: brandColor) : .primary)
                 .font(.custom(isSelected ? "Poppins-SemiBold" : "Poppins-Regular", size: 14))
         }
         .padding(.leading, 16)
