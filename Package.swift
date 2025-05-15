@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "ios-checkout-sdk",
+    name: "iosCheckoutSdk",
     platforms: [
         .macOS(.v10_15),
         .iOS(.v14)
@@ -12,8 +12,8 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "ios_checkout_sdk",
-            targets: ["ios-checkout-sdk"]),
+            name: "iosCheckoutSdk",
+            targets: ["iosCheckoutSdk"]),
     ],
     dependencies: [
         .package(url: "https://github.com/airbnb/lottie-ios.git", from: "4.5.1"),
@@ -23,7 +23,7 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "ios-checkout-sdk",
+            name: "iosCheckoutSdk",
             dependencies: [
                 .product(name: "Lottie", package: "lottie-ios"),
                 .product(name: "SVGKit", package: "SVGKit")
