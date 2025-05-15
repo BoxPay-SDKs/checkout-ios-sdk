@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "checkoutSdk",
+    name: "ios-checkout-sdk",
     platforms: [
         .macOS(.v10_15),
         .iOS(.v14)
@@ -12,7 +12,7 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "ios-checkout-sdk",
+            name: "ios_checkout_sdk",
             targets: ["ios-checkout-sdk"]),
     ],
     dependencies: [
