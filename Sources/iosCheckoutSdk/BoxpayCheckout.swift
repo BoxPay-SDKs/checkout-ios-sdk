@@ -1,8 +1,8 @@
 //
 //  BoxpayCheckout.swift
-//  checkout-ios-sdk
+//  iosCheckoutSdk
 //
-//  Created by Ishika Bansal on 13/05/25.
+//  Created by Ishika Bansal on 15/05/25.
 //
 
 import SwiftUICore

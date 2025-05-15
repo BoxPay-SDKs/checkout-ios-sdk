@@ -27,7 +27,8 @@ let package = Package(
             dependencies: [
                 .product(name: "Lottie", package: "lottie-ios"),
                 .product(name: "SVGKit", package: "SVGKit")
-            ]
+            ],
+            path: "Sources/iosCheckoutSdk"
         ),
 
     ]
