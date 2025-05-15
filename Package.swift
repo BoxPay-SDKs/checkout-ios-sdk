@@ -28,7 +28,10 @@ let package = Package(
                 .product(name: "Lottie", package: "lottie-ios"),
                 .product(name: "SVGKit", package: "SVGKit")
             ],
-            path: "Sources/iosCheckoutSdk"
+            path: "Sources/iosCheckoutSdk",
+            resources: [
+                .process("BoxpayLogo.json")
+            ]
         ),
 
     ]
