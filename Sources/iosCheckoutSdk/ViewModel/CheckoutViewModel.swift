@@ -33,6 +33,24 @@ class CheckoutViewModel: ObservableObject {
     }
     
     @Published var brandColor = ""
+    
+    @Published var isInitialized = false
+        func initialize(token: String, shopperToken: String, config: ConfigOptions?, callback: @escaping (PaymentResultObject) -> Void) {
+            Task {
+                PaymentCallBackManager.shared.setCallback(callback)
+                await checkoutManager.setBaseURL(config?[ConfigurationOption.enableTextEnv] == true)
+                await checkoutManager.setIsSuccessScreenVisible(config?[ConfigurationOption.showBoxpaySuccessScreen] ?? true)
+                
+                if !token.isEmpty {
+                    await checkoutManager.setMainToken(token)
+                }
+                if !shopperToken.isEmpty {
+                    await checkoutManager.setShopperToken(shopperToken)
+                }
+
+                isInitialized = true // ✅ Mark as initialized
+            }
+        }
 
     /// Fetches the checkout session using the main token
     func getCheckoutSession() {
