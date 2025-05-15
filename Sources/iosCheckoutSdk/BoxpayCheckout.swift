@@ -45,21 +45,7 @@ public struct BoxpayCheckout : View {
         configurationOptions: ConfigOptions? = nil,
         onPaymentResult: @escaping (PaymentResultObject) -> Void
     ){
-        Task {
-            let checkoutManager = CheckoutManager.shared
-            PaymentCallBackManager.shared.setCallback(onPaymentResult)
-            await checkoutManager.setBaseURL(configurationOptions?[ConfigurationOption.enableTextEnv] == true)
-            await checkoutManager.setIsSuccessScreenVisible(configurationOptions?[ConfigurationOption.showBoxpaySuccessScreen] ?? true)
-            
-            // Set tokens
-            if !token.isEmpty {
-                await checkoutManager.setMainToken(token)
-            }
-            
-            if !shopperToken.isEmpty {
-                await checkoutManager.setShopperToken(shopperToken)
-            }
-        }
+        viewModel.initialize(token: token, shopperToken: shopperToken, config: configurationOptions, callback: onPaymentResult)
     }
     
     public var body: some View {
@@ -164,8 +150,10 @@ public struct BoxpayCheckout : View {
                         EmptyView()
                     }
         }
-        .onAppear {
-            viewModel.getCheckoutSession()
+        .onChange(of : viewModel.isInitialized) { initialized in
+            if(initialized) {
+                viewModel.getCheckoutSession()
+            }
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
