@@ -5,8 +5,7 @@
 //  Created by Ishika Bansal on 13/05/25.
 //
 
-@MainActor
-public class UserDataManager {
+public actor UserDataManager {
     static let shared = UserDataManager()
 
     private var firstNameStored: String? = nil

@@ -15,8 +15,8 @@ class NetBankingViewModel : ObservableObject {
     @Published var isLoading = false
     @Published var actions : PaymentAction?
     @Published var checkoutManager = CheckoutManager.shared
-    @Published var apiService = ApiService.shared
-    @Published var userDataManager = UserDataManager.shared
+    private let apiService = ApiService.shared
+    private let userDataManager = UserDataManager.shared
     
     @Published var netBankingDataClass : [CommonDataClass] = []
     @Published var defaultNetBankingDataClass : [CommonDataClass] = []
@@ -25,57 +25,70 @@ class NetBankingViewModel : ObservableObject {
     ]
     @Published var popularBankDataClass : [CommonDataClass] = []
     
+    @Published var itemsCount = 0
+    @Published var currencySymbol = ""
+    @Published var totalAmount = ""
+    @Published var brandColor = ""
+    @Published var transactionId = ""
+    
     func getNetBankingPaymentMethods() {
-        apiService.request(
-            endpoint: "payment-methods",
-            responseType: [PaymentMethod].self
-            ) { [weak self] result in
-                DispatchQueue.main.async {
-                    guard let self = self else { return }
-                    self.isFirstLoad = false
-                    switch result {
-                    case .success(let data):
-                        self.netBankingDataClass = data
-                            .filter { $0.type == "NetBanking" }
-                            .map { item in
-                                CommonDataClass(
-                                    id: item.id ?? "",
-                                    title: item.title ?? "",
-                                    image: item.logoUrl ?? "",
-                                    instrumentTypeValue: item.instrumentTypeValue ?? "",
-                                    isLastUsed: nil
-                                )
-                            }
-                        
-                        self.defaultNetBankingDataClass = self.netBankingDataClass
-                        
-                        self.popularBankDataClass = self.netBankingDataClass.filter { bank in
-                            self.popularBanksList.contains { popularName in
-                                bank.title.caseInsensitiveCompare(popularName) == .orderedSame
-                            }
-                        }
+        Task {
+            do {
+                let data = try await apiService.request(
+                    endpoint: "payment-methods",
+                    responseType: [PaymentMethod].self
+                )
 
-                    case .failure(let error):
-                        self.actions = CommonFunctions.handle(timeStamp: "", reasonCode: "", reason: "", methodType: "", response: PaymentActionResponse(action: nil), shopperVpa: "")
-                        print("=======errorr \(error)")
-                    }
+                let filteredData = data.filter { $0.type == "NetBanking" }.map { item in
+                    CommonDataClass(
+                        id: item.id ?? "",
+                        title: item.title ?? "",
+                        image: item.logoUrl ?? "",
+                        instrumentTypeValue: item.instrumentTypeValue ?? "",
+                        isLastUsed: nil
+                    )
                 }
 
+                self.netBankingDataClass = filteredData
+                self.defaultNetBankingDataClass = filteredData
+                
+                self.popularBankDataClass = self.netBankingDataClass.filter { bank in
+                                            self.popularBanksList.contains { popularName in
+                                                bank.title.caseInsensitiveCompare(popularName) == .orderedSame
+                                            }
+                                        }
+                self.itemsCount = await checkoutManager.getItemsCount()
+                self.currencySymbol = await checkoutManager.getCurrencySymbol()
+                self.totalAmount = await checkoutManager.getTotalAmount()
+                self.brandColor = await checkoutManager.getBrandColor()
+                self.isFirstLoad = false
+            } catch {
+                self.isFirstLoad = false
+                self.actions = CommonFunctions.handle(
+                    timeStamp: "",
+                    reasonCode: "",
+                    reason: "",
+                    methodType: "",
+                    response: PaymentActionResponse(action: nil),
+                    shopperVpa: ""
+                )
+                print("=======errorr \(error)")
             }
+        }
     }
-    
-    func initiateNetBankingPostRequest(instrumentValue:String) {
-        // Construct instrumentDetails
-        self.isLoading = true
+
+    func initiateNetBankingPostRequest(instrumentValue: String) {
+        Task {
+            await MainActor.run { self.isLoading = true }
+
             let instrumentDetails: [String: Any] = [
                 "type": instrumentValue,
-                "netBanking" : [
-                    "token" : checkoutManager.getMainToken()
+                "netBanking": [
+                    "token": await checkoutManager.getMainToken()
                 ]
             ]
 
-            // Construct delivery address
-            let deliveryAddress: [String: Any?] = [
+            let deliveryAddress: [String: Any?] = await [
                 "address1": userDataManager.getAddress1(),
                 "address2": userDataManager.getAddress2(),
                 "city": userDataManager.getCity(),
@@ -86,12 +99,9 @@ class NetBankingViewModel : ObservableObject {
                 "labelName": userDataManager.getLabelName()
             ]
 
-            let isDeliveryEmpty = deliveryAddress.values.allSatisfy { value in
-                (value as? String)?.isEmpty ?? true
-            }
-        
+            let isDeliveryEmpty = deliveryAddress.values.allSatisfy { ($0 as? String)?.isEmpty ?? true }
 
-            let payload: [String: Any] = [
+            let payload: [String: Any] = await [
                 "browserData": [
                     "screenHeight": Int(UIScreen.main.bounds.height),
                     "screenWidth": Int(UIScreen.main.bounds.width),
@@ -123,55 +133,62 @@ class NetBankingViewModel : ObservableObject {
                     "deviceBrandName": "Apple"
                 ]
             ]
-        
-        guard JSONSerialization.isValidJSONObject(payload) else {
-            print("❌ Invalid JSON")
-            return
-        }
 
-        let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: [])
-        
-        if let json = jsonData, let jsonString = String(data: json, encoding: .utf8) {
-            print("📤 JSON Payload:\n\(jsonString)")
-        }
-
-        
-        apiService.request(
-            method : .POST,
-            headers: [
-                "Content-Type": "application/json",
-                "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
-            ],
-            body: jsonData,
-            responseType: GeneralPaymentInitilizationResponse.self
-            ) { [weak self] result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let data):
-                        self?.checkoutManager.setStatus(data.status.status.uppercased())
-                        self?.checkoutManager.setTransactionId(data.transactionId)
-                        self?.actions = CommonFunctions.handle(timeStamp: data.transactionTimestampLocale, reasonCode: data.status.reasonCode, reason: data.status.reason, methodType: "WALLET", response: PaymentActionResponse(action: data.actions), shopperVpa:"")
-                    case .failure(let error):
-                        let errorDescription = error.localizedDescription.lowercased()
-
-                        if errorDescription.contains("expired") {
-                            self?.checkoutManager.setStatus("EXPIRED")
-                        } else {
-                            self?.checkoutManager.setStatus("FAILED")
-                        }
-
-                        self?.actions = CommonFunctions.handle(
-                            timeStamp: "",
-                            reasonCode: "",
-                            reason: error.localizedDescription, // You can pass actual error for better debugging
-                            methodType: "",
-                            response: PaymentActionResponse(action: nil),
-                            shopperVpa: ""
-                        )
-
-                        print("=======errorr \(error)")
-                    }
-                }
+            guard JSONSerialization.isValidJSONObject(payload),
+                  let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+                  let jsonString = String(data: jsonData, encoding: .utf8) else {
+                print("❌ Invalid JSON payload")
+                return
             }
+
+            print("📤 JSON Payload:\n\(jsonString)")
+
+            do {
+                let data = try await apiService.request(
+                    method: .POST,
+                    headers: [
+                        "Content-Type": "application/json",
+                        "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
+                    ],
+                    body: jsonData,
+                    responseType: GeneralPaymentInitilizationResponse.self
+                )
+
+                await checkoutManager.setStatus(data.status.status.uppercased())
+                await checkoutManager.setTransactionId(data.transactionId)
+                transactionId = data.transactionId
+
+                self.actions = CommonFunctions.handle(
+                    timeStamp: data.transactionTimestampLocale,
+                    reasonCode: data.status.reasonCode,
+                    reason: data.status.reason,
+                    methodType: "WALLET",
+                    response: PaymentActionResponse(action: data.actions),
+                    shopperVpa: ""
+                )
+
+            } catch {
+                let errorDescription = error.localizedDescription.lowercased()
+
+                if errorDescription.contains("expired") {
+                    await checkoutManager.setStatus("EXPIRED")
+                } else {
+                    await checkoutManager.setStatus("FAILED")
+                }
+
+                self.actions = CommonFunctions.handle(
+                    timeStamp: "",
+                    reasonCode: "",
+                    reason: error.localizedDescription,
+                    methodType: "",
+                    response: PaymentActionResponse(action: nil),
+                    shopperVpa: ""
+                )
+
+                print("=======errorr \(error)")
+            }
+
+            await MainActor.run { self.isLoading = false }
+        }
     }
 }

@@ -32,26 +32,34 @@ public struct BoxpayCheckout : View {
     
     @State private var isCheckoutMainScreenFocused = false
     
+    @State private var paymentUrl : String? = nil
+    @State private var paymentHtmlString: String? = nil
+    @State private var showWebView = false
+    
+    @State private var status : String = ""
+    @State private var transactionId : String = ""
+    
     public init(
         token: String,
         shopperToken: String,
         configurationOptions: ConfigOptions? = nil,
         onPaymentResult: @escaping (PaymentResultObject) -> Void
-    ) {
-        let checkoutManager = CheckoutManager.shared
-        PaymentCallBackManager.shared.setCallback(onPaymentResult)
-        checkoutManager.setBaseURL(configurationOptions?[ConfigurationOption.enableTextEnv] == true)
-        checkoutManager.setIsSuccessScreenVisible(configurationOptions?[ConfigurationOption.showBoxpaySuccessScreen] ?? true)
-        
-        // Set tokens
-        if !token.isEmpty {
-            checkoutManager.setMainToken(token)
+    ){
+        Task {
+            let checkoutManager = CheckoutManager.shared
+            PaymentCallBackManager.shared.setCallback(onPaymentResult)
+            await checkoutManager.setBaseURL(configurationOptions?[ConfigurationOption.enableTextEnv] == true)
+            await checkoutManager.setIsSuccessScreenVisible(configurationOptions?[ConfigurationOption.showBoxpaySuccessScreen] ?? true)
+            
+            // Set tokens
+            if !token.isEmpty {
+                await checkoutManager.setMainToken(token)
+            }
+            
+            if !shopperToken.isEmpty {
+                await checkoutManager.setShopperToken(shopperToken)
+            }
         }
-        
-        if !shopperToken.isEmpty {
-            checkoutManager.setShopperToken(shopperToken)
-        }
-        
     }
     
     public var body: some View {
@@ -82,7 +90,7 @@ public struct BoxpayCheckout : View {
                                 .padding(.bottom, 8)
                         }
                         
-                        UpiScreen(isUpiIntentVisible: $viewModel.upiIntentMethod, isGpayVisible: isGooglePayInstalled(), isPaytmVisible: isPaytmInstalled(), isPhonePeVisible: isPhonePeInstalled(), isUpiCollectVisible: $viewModel.upiCollectMethod, handleUpiPayment: upiViewModel.initiateUpiPostRequest)
+                        UpiScreen(isUpiIntentVisible: $viewModel.upiIntentMethod, isGpayVisible: isGooglePayInstalled(), isPaytmVisible: isPaytmInstalled(), isPhonePeVisible: isPhonePeInstalled(),brandColor : viewModel.brandColor, totalAmount : viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "", currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",  isUpiCollectVisible: $viewModel.upiCollectMethod, handleUpiPayment: upiViewModel.initiateUpiPostRequest)
                         
                         if(viewModel.cardsMethod || viewModel.walletsMethod || viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                             TitleHeaderView(text: "More Payment Options")
@@ -166,10 +174,10 @@ public struct BoxpayCheckout : View {
         .onReceive(fetchStatusViewModel.$actions.compactMap{ $0}, perform: handlePaymentAction)
         .bottomSheet(isPresented: $sessionExpireScreen) {
             SessionExpireScreen(
-                brandColor: viewModel.checkoutManager.getBrandColor(),
+                brandColor: viewModel.brandColor,
                 onGoBackToHome: {
                     print("Okay from session expire screen")
-                    PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                    PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: status, transactionId: transactionId))
                     sessionExpireScreen = false
                     presentationMode.wrappedValue.dismiss()
                 }
@@ -180,19 +188,19 @@ public struct BoxpayCheckout : View {
                 sessionFailedScreen = false
             }, onReturnToPaymentOptions: {
                 sessionFailedScreen = false
-            },brandColor: viewModel.checkoutManager.getBrandColor())
+            },brandColor: viewModel.brandColor)
         }
         .bottomSheet(isPresented: $sessionCompleteScreen) {
-            GeneralSuccessScreen(transactionID: viewModel.checkoutManager.getTransactionId(), date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.checkoutManager.getTotalAmount(),currencySymbol: viewModel.checkoutManager.getCurrencySymbol(), onDone: {
+            GeneralSuccessScreen(transactionID: transactionId, date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "", onDone: {
                 sessionCompleteScreen = false
-                PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: status, transactionId: transactionId))
                 presentationMode.wrappedValue.dismiss()
-            },brandColor: viewModel.checkoutManager.getBrandColor())
+            },brandColor: viewModel.brandColor)
         }
         .bottomSheet(isPresented: $showTimerSheet) {
             UpiTimerSheet(onCancelButton: {
                 showCancelPopup = true
-            },_vpa: $shopperVpa, brandColor: viewModel.checkoutManager.getBrandColor())
+            },_vpa: $shopperVpa, brandColor: viewModel.brandColor)
         }
         .overlay(
             Group {
@@ -211,7 +219,7 @@ public struct BoxpayCheckout : View {
                             onDismiss: {
                                 showCancelPopup = false
                             },
-                            brandColor: viewModel.checkoutManager.getBrandColor()
+                            brandColor: viewModel.brandColor
                         )
                     }
                 }
@@ -223,9 +231,23 @@ public struct BoxpayCheckout : View {
         }
         .onChange(of: isCheckoutMainScreenFocused) { focused in
             if(focused) {
-                PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
+                Task {
+                    status = await viewModel.checkoutManager.getStatus()
+                    transactionId = await viewModel.checkoutManager.getTransactionId()
+                }
+                PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: status, transactionId: transactionId))
                 presentationMode.wrappedValue.dismiss()
             }
+        }
+        .sheet(isPresented: $showWebView) {
+            WebView(
+                url: URL(string: paymentUrl ?? ""), htmlString: paymentHtmlString,
+                onDismiss: {
+                    showWebView = false
+                    upiViewModel.isLoading = true
+                    fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
+                }
+            )
         }
     }
     
@@ -251,43 +273,45 @@ public struct BoxpayCheckout : View {
     }
 
     private func handlePaymentAction(_ action: PaymentAction) {
-        switch action {
-        case .showFailed(let message):
-            print("❌ Failed: - \(message)")
-            viewModel.checkoutManager.setStatus("FAILED")
-            showTimerSheet = false
-            upiViewModel.isLoading = false
-            fetchStatusViewModel.stopFetchingStatus()
-            errorReason = message
-            sessionFailedScreen = true
-        case .showSuccess(let time):
-            print("✅ Success: - \(time)")
-            viewModel.checkoutManager.setStatus("SUCCESS")
-            showTimerSheet = false
-            fetchStatusViewModel.stopFetchingStatus()
-            timeStamp = time
-            sessionCompleteScreen = true
-        case .showExpired:
-            print("⌛ Expired:")
-            viewModel.checkoutManager.setStatus("EXPIRED")
-            showTimerSheet = false
-            fetchStatusViewModel.stopFetchingStatus()
-            sessionExpireScreen = true
-        case .openWebViewUrl(let url):
-            print("🌐 WebView URL: \(url)")
-        case .openWebViewHTML(let htmlContent):
-            print("📄 HTML: \(htmlContent)")
-        case .openIntentUrl(let base64Url):
-            print("📦 Base64: \(base64Url)")
-            upiViewModel.isLoading = true
-            openURL(urlString: base64Url)
-        case .openUpiTimer(let vpa) :
-            print("⌛ timer opened:")
-            fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
-            shopperVpa = vpa
-            showTimerSheet = true
+        Task {
+            status = await viewModel.checkoutManager.getStatus()
+            transactionId = await viewModel.checkoutManager.getTransactionId()
+            switch action {
+            case .showFailed(let message):
+                print("❌ Failed: - \(message)")
+                upiViewModel.isLoading = false
+                await viewModel.checkoutManager.setStatus("FAILED")
+                fetchStatusViewModel.stopFetchingStatus()
+                errorReason = message
+                sessionFailedScreen = true
+            case .showSuccess(let time):
+                print("✅ Success: - \(time)")
+                await viewModel.checkoutManager.setStatus("SUCCESS")
+                upiViewModel.isLoading = false
+                fetchStatusViewModel.stopFetchingStatus()
+                timeStamp = time
+                sessionCompleteScreen = true
+            case .showExpired:
+                print("⌛ Expired:")
+                await viewModel.checkoutManager.setStatus("EXPIRED")
+                fetchStatusViewModel.stopFetchingStatus()
+                sessionExpireScreen = true
+            case .openWebViewUrl(let url):
+                print("🌐 WebView URL: \(url)")
+                paymentUrl = url
+                showWebView = true
+            case .openWebViewHTML(let htmlContent):
+                print("📄 HTML: \(htmlContent)")
+                paymentHtmlString = htmlContent
+                showWebView = true
+            case .openIntentUrl(let base64Url):
+                print("📦 Base64: \(base64Url)")
+            case .openUpiTimer(_) :
+                print("⌛ timer opened:")
+            }
         }
     }
+    
     private func openURL(urlString: String) {
         if let url = URL(string: urlString) {
             if UIApplication.shared.canOpenURL(url) {

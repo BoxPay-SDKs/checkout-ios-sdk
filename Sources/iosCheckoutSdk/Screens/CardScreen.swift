@@ -66,6 +66,11 @@ struct CardScreen : View {
     @State private var showWebView = false
     @State private var isCvvShowDetailsClicked = false
     
+    @State var itemsCount = 0
+    @State var currencySymbol = ""
+    @State var totalAmount = ""
+    @State var brandColor = ""
+    
     var body: some View {
         VStack {
             if(viewModel.isLoading) {
@@ -117,7 +122,7 @@ struct CardScreen : View {
                                                 (
                                                     Text("\(durationNumber ?? 0) months x ")
                                                         .font(.custom("Poppins-SemiBold", size: 12)) +
-                                                    Text(viewModel.checkoutManager.getCurrencySymbol())
+                                                    Text(currencySymbol)
                                                         .font(.custom("Inter-SemiBold", size: 12)) +
                                                     Text(emiAmount ?? "")
                                                         .font(.custom("Poppins-SemiBold", size: 12))
@@ -259,13 +264,21 @@ struct CardScreen : View {
                             .foregroundColor(.white)
                             .padding()
                             .frame(maxWidth: .infinity)
-                            .background(allCardFieldsMandate ? Color(hex: viewModel.checkoutManager.getBrandColor()) : Color.gray.opacity(0.5))
+                            .background(allCardFieldsMandate ? Color(hex: brandColor) : Color.gray.opacity(0.5))
                             .cornerRadius(8)
                             .font(.custom("Poppins-Regular", size: 16))
                     }
                     .padding(.top, 12)
                     .padding(.horizontal, 16)
                 }
+            }
+        }
+        .onAppear {
+            Task {
+                itemsCount = await viewModel.checkoutManager.getItemsCount()
+                currencySymbol = await viewModel.checkoutManager.getCurrencySymbol()
+                totalAmount = await viewModel.checkoutManager.getTotalAmount()
+                brandColor = await viewModel.checkoutManager.getBrandColor()
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -277,7 +290,7 @@ struct CardScreen : View {
         .onReceive(fetchStatusViewModel.$actions.compactMap{$0},perform: handlePaymentAction)
         .bottomSheet(isPresented: $sessionExpireScreen) {
             SessionExpireScreen(
-                brandColor: viewModel.checkoutManager.getBrandColor(),
+                brandColor: brandColor,
                 onGoBackToHome: {
                     print("Okay from session expire screen")
 //                    PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: viewModel.checkoutManager.getStatus(), transactionId: viewModel.checkoutManager.getTransactionId()))
@@ -292,14 +305,14 @@ struct CardScreen : View {
                 sessionFailedScreen = false
             }, onReturnToPaymentOptions: {
                 sessionFailedScreen = false
-            },brandColor: viewModel.checkoutManager.getBrandColor())
+            },brandColor: brandColor)
         }
         .bottomSheet(isPresented: $sessionCompleteScreen) {
-            GeneralSuccessScreen(transactionID: viewModel.checkoutManager.getTransactionId(), date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.checkoutManager.getTotalAmount(),currencySymbol: viewModel.checkoutManager.getCurrencySymbol(), onDone: {
+            GeneralSuccessScreen(transactionID: viewModel.transactionId, date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: totalAmount,currencySymbol: currencySymbol, onDone: {
                 sessionCompleteScreen = false
                 isCheckoutFocused = true
                 presentationMode.wrappedValue.dismiss()
-            },brandColor: viewModel.checkoutManager.getBrandColor())
+            },brandColor: brandColor)
         }
         .sheet(isPresented: $showWebView) {
             WebView(
@@ -314,7 +327,7 @@ struct CardScreen : View {
         .bottomSheet(isPresented: $isCvvShowDetailsClicked) {
             CVVInfoView(onGoBack: {
                 isCvvShowDetailsClicked = false
-            },brandColor: viewModel.checkoutManager.getBrandColor())
+            },brandColor: brandColor)
         }
     }
     
@@ -575,39 +588,40 @@ struct CardScreen : View {
     }
 
     private func handlePaymentAction(_ action: PaymentAction) {
-        switch action {
-        case .showFailed(let message):
-            print("❌ Failed: - \(message)")
-            viewModel.checkoutManager.setStatus("FAILED")
-            viewModel.isLoading = false
-            fetchStatusViewModel.stopFetchingStatus()
-            errorReason = message
-            sessionFailedScreen = true
-        case .showSuccess(let time):
-            print("✅ Success: - \(time)")
-            viewModel.checkoutManager.setStatus("SUCCESS")
-            viewModel.isLoading = false
-            fetchStatusViewModel.stopFetchingStatus()
-            timeStamp = time
-            sessionCompleteScreen = true
-        case .showExpired:
-            print("⌛ Expired:")
-            viewModel.checkoutManager.setStatus("EXPIRED")
-            viewModel.isLoading = false
-            fetchStatusViewModel.stopFetchingStatus()
-            sessionExpireScreen = true
-        case .openWebViewUrl(let url):
-            print("🌐 WebView URL: \(url)")
-            paymentUrl = url
-            showWebView = true
-        case .openWebViewHTML(let htmlContent):
-            print("📄 HTML: \(htmlContent)")
-            paymentHtmlString = htmlContent
-            showWebView = true
-        case .openIntentUrl(let base64Url):
-            print("📦 Base64: \(base64Url)")
-        case .openUpiTimer( _) :
-            print("⌛ timer opened:")
+        Task {
+            switch action {
+            case .showFailed(let message):
+                print("❌ Failed: - \(message)")
+                viewModel.isLoading = false
+                await viewModel.checkoutManager.setStatus("FAILED")
+                fetchStatusViewModel.stopFetchingStatus()
+                errorReason = message
+                sessionFailedScreen = true
+            case .showSuccess(let time):
+                print("✅ Success: - \(time)")
+                await viewModel.checkoutManager.setStatus("SUCCESS")
+                viewModel.isLoading = false
+                fetchStatusViewModel.stopFetchingStatus()
+                timeStamp = time
+                sessionCompleteScreen = true
+            case .showExpired:
+                print("⌛ Expired:")
+                await viewModel.checkoutManager.setStatus("EXPIRED")
+                fetchStatusViewModel.stopFetchingStatus()
+                sessionExpireScreen = true
+            case .openWebViewUrl(let url):
+                print("🌐 WebView URL: \(url)")
+                paymentUrl = url
+                showWebView = true
+            case .openWebViewHTML(let htmlContent):
+                print("📄 HTML: \(htmlContent)")
+                paymentHtmlString = htmlContent
+                showWebView = true
+            case .openIntentUrl(let base64Url):
+                print("📦 Base64: \(base64Url)")
+            case .openUpiTimer(_) :
+                print("⌛ timer opened:")
+            }
         }
     }
 }

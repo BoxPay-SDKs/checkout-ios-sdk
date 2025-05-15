@@ -5,13 +5,13 @@
 //  Created by Ishika Bansal on 13/05/25.
 //
 
-struct CardInfoResponse : Codable {
+struct CardInfoResponse : Codable, Sendable {
     let paymentMethod : PaymentMethod
     let methodEnabled : Bool
     let issuerName : String?
     let issuerTitle : String?
     
-    struct PaymentMethod : Codable {
+    struct PaymentMethod : Codable,Sendable {
         let id : String
         let type:String?
         let brand : String?
