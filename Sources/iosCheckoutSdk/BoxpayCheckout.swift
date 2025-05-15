@@ -44,6 +44,18 @@ public struct BoxpayCheckout : View {
     @State private var transactionId : String = ""
     
     
+    public init(
+            token: String,
+            shopperToken: String,
+            configurationOptions: ConfigOptions? = nil,
+            onPaymentResult: @escaping (PaymentResultObject) -> Void
+        ){
+            self.token = token
+            self.shopperToken = shopperToken
+            self.configurationOption = configurationOptions
+            self.onPaymentResult = onPaymentResult
+        }
+    
     public var body: some View {
         // Replace this with your actual SDK UI
         ZStack {
