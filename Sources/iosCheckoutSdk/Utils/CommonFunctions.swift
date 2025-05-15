@@ -136,7 +136,7 @@ extension String {
 
 extension Image {
     init(frameworkAsset name: String, isTemplate: Bool = false) {
-        let bundle = Bundle.main
+        let bundle = Bundle.module
         let image = Image(name, bundle: bundle)
         self = isTemplate ? image.renderingMode(.template) : image.renderingMode(.original)
     }
