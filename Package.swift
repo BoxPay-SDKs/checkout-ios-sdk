@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "iosCheckoutSdk",
+    defaultLocalization: "en",
     platforms: [
         .macOS(.v10_15),
         .iOS(.v14)
@@ -28,10 +29,7 @@ let package = Package(
                 .product(name: "Lottie", package: "lottie-ios"),
                 .product(name: "SVGKit", package: "SVGKit")
             ],
-            path: "Sources/iosCheckoutSdk",
-            resources: [
-                .copy("../Resources")
-            ]
+            path: "Sources/iosCheckoutSdk"
         ),
 
     ]
