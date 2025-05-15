@@ -38,7 +38,7 @@ class CheckoutViewModel: ObservableObject {
     func getCheckoutSession() {
         guard !hasFetechedCheckoutDetails else { return }
 
-        Task { @MainActor in
+        Task {
             do {
                 let data: CheckoutSession = try await apiManager.request(
                     endpoint: nil,
@@ -57,7 +57,6 @@ class CheckoutViewModel: ObservableObject {
                 await checkoutManager.setStatus(status)
                 await checkoutManager.setTransactionId(txnId)
 
-                self.isFirstLoad = false
                 self.actions = CommonFunctions.handle(
                     timeStamp: data.sessionExpiryTimestampLocale,
                     reasonCode: "",
@@ -69,7 +68,6 @@ class CheckoutViewModel: ObservableObject {
                 self.sessionData = data
 
             } catch {
-                self.isFirstLoad = false
                 self.actions = CommonFunctions.handle(
                     timeStamp: "",
                     reasonCode: "",
@@ -81,6 +79,7 @@ class CheckoutViewModel: ObservableObject {
                 print("=======error \(error)")
             }
         }
+        self.isFirstLoad = false
     }
 
     private func processSessionData() async {
@@ -149,6 +148,7 @@ class CheckoutViewModel: ObservableObject {
             await userDataManager.setDOB(userData.dateOfBirth)
             await userDataManager.setPan(userData.panNumber)
         
+        print(sessionData)
     }
 
     func getCurrencySymbol(from currencyCode: String?) -> String {
