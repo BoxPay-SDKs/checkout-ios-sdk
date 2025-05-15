@@ -9,6 +9,10 @@ import SwiftUICore
 import SwiftUI
 
 public struct BoxpayCheckout : View {
+    var token : String
+    var shopperToken : String
+    var configurationOption : ConfigOptions?
+    var onPaymentResult : (PaymentResultObject) -> Void
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel = CheckoutViewModel()
     @StateObject var upiViewModel = UpiViewModel()
@@ -39,14 +43,6 @@ public struct BoxpayCheckout : View {
     @State private var status : String = ""
     @State private var transactionId : String = ""
     
-    public init(
-        token: String,
-        shopperToken: String,
-        configurationOptions: ConfigOptions? = nil,
-        onPaymentResult: @escaping (PaymentResultObject) -> Void
-    ){
-        viewModel.initialize(token: token, shopperToken: shopperToken, config: configurationOptions, callback: onPaymentResult)
-    }
     
     public var body: some View {
         // Replace this with your actual SDK UI
@@ -149,6 +145,9 @@ public struct BoxpayCheckout : View {
             NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
+        }
+        .onAppear {
+            viewModel.initialize(token: token, shopperToken: shopperToken, config: configurationOption, callback: onPaymentResult)
         }
         .onChange(of : viewModel.isInitialized) { initialized in
             if(initialized) {
