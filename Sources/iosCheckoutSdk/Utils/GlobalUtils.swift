@@ -1,5 +1,5 @@
 //
-//  CommonFunctions.swift
+//  GlobalUtils.swift
 //  checkout-ios-sdk
 //
 //  Created by Ishika Bansal on 13/05/25.
@@ -9,7 +9,7 @@
 import Foundation
 import SwiftUI
 
-struct CommonFunctions {
+struct GlobalUtils {
     static func generateRandomAlphanumericString(length: Int) -> String {
         let charPool = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
         var result = ""

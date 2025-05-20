@@ -184,7 +184,7 @@ struct NetBankingScreen: View {
             },brandColor: viewModel.brandColor)
         }
         .bottomSheet(isPresented: $sessionCompleteScreen) {
-            GeneralSuccessScreen(transactionID: viewModel.transactionId, date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
+            GeneralSuccessScreen(transactionID: viewModel.transactionId, date: GlobalUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: GlobalUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
                 sessionCompleteScreen = false
                 isCheckoutFocused = true
                 presentationMode.wrappedValue.dismiss()

@@ -20,7 +20,7 @@ class CardViewModel: ObservableObject {
                     method: .POST,
                     headers: [
                         "Content-Type": "application/json",
-                        "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
+                        "X-REQUEST-ID": GlobalUtils.generateRandomAlphanumericString(length: 10)
                     ],
                     responseType: CardInfoResponse.self
                 )
@@ -112,7 +112,7 @@ class CardViewModel: ObservableObject {
                     method: .POST,
                     headers: [
                         "Content-Type": "application/json",
-                        "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
+                        "X-REQUEST-ID": GlobalUtils.generateRandomAlphanumericString(length: 10)
                     ],
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
@@ -121,7 +121,7 @@ class CardViewModel: ObservableObject {
                 await self.checkoutManager.setStatus(data.status.status.uppercased())
                 await self.checkoutManager.setTransactionId(data.transactionId)
                 transactionId = data.transactionId
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: data.transactionTimestampLocale,
                     reasonCode: data.status.reasonCode,
                     reason: data.status.reason,
@@ -138,7 +138,7 @@ class CardViewModel: ObservableObject {
                     await self.checkoutManager.setStatus("FAILED")
                 }
                 
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,
@@ -241,7 +241,7 @@ class CardViewModel: ObservableObject {
                     method: .POST,
                     headers: [
                         "Content-Type": "application/json",
-                        "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
+                        "X-REQUEST-ID": GlobalUtils.generateRandomAlphanumericString(length: 10)
                     ],
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
@@ -249,7 +249,7 @@ class CardViewModel: ObservableObject {
                 
                 await self.checkoutManager.setStatus(data.status.status.uppercased())
                 await self.checkoutManager.setTransactionId(data.transactionId)
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: data.transactionTimestampLocale,
                     reasonCode: data.status.reasonCode,
                     reason: data.status.reason,
@@ -266,7 +266,7 @@ class CardViewModel: ObservableObject {
                     await self.checkoutManager.setStatus("FAILED")
                 }
                 
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,

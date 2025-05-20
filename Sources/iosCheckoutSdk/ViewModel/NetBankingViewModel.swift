@@ -64,7 +64,7 @@ class NetBankingViewModel : ObservableObject {
                 self.isFirstLoad = false
             } catch {
                 self.isFirstLoad = false
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: "",
@@ -148,7 +148,7 @@ class NetBankingViewModel : ObservableObject {
                     method: .POST,
                     headers: [
                         "Content-Type": "application/json",
-                        "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
+                        "X-REQUEST-ID": GlobalUtils.generateRandomAlphanumericString(length: 10)
                     ],
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
@@ -158,7 +158,7 @@ class NetBankingViewModel : ObservableObject {
                 await checkoutManager.setTransactionId(data.transactionId)
                 transactionId = data.transactionId
 
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: data.transactionTimestampLocale,
                     reasonCode: data.status.reasonCode,
                     reason: data.status.reason,
@@ -176,7 +176,7 @@ class NetBankingViewModel : ObservableObject {
                     await checkoutManager.setStatus("FAILED")
                 }
 
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,

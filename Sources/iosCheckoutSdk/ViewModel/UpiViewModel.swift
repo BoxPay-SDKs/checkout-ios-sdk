@@ -86,7 +86,7 @@ class UpiViewModel: ObservableObject {
                     method: .POST,
                     headers: [
                         "Content-Type": "application/json",
-                        "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
+                        "X-REQUEST-ID": GlobalUtils.generateRandomAlphanumericString(length: 10)
                     ],
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
@@ -95,7 +95,7 @@ class UpiViewModel: ObservableObject {
 
                 await self.checkoutManager.setStatus(response.status.status.uppercased())
                 await self.checkoutManager.setTransactionId(response.transactionId)
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: response.transactionTimestampLocale,
                     reasonCode: response.status.reasonCode,
                     reason: response.status.reason,
@@ -113,7 +113,7 @@ class UpiViewModel: ObservableObject {
                 }
                 print("error \(errorDescription)")
 
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,
@@ -123,7 +123,9 @@ class UpiViewModel: ObservableObject {
                 )
                 print("❌ Error occurred: \(error)")
             }
+            await MainActor.run {
+                    self.isLoading = true
+                }
         }
-        self.isLoading = false
     }
 }

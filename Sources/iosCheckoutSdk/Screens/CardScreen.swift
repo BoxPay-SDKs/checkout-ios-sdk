@@ -308,7 +308,7 @@ struct CardScreen : View {
             },brandColor: brandColor)
         }
         .bottomSheet(isPresented: $sessionCompleteScreen) {
-            GeneralSuccessScreen(transactionID: viewModel.transactionId, date: CommonFunctions.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: CommonFunctions.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: totalAmount,currencySymbol: currencySymbol, onDone: {
+            GeneralSuccessScreen(transactionID: viewModel.transactionId, date: GlobalUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: GlobalUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: totalAmount,currencySymbol: currencySymbol, onDone: {
                 sessionCompleteScreen = false
                 isCheckoutFocused = true
                 presentationMode.wrappedValue.dismiss()

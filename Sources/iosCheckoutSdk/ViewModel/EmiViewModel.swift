@@ -224,7 +224,7 @@ class EmiViewModel: ObservableObject {
                     method: .POST,
                     headers: [
                         "Content-Type": "application/json",
-                        "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
+                        "X-REQUEST-ID": GlobalUtils.generateRandomAlphanumericString(length: 10)
                     ],
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
@@ -234,7 +234,7 @@ class EmiViewModel: ObservableObject {
                 await checkoutManager.setTransactionId(data.transactionId)
                 transactionId = data.transactionId
                 
-                actions = await CommonFunctions.handle(
+                actions = await GlobalUtils.handle(
                     timeStamp: data.transactionTimestampLocale,
                     reasonCode: data.status.reasonCode,
                     reason: data.status.reason,
@@ -251,7 +251,7 @@ class EmiViewModel: ObservableObject {
                     await checkoutManager.setStatus("FAILED")
                 }
                 
-                actions = await CommonFunctions.handle(
+                actions = await GlobalUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,

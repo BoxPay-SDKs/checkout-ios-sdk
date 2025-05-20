@@ -34,7 +34,7 @@ class FetchStatusViewModel: ObservableObject {
             print("=======data \(data)")
             await checkoutManager.setStatus(data.status.uppercased())
             await checkoutManager.setTransactionId(data.transactionId ?? "")
-            actions = await CommonFunctions.handle(
+            actions = await GlobalUtils.handle(
                 timeStamp: data.transactionTimestampLocale ?? "",
                 reasonCode: data.reasonCode ?? "",
                 reason: data.statusReason ?? "",
@@ -50,7 +50,7 @@ class FetchStatusViewModel: ObservableObject {
                 await checkoutManager.setStatus("FAILED")
             }
             
-            actions = await CommonFunctions.handle(
+            actions = await GlobalUtils.handle(
                 timeStamp: "",
                 reasonCode: "",
                 reason: error.localizedDescription,

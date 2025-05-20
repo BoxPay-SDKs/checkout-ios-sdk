@@ -54,7 +54,7 @@ class WalletViewModel : ObservableObject {
                 self.isFirstLoad = false
             } catch {
                 self.isFirstLoad = false
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: "",
@@ -138,7 +138,7 @@ class WalletViewModel : ObservableObject {
                     method: .POST,
                     headers: [
                         "Content-Type": "application/json",
-                        "X-REQUEST-ID": CommonFunctions.generateRandomAlphanumericString(length: 10)
+                        "X-REQUEST-ID": GlobalUtils.generateRandomAlphanumericString(length: 10)
                     ],
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
@@ -148,7 +148,7 @@ class WalletViewModel : ObservableObject {
                 await checkoutManager.setTransactionId(data.transactionId)
                 self.transactionId = data.transactionId
 
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: data.transactionTimestampLocale,
                     reasonCode: data.status.reasonCode,
                     reason: data.status.reason,
@@ -166,7 +166,7 @@ class WalletViewModel : ObservableObject {
                     await checkoutManager.setStatus("FAILED")
                 }
 
-                self.actions = await CommonFunctions.handle(
+                self.actions = await GlobalUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,
