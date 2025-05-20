@@ -21,7 +21,7 @@ struct GeneralSuccessScreen: View {
     var body: some View {
         VStack(spacing: 20) {
             // Success Icon
-            LottieView(animation: .named("PaymentSuccessful"))
+            LottieView(animation: .named("PaymentSuccessful", bundle: .module))
                 .playbackMode(.playing(.toProgress(1, loopMode: .playOnce)))
                 .frame(width: 80, height: 80)
 

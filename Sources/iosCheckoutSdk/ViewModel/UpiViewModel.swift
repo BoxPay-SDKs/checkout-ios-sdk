@@ -123,9 +123,7 @@ class UpiViewModel: ObservableObject {
                 )
                 print("❌ Error occurred: \(error)")
             }
-            await MainActor.run {
-                    self.isLoading = true
-                }
+            self.isLoading = false
         }
     }
 }

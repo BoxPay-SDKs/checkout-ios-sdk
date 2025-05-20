@@ -19,7 +19,7 @@ struct PaymentFailureScreen: View {
     var body: some View {
         VStack(spacing: 20) {
             // Warning Icon
-            LottieView(animation: .named("PaymentFailed"))
+            LottieView(animation: .named("PaymentFailed",bundle: .module))
                 .playbackMode(.playing(.toProgress(1, loopMode: .playOnce)))
                 .frame(width: 80, height: 80)
             

@@ -96,8 +96,8 @@ class CheckoutViewModel: ObservableObject {
                 )
                 print("=======error \(error)")
             }
+            self.isFirstLoad = false
         }
-        self.isFirstLoad = false
     }
 
     private func processSessionData() async {
