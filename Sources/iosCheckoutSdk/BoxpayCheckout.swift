@@ -305,8 +305,13 @@ public struct BoxpayCheckout : View {
                 showWebView = true
             case .openIntentUrl(let base64Url):
                 print("📦 Base64: \(base64Url)")
-            case .openUpiTimer(_) :
+                upiViewModel.isLoading = true
+                openURL(urlString: base64Url)
+            case .openUpiTimer(let vpa) :
                 print("⌛ timer opened:")
+                fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
+                shopperVpa = vpa
+                showTimerSheet = true
             }
         }
     }
