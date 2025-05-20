@@ -10,7 +10,7 @@ import UIKit
 import CoreGraphics
 
 private class FontLoader {
-    public static func loadFont(named fontName: String, withExtension ext: String = "ttf", from bundle: Bundle) {
+    public static func loadFont(named fontName: String, withExtension ext: String = "otf", from bundle: Bundle) {
         print("🔍 Looking for: Fonts/\(fontName).\(ext)")
         guard let fontURL = bundle.url(forResource: fontName, withExtension: ext, subdirectory: "Fonts") else {
             print("❌ Could not find font: \(fontName).\(ext)")
