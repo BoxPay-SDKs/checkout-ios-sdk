@@ -34,7 +34,8 @@ let package = Package(
                 .process("BoxpayLogo.json"),
                 .process("PaymentFailed.json"),
                 .process("PaymentSuccessful.json"),
-                .process("SessionExpired.json")
+                .process("SessionExpired.json"),
+                .process("Fonts")
             ]
         ),
 
