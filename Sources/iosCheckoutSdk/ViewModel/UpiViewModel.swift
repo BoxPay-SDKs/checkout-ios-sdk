@@ -91,6 +91,7 @@ class UpiViewModel: ObservableObject {
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
                 )
+                print("respinse \(response)")
 
                 await self.checkoutManager.setStatus(response.status.status.uppercased())
                 await self.checkoutManager.setTransactionId(response.transactionId)
@@ -110,6 +111,7 @@ class UpiViewModel: ObservableObject {
                 } else {
                     await self.checkoutManager.setStatus("FAILED")
                 }
+                print("error \(errorDescription)")
 
                 self.actions = CommonFunctions.handle(
                     timeStamp: "",
