@@ -90,7 +90,7 @@ struct UpiScreen: View {
                 VStack {
                     Button(action: toggleCollectSection) {
                         HStack {
-                            Image(frameworkAsset: "add_green")
+                            Image(frameworkAsset: "add_green", isTemplate: true)
                                 .foregroundColor(Color(hex: brandColor))
                                 .frame(width:16, height:16)
                             Text("Add new UPI Id")

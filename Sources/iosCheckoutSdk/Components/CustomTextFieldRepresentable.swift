@@ -83,7 +83,7 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
         textField.addTarget(context.coordinator, action: #selector(Coordinator.textFieldDidChangeSelection(_:)), for: .editingChanged)
         textField.isSecureTextEntry = isSecureText
 
-        let bundle = Bundle.main
+        let bundle = Bundle.module
 
         // Leading icon
         if let leadingIconName = leadingIconName, !leadingIconName.isEmpty {
@@ -131,7 +131,7 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
         let currentIconName = (uiView.rightView as? UIButton)?.image(for: .normal)?.accessibilityIdentifier
         if let trailingIconName = trailingIconName, !trailingIconName.isEmpty {
             if currentIconName != trailingIconName {
-                let bundle = Bundle.main
+                let bundle = Bundle.module
                 let trailingImage = UIImage(named: trailingIconName, in: bundle, compatibleWith: nil)
                 trailingImage?.accessibilityIdentifier = trailingIconName // Set identifier to compare
 
