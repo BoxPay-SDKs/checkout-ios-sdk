@@ -31,66 +31,74 @@ struct CommonFunctions {
         methodType: String,
         response : PaymentActionResponse,
         shopperVpa:String
-    ) -> PaymentAction? {
+    ) async -> PaymentAction? {
         let checkoutManager = CheckoutManager.shared
-        var paymentAction : PaymentAction? = nil
         
-        Task {
-            let status = await checkoutManager.getStatus()
-            let paymentErrorMessage = await checkoutManager.getpaymentErrorMessage()
-            if status == "REQUIRESACTION"{
-                if let actions = response.action , !actions.isEmpty, !methodType.isEmpty {
-                    let type = actions.first?.type
-                    
-                    if methodType == "UpiIntent" {
-                        let url = actions.first?.url
-                        let base64 = decodeBase64(url: url ?? "")
-                        paymentAction = .openIntentUrl(url: base64 ?? "")
+        let status = await checkoutManager.getStatus()
+        let paymentErrorMessage = await checkoutManager.getpaymentErrorMessage()
+        
+        switch status {
+        case "REQUIRESACTION":
+            if let actions = response.action, !actions.isEmpty, !methodType.isEmpty {
+                let first = actions[0]
+                switch methodType {
+                case "UpiIntent":
+                    let base64 = decodeBase64(url: first.url ?? "")
+                    return .openIntentUrl(url: base64 ?? "")
+                default:
+                    if first.type == "html" {
+                        return .openWebViewHTML(htmlString: first.htmlPageString ?? "")
                     } else {
-                        if(type == "html") {
-                            paymentAction =  .openWebViewHTML(htmlString: actions.first?.htmlPageString ?? "")
-                        }
-                        paymentAction =  .openWebViewUrl(url: actions.first?.url ?? "")
-                    }
-                } else if(methodType == "UpiCollect") {
-                    paymentAction =  .openUpiTimer(shopperVpa: shopperVpa)
-                }
-            }
-            else if ["FAILED", "REJECTED"].contains(status) {
-                let message: String
-                if let code = reasonCode, !code.hasPrefix("UF") {
-                    message = paymentErrorMessage
-                } else {
-                    if let reason = reason, reason.contains(":") {
-                        message = reason.split(separator: ":").dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
-                    } else {
-                        message = reason ?? paymentErrorMessage
+                        return .openWebViewUrl(url: first.url ?? "")
                     }
                 }
-                paymentAction = .showFailed(message: message)
+            } else if methodType == "UpiCollect" {
+                return .openUpiTimer(shopperVpa: shopperVpa)
             }
-            else if ["APPROVED", "SUCCESS", "PAID"].contains(status) {
-                paymentAction =  .showSuccess(timestamp: timeStamp ?? "")
+            fallthrough  // if you want a default for empty actions
+            
+        case "FAILED", "REJECTED":
+            let message: String
+            if let code = reasonCode, !code.hasPrefix("UF") {
+                message = paymentErrorMessage
+            } else if let reason = reason, reason.contains(":") {
+                message = reason
+                    .split(separator: ":")
+                    .dropFirst()
+                    .joined(separator: ":")
+                    .trimmingCharacters(in: .whitespaces)
+            } else {
+                message = reason ?? paymentErrorMessage
             }
-            else if status == "EXPIRED" {
-                paymentAction =  .showExpired
+            return .showFailed(message: message)
+            
+        case "APPROVED", "SUCCESS", "PAID":
+            return .showSuccess(timestamp: timeStamp ?? "")
+            
+        case "EXPIRED":
+            return .showExpired
+            
+        case "PENDING" where methodType == "UpiIntent":
+            let message: String
+            if let code = reasonCode, !code.hasPrefix("UF") {
+                message = paymentErrorMessage
+            } else if let reason = reason, reason.contains(":") {
+                message = reason
+                    .split(separator: ":")
+                    .dropFirst()
+                    .joined(separator: ":")
+                    .trimmingCharacters(in: .whitespaces)
+            } else {
+                message = reason ?? paymentErrorMessage
             }
-            else if status == "PENDING" , methodType == "UpiIntent" {
-                let message: String
-                if let code = reasonCode, !code.hasPrefix("UF") {
-                    message = paymentErrorMessage
-                } else {
-                    if let reason = reason, reason.contains(":") {
-                        message = reason.split(separator: ":").dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
-                    } else {
-                        message = reason ?? paymentErrorMessage
-                    }
-                }
-                paymentAction =  .showFailed(message: message)
-            }
+            return .showFailed(message: message)
+            
+        default:
+            // handle any other unexpected statuses
+            return nil
         }
-        return paymentAction
     }
+
 
     private static func decodeBase64(url: String) -> String? {
         // Decode the base64 string into Data

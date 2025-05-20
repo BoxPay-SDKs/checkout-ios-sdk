@@ -95,7 +95,7 @@ class UpiViewModel: ObservableObject {
 
                 await self.checkoutManager.setStatus(response.status.status.uppercased())
                 await self.checkoutManager.setTransactionId(response.transactionId)
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: response.transactionTimestampLocale,
                     reasonCode: response.status.reasonCode,
                     reason: response.status.reason,
@@ -113,7 +113,7 @@ class UpiViewModel: ObservableObject {
                 }
                 print("error \(errorDescription)")
 
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,

@@ -47,7 +47,7 @@ class BnplViewModel: ObservableObject {
                 self.isFirstLoad = false
             } catch {
                 self.isFirstLoad = false
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: "",
@@ -141,7 +141,7 @@ class BnplViewModel: ObservableObject {
                 await checkoutManager.setTransactionId(data.transactionId)
                 transactionId = data.transactionId
 
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: data.transactionTimestampLocale,
                     reasonCode: data.status.reasonCode,
                     reason: data.status.reason,
@@ -159,7 +159,7 @@ class BnplViewModel: ObservableObject {
                     await checkoutManager.setStatus("FAILED")
                 }
 
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,

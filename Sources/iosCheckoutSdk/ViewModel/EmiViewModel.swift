@@ -234,7 +234,7 @@ class EmiViewModel: ObservableObject {
                 await checkoutManager.setTransactionId(data.transactionId)
                 transactionId = data.transactionId
                 
-                actions = CommonFunctions.handle(
+                actions = await CommonFunctions.handle(
                     timeStamp: data.transactionTimestampLocale,
                     reasonCode: data.status.reasonCode,
                     reason: data.status.reason,
@@ -251,7 +251,7 @@ class EmiViewModel: ObservableObject {
                     await checkoutManager.setStatus("FAILED")
                 }
                 
-                actions = CommonFunctions.handle(
+                actions = await CommonFunctions.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,

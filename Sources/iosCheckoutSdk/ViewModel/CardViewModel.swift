@@ -121,7 +121,7 @@ class CardViewModel: ObservableObject {
                 await self.checkoutManager.setStatus(data.status.status.uppercased())
                 await self.checkoutManager.setTransactionId(data.transactionId)
                 transactionId = data.transactionId
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: data.transactionTimestampLocale,
                     reasonCode: data.status.reasonCode,
                     reason: data.status.reason,
@@ -138,7 +138,7 @@ class CardViewModel: ObservableObject {
                     await self.checkoutManager.setStatus("FAILED")
                 }
                 
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,
@@ -249,7 +249,7 @@ class CardViewModel: ObservableObject {
                 
                 await self.checkoutManager.setStatus(data.status.status.uppercased())
                 await self.checkoutManager.setTransactionId(data.transactionId)
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: data.transactionTimestampLocale,
                     reasonCode: data.status.reasonCode,
                     reason: data.status.reason,
@@ -266,7 +266,7 @@ class CardViewModel: ObservableObject {
                     await self.checkoutManager.setStatus("FAILED")
                 }
                 
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,

@@ -75,7 +75,7 @@ class CheckoutViewModel: ObservableObject {
                 await checkoutManager.setStatus(status)
                 await checkoutManager.setTransactionId(txnId)
 
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: data.sessionExpiryTimestampLocale,
                     reasonCode: "",
                     reason: "",
@@ -86,7 +86,7 @@ class CheckoutViewModel: ObservableObject {
                 self.sessionData = data
 
             } catch {
-                self.actions = CommonFunctions.handle(
+                self.actions = await CommonFunctions.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: "",
