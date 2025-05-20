@@ -54,6 +54,7 @@ public struct BoxpayCheckout : View {
             self.shopperToken = shopperToken
             self.configurationOption = configurationOptions
             self.onPaymentResult = onPaymentResult
+            CustomFontLoader.loadFonts()
         }
     
     public var body: some View {
