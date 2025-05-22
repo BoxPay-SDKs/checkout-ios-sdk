@@ -35,7 +35,7 @@ class WalletViewModel : ObservableObject {
                     responseType: [PaymentMethod].self
                 )
 
-                let filteredData = data.filter { $0.type == "BuyNowPayLater" }.map { item in
+                let filteredData = data.filter { $0.type == "Wallet" }.map { item in
                     CommonDataClass(
                         id: item.id ?? "",
                         title: item.title ?? "",
