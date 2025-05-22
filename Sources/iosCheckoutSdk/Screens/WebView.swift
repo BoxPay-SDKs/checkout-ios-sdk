@@ -84,7 +84,7 @@ struct WebView: UIViewRepresentable {
         // Log start of navigation
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
             print("➡️ Started navigation to: \(webView.url?.absoluteString ?? "unknown")")
-            if ((webView.url?.absoluteString.contains("boxpay")) != nil) {
+            if ((webView.url?.absoluteString.contains("boxpay")) == true) {
                 print("🔴 Dismiss triggered for: \(String(describing: webView.url?.absoluteString))")
                 DispatchQueue.main.async {
                     self.parent.onDismiss?()
