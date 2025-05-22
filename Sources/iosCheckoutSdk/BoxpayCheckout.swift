@@ -191,7 +191,7 @@ public struct BoxpayCheckout : View {
             },brandColor: viewModel.brandColor)
         }
         .bottomSheet(isPresented: $sessionCompleteScreen) {
-            GeneralSuccessScreen(transactionID: transactionId, date: GlobalUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: GlobalUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "", onDone: {
+            GeneralSuccessScreen(transactionID: transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "", onDone: {
                 sessionCompleteScreen = false
                 PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: status, transactionId: transactionId))
                 presentationMode.wrappedValue.dismiss()
