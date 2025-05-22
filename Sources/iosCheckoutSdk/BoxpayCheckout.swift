@@ -74,6 +74,7 @@ public struct BoxpayCheckout : View {
                         currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
                         amount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
                         onBackPress: {
+                            triggerPaymentStatusCallBack()
                             presentationMode.wrappedValue.dismiss()
                         }
                     )
@@ -231,16 +232,7 @@ public struct BoxpayCheckout : View {
         }
         .onChange(of: isCheckoutMainScreenFocused) { focused in
             if focused {
-                Task {
-                    let status = await viewModel.checkoutManager.getStatus()
-                    let transactionId = await viewModel.checkoutManager.getTransactionId()
-
-                    PaymentCallBackManager.shared.triggerPaymentResult(
-                        result: PaymentResultObject(status: status, transactionId: transactionId)
-                    )
-
-                    presentationMode.wrappedValue.dismiss()
-                }
+                triggerPaymentStatusCallBack()
             }
         }
 
@@ -332,7 +324,19 @@ public struct BoxpayCheckout : View {
             }
         }
     }
+    
+    private func triggerPaymentStatusCallBack() {
+        Task {
+            let status = await viewModel.checkoutManager.getStatus()
+            let transactionId = await viewModel.checkoutManager.getTransactionId()
 
+            PaymentCallBackManager.shared.triggerPaymentResult(
+                result: PaymentResultObject(status: status, transactionId: transactionId)
+            )
+
+            presentationMode.wrappedValue.dismiss()
+        }
+    }
 }
 
 private struct AddressSectionView: View {
