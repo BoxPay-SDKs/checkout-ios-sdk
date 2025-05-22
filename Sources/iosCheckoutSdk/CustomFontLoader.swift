@@ -12,7 +12,7 @@ import CoreGraphics
 private class FontLoader {
     public static func loadFont(named fontName: String, withExtension ext: String = "otf", from bundle: Bundle) {
         print("🔍 Looking for: Fonts/\(fontName).\(ext)")
-        guard let fontURL = bundle.url(forResource: fontName, withExtension: ext, subdirectory: "Fonts") else {
+        guard let fontURL = bundle.url(forResource: fontName, withExtension: ext) else {
             print("❌ Could not find font: \(fontName).\(ext)")
             return
         }
@@ -32,8 +32,7 @@ private class FontLoader {
     }
 }
 
-public class CustomFontLoader {
-    
+public struct CustomFontLoader {
     public static func loadFonts() {
         FontLoader.loadFont(named: "Poppins-Regular", from: .module)
         FontLoader.loadFont(named: "Poppins-Medium", from: .module)

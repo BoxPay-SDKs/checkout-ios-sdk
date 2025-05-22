@@ -50,11 +50,11 @@ public struct BoxpayCheckout : View {
             configurationOptions: ConfigOptions? = nil,
             onPaymentResult: @escaping (PaymentResultObject) -> Void
         ){
+            CustomFontLoader.loadFonts()
             self.token = token
             self.shopperToken = shopperToken
             self.configurationOption = configurationOptions
             self.onPaymentResult = onPaymentResult
-            CustomFontLoader.loadFonts()
         }
     
     public var body: some View {
