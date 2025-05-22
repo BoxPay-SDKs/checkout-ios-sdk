@@ -1,0 +1,34 @@
+//
+//  GeneralPaymentInitilizationResponse.swift
+//  checkout-ios-sdk
+//
+//  Created by Ishika Bansal on 13/05/25.
+//
+
+
+struct GeneralPaymentInitilizationResponse: Codable,Sendable {
+    let message : String?
+    let transactionId: String
+    let status: GeneralStatusResponse
+    let actions: [GeneralActionResponse]
+    let transactionTimestampLocale : String
+    
+    struct GeneralStatusResponse: Codable,Sendable {
+        let operation: String
+        let status: String
+        let reason: String
+        let reasonCode: String
+    }
+}
+
+struct GeneralActionResponse: Codable,Sendable {
+    let method: String?
+    let url: String?
+    let type: String?
+    let htmlPageString : String?
+}
+
+struct ApiErrorResponse : Codable, Sendable {
+    let errorCode : String
+    let message:String
+}
