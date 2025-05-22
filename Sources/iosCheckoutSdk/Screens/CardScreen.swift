@@ -610,8 +610,12 @@ struct CardScreen : View {
             case .openWebViewHTML(let htmlContent):
                 paymentHtmlString = htmlContent
                 showWebView = true
-            case .openIntentUrl(let base64Url):
+            case .openIntentUrl(_):
+                // no operation
+                break
             case .openUpiTimer(_) :
+                // no operation
+                break
             }
         }
     }
