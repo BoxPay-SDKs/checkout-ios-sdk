@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "iosCheckoutSdk",
+    name: "checkout_ios_sdk",
     defaultLocalization: "en",
     platforms: [
         .macOS(.v10_15),
