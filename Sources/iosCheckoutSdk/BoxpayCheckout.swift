@@ -230,15 +230,20 @@ public struct BoxpayCheckout : View {
             fetchStatusViewModel.startFetchingStatus(methodType: "UpiIntent")
         }
         .onChange(of: isCheckoutMainScreenFocused) { focused in
-            if(focused) {
+            if focused {
                 Task {
-                    status = await viewModel.checkoutManager.getStatus()
-                    transactionId = await viewModel.checkoutManager.getTransactionId()
+                    let status = await viewModel.checkoutManager.getStatus()
+                    let transactionId = await viewModel.checkoutManager.getTransactionId()
+
+                    PaymentCallBackManager.shared.triggerPaymentResult(
+                        result: PaymentResultObject(status: status, transactionId: transactionId)
+                    )
+
+                    presentationMode.wrappedValue.dismiss()
                 }
-                PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: status, transactionId: transactionId))
-                presentationMode.wrappedValue.dismiss()
             }
         }
+
         .sheet(isPresented: $showWebView) {
             WebView(
                 url: URL(string: paymentUrl ?? ""), htmlString: paymentHtmlString,
