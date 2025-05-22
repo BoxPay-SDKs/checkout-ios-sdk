@@ -56,7 +56,6 @@ struct PaymentOptionView: View {
             // Pay Button
             if isSelected {
                 Button(action: {
-                    print("Proceed to pay tapped")
                     onProceedButton()
                 }) {
                     (

@@ -209,7 +209,6 @@ struct EmiScreen : View {
             SessionExpireScreen(
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
-                    print("Okay from session expire screen")
                     isCheckoutFocused = true
                     sessionExpireScreen = false
                     presentationMode.wrappedValue.dismiss()
@@ -280,29 +279,23 @@ struct EmiScreen : View {
                 errorReason = message
                 sessionFailedScreen = true
             case .showSuccess(let time):
-                print("✅ Success: - \(time)")
                 await viewModel.checkoutManager.setStatus("SUCCESS")
                 viewModel.isLoading = false
                 fetchStatusViewModel.stopFetchingStatus()
                 timeStamp = time
                 sessionCompleteScreen = true
             case .showExpired:
-                print("⌛ Expired:")
                 await viewModel.checkoutManager.setStatus("EXPIRED")
                 fetchStatusViewModel.stopFetchingStatus()
                 sessionExpireScreen = true
             case .openWebViewUrl(let url):
-                print("🌐 WebView URL: \(url)")
                 paymentUrl = url
                 showWebView = true
             case .openWebViewHTML(let htmlContent):
-                print("📄 HTML: \(htmlContent)")
                 paymentHtmlString = htmlContent
                 showWebView = true
             case .openIntentUrl(let base64Url):
-                print("📦 Base64: \(base64Url)")
             case .openUpiTimer(_) :
-                print("⌛ timer opened:")
             }
         }
     }

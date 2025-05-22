@@ -54,12 +54,8 @@ public actor ApiService {
         } catch {
             // Try to parse error message from response
             if let errorMessage = try? JSONDecoder().decode(ApiErrorResponse.self, from: data) {
-                print("API Error Message: \(errorMessage.message)")
                 throw NSError(domain: errorMessage.message, code: -3)
             } else {
-                if let raw = String(data: data, encoding: .utf8) {
-                    print("Raw response: \(raw)")
-                }
                 throw error
             }
         }

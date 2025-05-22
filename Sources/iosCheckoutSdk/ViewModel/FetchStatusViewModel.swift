@@ -30,8 +30,6 @@ class FetchStatusViewModel: ObservableObject {
                 endpoint: "status",
                 responseType: FetchStatusResponse.self
             )
-            
-            print("=======data \(data)")
             await checkoutManager.setStatus(data.status.uppercased())
             await checkoutManager.setTransactionId(data.transactionId ?? "")
             actions = await GlobalUtils.handle(
@@ -58,7 +56,6 @@ class FetchStatusViewModel: ObservableObject {
                 response: PaymentActionResponse(action: nil),
                 shopperVpa: ""
             )
-            print("=======errorr \(error)")
         }
     }
 }

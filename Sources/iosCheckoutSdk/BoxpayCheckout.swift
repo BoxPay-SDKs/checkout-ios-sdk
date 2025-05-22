@@ -177,7 +177,6 @@ public struct BoxpayCheckout : View {
             SessionExpireScreen(
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
-                    print("Okay from session expire screen")
                     PaymentCallBackManager.shared.triggerPaymentResult(result: PaymentResultObject(status: status, transactionId: transactionId))
                     sessionExpireScreen = false
                     presentationMode.wrappedValue.dismiss()
@@ -227,7 +226,6 @@ public struct BoxpayCheckout : View {
             }
         )
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-            print("App is now active again!")
             fetchStatusViewModel.startFetchingStatus(methodType: "UpiIntent")
         }
         .onChange(of: isCheckoutMainScreenFocused) { focused in
@@ -275,38 +273,31 @@ public struct BoxpayCheckout : View {
             transactionId = await viewModel.checkoutManager.getTransactionId()
             switch action {
             case .showFailed(let message):
-                print("❌ Failed: - \(message)")
                 upiViewModel.isLoading = false
                 await viewModel.checkoutManager.setStatus("FAILED")
                 fetchStatusViewModel.stopFetchingStatus()
                 errorReason = message
                 sessionFailedScreen = true
             case .showSuccess(let time):
-                print("✅ Success: - \(time)")
                 await viewModel.checkoutManager.setStatus("SUCCESS")
                 upiViewModel.isLoading = false
                 fetchStatusViewModel.stopFetchingStatus()
                 timeStamp = time
                 sessionCompleteScreen = true
             case .showExpired:
-                print("⌛ Expired:")
                 await viewModel.checkoutManager.setStatus("EXPIRED")
                 fetchStatusViewModel.stopFetchingStatus()
                 sessionExpireScreen = true
             case .openWebViewUrl(let url):
-                print("🌐 WebView URL: \(url)")
                 paymentUrl = url
                 showWebView = true
             case .openWebViewHTML(let htmlContent):
-                print("📄 HTML: \(htmlContent)")
                 paymentHtmlString = htmlContent
                 showWebView = true
             case .openIntentUrl(let base64Url):
-                print("📦 Base64: \(base64Url)")
                 upiViewModel.isLoading = true
                 openURL(urlString: base64Url)
             case .openUpiTimer(let vpa) :
-                print("⌛ timer opened:")
                 fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
                 shopperVpa = vpa
                 showTimerSheet = true

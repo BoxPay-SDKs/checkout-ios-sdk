@@ -11,24 +11,17 @@ import CoreGraphics
 
 private class FontLoader {
     public static func loadFont(named fontName: String, withExtension ext: String = "otf", from bundle: Bundle) {
-        print("🔍 Looking for: Fonts/\(fontName).\(ext)")
         guard let fontURL = bundle.url(forResource: fontName, withExtension: ext) else {
-            print("❌ Could not find font: \(fontName).\(ext)")
             return
         }
 
         guard let dataProvider = CGDataProvider(url: fontURL as CFURL),
               let font = CGFont(dataProvider) else {
-            print("❌ Could not create font from data provider")
             return
         }
 
         var error: Unmanaged<CFError>?
-        if !CTFontManagerRegisterGraphicsFont(font, &error) {
-            print("❌ Failed to register font: \(error?.takeUnretainedValue().localizedDescription ?? "unknown error")")
-        } else {
-            print("✅ Font registered: \(font.fullName ?? fontName as CFString)")
-        }
+        CTFontManagerRegisterGraphicsFont(font, &error)
     }
 }
 

@@ -94,7 +94,6 @@ class CheckoutViewModel: ObservableObject {
                     response: PaymentActionResponse(action: nil),
                     shopperVpa: ""
                 )
-                print("=======error \(error)")
             }
             self.isFirstLoad = false
         }
@@ -109,7 +108,6 @@ class CheckoutViewModel: ObservableObject {
             }
             itemsCount = total
             await checkoutManager.setItemsCount(total)
-            print("Total items count: \(itemsCount)")
         }
 
         let data = sessionData.paymentDetails.money
@@ -165,8 +163,6 @@ class CheckoutViewModel: ObservableObject {
             await userDataManager.setLabelName(userData.deliveryAddress?.labelName)
             await userDataManager.setDOB(userData.dateOfBirth)
             await userDataManager.setPan(userData.panNumber)
-        
-        print(sessionData)
     }
 
     func getCurrencySymbol(from currencyCode: String?) -> String {

@@ -143,7 +143,6 @@ class EmiViewModel: ObservableObject {
                 self.brandColor = await checkoutManager.getBrandColor()
 
             } catch {
-                print("=======error \(error)")
                 self.isFirstLoad = false
             }
         }
@@ -208,18 +207,12 @@ class EmiViewModel: ObservableObject {
             ]
             
             guard JSONSerialization.isValidJSONObject(payload) else {
-                print("❌ Invalid JSON")
                 self.isLoading = false
                 return
             }
             
             do {
                 let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
-                
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    print("📤 JSON Payload:\n\(jsonString)")
-                }
-                
                 let data = try await apiService.request(
                     method: .POST,
                     headers: [
@@ -259,8 +252,6 @@ class EmiViewModel: ObservableObject {
                     response: PaymentActionResponse(action: nil),
                     shopperVpa: ""
                 )
-                
-                print("=======errorr \(error)")
             }
         }
         self.isLoading = false

@@ -76,7 +76,6 @@ class UpiViewModel: ObservableObject {
 
             guard JSONSerialization.isValidJSONObject(payload),
                   let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
-                print("❌ Invalid JSON")
                 await MainActor.run { self.isLoading = false }
                 return
             }
@@ -91,8 +90,6 @@ class UpiViewModel: ObservableObject {
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
                 )
-                print("respinse \(response)")
-
                 await self.checkoutManager.setStatus(response.status.status.uppercased())
                 await self.checkoutManager.setTransactionId(response.transactionId)
                 self.actions = await GlobalUtils.handle(
@@ -111,8 +108,6 @@ class UpiViewModel: ObservableObject {
                 } else {
                     await self.checkoutManager.setStatus("FAILED")
                 }
-                print("error \(errorDescription)")
-
                 self.actions = await GlobalUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
@@ -121,7 +116,6 @@ class UpiViewModel: ObservableObject {
                     response: PaymentActionResponse(action: nil),
                     shopperVpa: ""
                 )
-                print("❌ Error occurred: \(error)")
             }
             self.isLoading = false
         }

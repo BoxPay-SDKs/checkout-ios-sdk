@@ -55,7 +55,6 @@ class BnplViewModel: ObservableObject {
                     response: PaymentActionResponse(action: nil),
                     shopperVpa: ""
                 )
-                print("=======errorr \(error)")
             }
         }
     }
@@ -120,11 +119,8 @@ class BnplViewModel: ObservableObject {
             guard JSONSerialization.isValidJSONObject(payload),
                   let jsonData = try? JSONSerialization.data(withJSONObject: payload),
                   let jsonString = String(data: jsonData, encoding: .utf8) else {
-                print("❌ Invalid JSON payload")
                 return
             }
-
-            print("📤 JSON Payload:\n\(jsonString)")
 
             do {
                 let data = try await apiService.request(
@@ -167,8 +163,6 @@ class BnplViewModel: ObservableObject {
                     response: PaymentActionResponse(action: nil),
                     shopperVpa: ""
                 )
-
-                print("=======errorr \(error)")
             }
 
             await MainActor.run { self.isLoading = false }

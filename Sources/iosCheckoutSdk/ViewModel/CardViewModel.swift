@@ -24,10 +24,8 @@ class CardViewModel: ObservableObject {
                     ],
                     responseType: CardInfoResponse.self
                 )
-                print("==========data: \(data)")
                 self.cardResponse = data
             } catch {
-                print("=======error: \(error)")
             }
         }
     }
@@ -96,18 +94,12 @@ class CardViewModel: ObservableObject {
             ]
             
             guard JSONSerialization.isValidJSONObject(payload) else {
-                print("❌ Invalid JSON")
                 self.isLoading = false
                 return
             }
             
             do {
                 let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
-                
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    print("📤 JSON Payload:\n\(jsonString)")
-                }
-                
                 let data = try await apiService.request(
                     method: .POST,
                     headers: [
@@ -146,8 +138,6 @@ class CardViewModel: ObservableObject {
                     response: PaymentActionResponse(action: nil),
                     shopperVpa: ""
                 )
-                
-                print("=======errorr \(error)")
             }
             self.isLoading = false
         }
@@ -225,18 +215,12 @@ class CardViewModel: ObservableObject {
             }
             
             guard JSONSerialization.isValidJSONObject(payload) else {
-                print("❌ Invalid JSON")
                 self.isLoading = false
                 return
             }
             
             do {
                 let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
-                
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    print("📤 JSON Payload:\n\(jsonString)")
-                }
-                
                 let data = try await apiService.request(
                     method: .POST,
                     headers: [
@@ -274,8 +258,6 @@ class CardViewModel: ObservableObject {
                     response: PaymentActionResponse(action: nil),
                     shopperVpa: ""
                 )
-                
-                print("=======errorr \(error)")
             }
             self.isLoading = false
         }

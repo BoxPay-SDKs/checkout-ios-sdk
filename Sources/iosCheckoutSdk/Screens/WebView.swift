@@ -26,10 +26,8 @@ struct WebView: UIViewRepresentable {
         // Load either a URL or raw HTML
         if let url = url {
             let request = URLRequest(url: url)
-            print("🔵 Loading URL: \(url.absoluteString)")
             webView.load(request)
         } else if let html = htmlString {
-            print("🔵 Loading HTML content")
             webView.loadHTMLString(html, baseURL: nil)
         }
 
@@ -57,14 +55,12 @@ struct WebView: UIViewRepresentable {
 
             if let url = navigationAction.request.url {
                 let urlString = url.absoluteString
-                print("🟡 Navigating to: \(urlString)")
 
                 // Notify parent of navigation
                 parent.onNavigationChange?(urlString)
 
                 // If URL contains "boxpay", trigger dismissal
                 if urlString.contains("boxpay") {
-                    print("🔴 Dismiss triggered for: \(urlString)")
                     DispatchQueue.main.async {
                         self.parent.onDismiss?()
                     }
@@ -83,32 +79,11 @@ struct WebView: UIViewRepresentable {
 
         // Log start of navigation
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            print("➡️ Started navigation to: \(webView.url?.absoluteString ?? "unknown")")
             if ((webView.url?.absoluteString.contains("boxpay")) == true) {
-                print("🔴 Dismiss triggered for: \(String(describing: webView.url?.absoluteString))")
                 DispatchQueue.main.async {
                     self.parent.onDismiss?()
                 }
             }
-        }
-
-        // Log when navigation finishes
-        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            print("✅ Finished loading: \(webView.url?.absoluteString ?? "unknown")")
-        }
-
-        // Optional: allow zooming by identifying zoomable view
-        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-            return scrollView.subviews.first
-        }
-
-        // Optional: handle load errors
-        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            print("❌ Navigation failed: \(error.localizedDescription)")
-        }
-
-        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-            print("❌ Provisional navigation failed: \(error.localizedDescription)")
         }
     }
 }
