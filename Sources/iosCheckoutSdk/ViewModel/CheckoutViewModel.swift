@@ -61,7 +61,6 @@ class CheckoutViewModel: ObservableObject {
                 let data: CheckoutSession = try await apiManager.request(
                     endpoint: nil,
                     method: .GET,
-                    headers: ["Content-Type": "application/json"],
                     body: nil,
                     responseType: CheckoutSession.self
                 )
@@ -75,7 +74,7 @@ class CheckoutViewModel: ObservableObject {
                 await checkoutManager.setStatus(status)
                 await checkoutManager.setTransactionId(txnId)
 
-                self.actions = await GlobalUtils.handle(
+                self.actions = await PaymentActionUtils.handle(
                     timeStamp: data.sessionExpiryTimestampLocale,
                     reasonCode: "",
                     reason: "",
@@ -86,7 +85,7 @@ class CheckoutViewModel: ObservableObject {
                 self.sessionData = data
 
             } catch {
-                self.actions = await GlobalUtils.handle(
+                self.actions = await PaymentActionUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: "",

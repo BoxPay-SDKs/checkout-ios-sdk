@@ -215,10 +215,7 @@ class EmiViewModel: ObservableObject {
                 let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
                 let data = try await apiService.request(
                     method: .POST,
-                    headers: [
-                        "Content-Type": "application/json",
-                        "X-REQUEST-ID": GlobalUtils.generateRandomAlphanumericString(length: 10)
-                    ],
+                    headers: StringUtils.getRequestHeaders(),
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
                 )
@@ -227,7 +224,7 @@ class EmiViewModel: ObservableObject {
                 await checkoutManager.setTransactionId(data.transactionId)
                 transactionId = data.transactionId
                 
-                actions = await GlobalUtils.handle(
+                actions = await PaymentActionUtils.handle(
                     timeStamp: data.transactionTimestampLocale,
                     reasonCode: data.status.reasonCode,
                     reason: data.status.reason,
@@ -244,7 +241,7 @@ class EmiViewModel: ObservableObject {
                     await checkoutManager.setStatus("FAILED")
                 }
                 
-                actions = await GlobalUtils.handle(
+                actions = await PaymentActionUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,

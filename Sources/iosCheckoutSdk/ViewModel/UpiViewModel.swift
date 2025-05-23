@@ -83,16 +83,13 @@ class UpiViewModel: ObservableObject {
             do {
                 let response: GeneralPaymentInitilizationResponse = try await apiManager.request(
                     method: .POST,
-                    headers: [
-                        "Content-Type": "application/json",
-                        "X-REQUEST-ID": GlobalUtils.generateRandomAlphanumericString(length: 10)
-                    ],
+                    headers: StringUtils.getRequestHeaders(),
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
                 )
                 await self.checkoutManager.setStatus(response.status.status.uppercased())
                 await self.checkoutManager.setTransactionId(response.transactionId)
-                self.actions = await GlobalUtils.handle(
+                self.actions = await PaymentActionUtils.handle(
                     timeStamp: response.transactionTimestampLocale,
                     reasonCode: response.status.reasonCode,
                     reason: response.status.reason,
@@ -108,7 +105,7 @@ class UpiViewModel: ObservableObject {
                 } else {
                     await self.checkoutManager.setStatus("FAILED")
                 }
-                self.actions = await GlobalUtils.handle(
+                self.actions = await PaymentActionUtils.handle(
                     timeStamp: "",
                     reasonCode: "",
                     reason: error.localizedDescription,
