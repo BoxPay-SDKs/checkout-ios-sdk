@@ -46,7 +46,6 @@ class CheckoutViewModel: ObservableObject {
                 }
                 if let shopperTokenPresent = shopperToken {
                     await checkoutManager.setShopperToken(shopperTokenPresent)
-                    getRecommendedFields()
                 }
 
                 isInitialized = true
@@ -54,13 +53,16 @@ class CheckoutViewModel: ObservableObject {
             }
         }
     
-    func getRecommendedFields() {
+    func getRecommendedFields(shopperToken:String) {
         Task {
             do {
                 let uniqueId = await userDataManager.getUniqueId()
                 let response = try await apiManager.request(
                     endpoint: "shoppers/\(uniqueId)/recommended-instruments",
                     method: .GET,
+                    headers: [
+                        "Authorization" : "Session \(shopperToken)"
+                    ],
                     body: nil,
                     responseType: RecommendedResponse.self
                 )
@@ -179,6 +181,11 @@ class CheckoutViewModel: ObservableObject {
             await userDataManager.setLabelName(userData.deliveryAddress?.labelName)
             await userDataManager.setDOB(userData.dateOfBirth)
             await userDataManager.setPan(userData.panNumber)
+        
+        let shopperToken = await checkoutManager.getShopperToken()
+        if (!shopperToken.isEmpty) {
+            getRecommendedFields(shopperToken: shopperToken)
+        }
     }
 
     func getCurrencySymbol(from currencyCode: String?) -> String {
