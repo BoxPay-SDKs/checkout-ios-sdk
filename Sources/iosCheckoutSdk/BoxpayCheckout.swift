@@ -10,7 +10,7 @@ import SwiftUI
 
 public struct BoxpayCheckout : View {
     var token : String
-    var shopperToken : String
+    var shopperToken : String?
     var configurationOption : ConfigOptions?
     var onPaymentResult : (PaymentResultObject) -> Void
     @Environment(\.presentationMode) var presentationMode
@@ -46,7 +46,7 @@ public struct BoxpayCheckout : View {
     
     public init(
             token: String,
-            shopperToken: String,
+            shopperToken: String?,
             configurationOptions: ConfigOptions? = nil,
             onPaymentResult: @escaping (PaymentResultObject) -> Void
         ){
@@ -161,11 +161,8 @@ public struct BoxpayCheckout : View {
                     }
         }
         .onAppear {
-            viewModel.initialize(token: token, shopperToken: shopperToken, config: configurationOption, callback: onPaymentResult)
-        }
-        .onChange(of : viewModel.isInitialized) { initialized in
-            if(initialized) {
-                viewModel.getCheckoutSession()
+            if !viewModel.isInitialized {
+                viewModel.initialize(token: token, shopperToken: shopperToken, config: configurationOption, callback: onPaymentResult)
             }
         }
         .navigationBarBackButtonHidden(true)

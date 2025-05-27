@@ -35,7 +35,7 @@ class CheckoutViewModel: ObservableObject {
     @Published var brandColor = ""
     
     @Published var isInitialized = false
-        func initialize(token: String, shopperToken: String, config: ConfigOptions?, callback: @escaping (PaymentResultObject) -> Void) {
+        func initialize(token: String, shopperToken: String?, config: ConfigOptions?, callback: @escaping (PaymentResultObject) -> Void) {
             Task {
                 PaymentCallBackManager.shared.setCallback(callback)
                 await checkoutManager.setBaseURL(config?[ConfigurationOption.enableTextEnv] == true)
@@ -44,13 +44,28 @@ class CheckoutViewModel: ObservableObject {
                 if !token.isEmpty {
                     await checkoutManager.setMainToken(token)
                 }
-                if !shopperToken.isEmpty {
-                    await checkoutManager.setShopperToken(shopperToken)
+                if let shopperTokenPresent = shopperToken {
+                    await checkoutManager.setShopperToken(shopperTokenPresent)
+                    getRecommendedFields()
                 }
 
-                isInitialized = true // ✅ Mark as initialized
+                isInitialized = true
+                getCheckoutSession()
             }
         }
+    
+    func getRecommendedFields() {
+        Task {
+            do {
+                let response = try await apiManager.request(
+                    endpoint: nil,
+                    method: .GET,
+                    body: nil,
+                    responseType: RecommendedResponse.self
+                )
+            }
+        }
+    }
 
     /// Fetches the checkout session using the main token
     func getCheckoutSession() {
