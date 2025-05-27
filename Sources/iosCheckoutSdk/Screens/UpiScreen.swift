@@ -21,8 +21,7 @@ struct UpiScreen: View {
     let handleUpiPayment: (_ selectedIntent : String?, _ shopperVpa : String?, _ methodType:String) -> ()
     
     @Binding var savedUpiIds : [RecommendedResponse]
-    @Binding var selectedSavedUpiId : String
-    let onProceedSavedUpiId: () -> ()
+    let onProceedSavedUpiId: (_ selectedSavedUpiRef : String) -> ()
 
     @State private var upiCollectVisible = false
     @State private var upiCollectError = false
@@ -31,28 +30,31 @@ struct UpiScreen: View {
     @State private var isRotated = false
     @State private var isFocused = false
     @State private var selectedIntent: String? = nil
+    @State var selectedSavedUpiId : String
 
     var body: some View {
         VStack(alignment: .leading) {
             if (!savedUpiIds.isEmpty) {
-                ForEach(Array(savedUpiIds.enumerated()), id: \.offset) { index, item in
-                    PaymentOptionView(
-                        isSelected: selectedSavedUpiId == item.instrumentRef,
-                        imageUrl: item.logoUrl ?? "",
-                        title: item.displayValue ?? "",
-                        currencySymbol: currencySymbol,
-                        amount: totalAmount,
-                        instrumentValue: item.instrumentRef ?? "",
-                        brandColor: brandColor,
-                        onClick: { string in
-                            selectedSavedUpiId = string
-                        },
-                        onProceedButton: {
-                            onProceedSavedUpiId()
-                        },
-                        fallbackImage: "ic_upi_semi_bold"
-                    )
-                    Divider()
+                VStack(spacing : 0){
+                    ForEach(Array(savedUpiIds.enumerated()), id: \.offset) { index, item in
+                        PaymentOptionView(
+                            isSelected: selectedSavedUpiId == item.instrumentRef,
+                            imageUrl: item.logoUrl ?? "",
+                            title: item.displayValue ?? "",
+                            currencySymbol: currencySymbol,
+                            amount: totalAmount,
+                            instrumentValue: item.instrumentRef ?? "",
+                            brandColor: brandColor,
+                            onClick: { string in
+                                selectedSavedUpiId = string
+                            },
+                            onProceedButton: {
+                                onProceedSavedUpiId(selectedSavedUpiId)
+                            },
+                            fallbackImage: "ic_upi_semi_bold"
+                        )
+                        Divider()
+                    }
                 }
             }
             if isUpiIntentVisible {
