@@ -100,7 +100,7 @@ public struct BoxpayCheckout : View {
                                             selectedRecommendedInstrumentValue = string
                                         },
                                         onProceedButton: {
-                                            print("selectedRecommendedId \(selectedRecommendedInstrumentValue)")
+                                            viewModel.postRecommendedOrSavedInstrumentRef(selectedRecommendedInstrumentValue)
                                         },
                                         fallbackImage: "ic_upi_semi_bold"
                                     )
@@ -120,9 +120,7 @@ public struct BoxpayCheckout : View {
                                 .padding(.bottom, 8)
                         }
                         
-                        UpiScreen(isUpiIntentVisible: $viewModel.upiIntentMethod, isGpayVisible: isGooglePayInstalled(), isPaytmVisible: isPaytmInstalled(), isPhonePeVisible: isPhonePeInstalled(),brandColor : viewModel.brandColor, totalAmount : viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "", currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",  isUpiCollectVisible: $viewModel.upiCollectMethod, handleUpiPayment: upiViewModel.initiateUpiPostRequest, savedUpiIds : $viewModel.recommendedIds, onProceedSavedUpiId : {string in
-                            print("selectedRecommendedId \(string)")
-                        })
+                        UpiScreen(isUpiIntentVisible: $viewModel.upiIntentMethod, isGpayVisible: isGooglePayInstalled(), isPaytmVisible: isPaytmInstalled(), isPhonePeVisible: isPhonePeInstalled(),brandColor : viewModel.brandColor, totalAmount : viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "", currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",  isUpiCollectVisible: $viewModel.upiCollectMethod, handleUpiPayment: upiViewModel.initiateUpiPostRequest, savedUpiIds : $viewModel.recommendedIds, onProceedSavedUpiId: viewModel.postRecommendedOrSavedInstrumentRef)
                         
                         if(viewModel.cardsMethod || viewModel.walletsMethod || viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                             TitleHeaderView(text: "More Payment Options")

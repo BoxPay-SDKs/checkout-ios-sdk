@@ -30,7 +30,7 @@ struct UpiScreen: View {
     @State private var isRotated = false
     @State private var isFocused = false
     @State private var selectedIntent: String? = nil
-    @State var selectedSavedUpiId : String
+    @State var selectedSavedUpiId : String = ""
 
     var body: some View {
         VStack(alignment: .leading) {
