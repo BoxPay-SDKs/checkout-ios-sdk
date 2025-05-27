@@ -57,12 +57,14 @@ class CheckoutViewModel: ObservableObject {
     func getRecommendedFields() {
         Task {
             do {
+                let uniqueId = await userDataManager.getUniqueId()
                 let response = try await apiManager.request(
-                    endpoint: nil,
+                    endpoint: "shoppers/\(uniqueId)/recommended-instruments",
                     method: .GET,
                     body: nil,
                     responseType: RecommendedResponse.self
                 )
+                print("respinse \(response)")
             }
         }
     }
