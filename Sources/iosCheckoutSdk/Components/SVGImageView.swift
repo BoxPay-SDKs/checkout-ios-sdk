@@ -1,59 +1,63 @@
-//
-//  SVGImageView.swift
-//  checkout-ios-sdk
-//
-//  Created by Ishika Bansal on 13/05/25.
-//
-
-
-import SwiftUICore
 import SwiftUI
-import WebKit
 import SVGKit
 
+// MARK: - Helper for downloading data
+func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> ()) {
+    URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
+}
 
+// MARK: - SVGImage View
 struct SVGImageView: View {
-    let url: String
-    var fallbackImage: String
+    let url: URL
+    var fallbackImage: String = "placeholder"
 
-    @State private var svgImage: SVGKImage?
+    @State private var uiImage: UIImage? = nil
+    @State private var isLoading: Bool = true
     @State private var didFail: Bool = false
 
     var body: some View {
         Group {
-            if let svgImage = svgImage {
-                Image(uiImage: svgImage.uiImage)
+            if let image = uiImage {
+                Image(uiImage: image)
                     .resizable()
-                    .frame(width: 30, height: 30)
-                    .clipShape(Circle())
-            } else if didFail {
-                Image(frameworkAsset: fallbackImage, isTemplate: false)
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .clipShape(Circle())
-            } else {
+            } else if isLoading {
                 ShimmerView(height: 30, width: 30)
-                    .clipShape(Circle())
+            } else if didFail {
+                Image(fallbackImage)
+                    .resizable()
             }
         }
-        .onAppear {
-            loadSVG()
-        }
+        .frame(width: 30, height: 30)
+        .clipShape(Circle())
+        .onAppear(perform: loadImage)
     }
 
-    private func loadSVG() {
-        guard let svgURL = URL(string: url) else {
-            didFail = true
-            return
-        }
-
-        DispatchQueue.global(qos: .userInitiated).async {
-            if let data = try? Data(contentsOf: svgURL),
-               let svg = SVGKImage(data: data),
-               svg.hasSize() || svg.domDocument != nil { // more defensive check
-                svg.size = CGSize(width: 30, height: 30)
+    private func loadImage() {
+        getData(from: url) { data, _, error in
+            DispatchQueue.main.async {
+                self.isLoading = false
+            }
+            guard let data = data, error == nil else {
                 DispatchQueue.main.async {
-                    self.svgImage = svg
+                    self.didFail = true
+                }
+                return
+            }
+
+            // Try parsing as SVG
+            if let svg = SVGKImage(data: data) {
+                svg.size = CGSize(width: 30, height: 30)
+                let renderer = UIGraphicsImageRenderer(size: svg.size)
+                let rendered = renderer.image { ctx in
+                    svg.uiImage.draw(in: CGRect(origin: .zero, size: svg.size))
+                }
+                DispatchQueue.main.async {
+                    self.uiImage = rendered
+                }
+            } else if let altImage = UIImage(data: data, scale: 1.0) {
+                // Fallback to raster formats (PNG, JPEG, etc.)
+                DispatchQueue.main.async {
+                    self.uiImage = altImage
                 }
             } else {
                 DispatchQueue.main.async {
@@ -62,5 +66,4 @@ struct SVGImageView: View {
             }
         }
     }
-
 }

@@ -134,10 +134,11 @@ public struct BoxpayCheckout : View {
                             handleUpiPayment: upiViewModel.initiateUpiPostRequest,
                             savedUpiIds: $viewModel.recommendedIds,
                             selectedSavedUpiId : $selectedSavedInstrumentValue,
-                            onProceedSavedUpiId: { selectedUpiId in
+                            onClickSavedUpi: {selectedUpiId in
                                 selectedRecommendedInstrumentValue = ""
-                                viewModel.postRecommendedOrSavedInstrumentRef(selectedUpiId)
-                            }
+                                selectedSavedInstrumentValue = selectedUpiId
+                            },
+                            onProceedSavedUpiId: viewModel.postRecommendedOrSavedInstrumentRef
                         )
 
                         

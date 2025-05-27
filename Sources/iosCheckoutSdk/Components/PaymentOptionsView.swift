@@ -23,7 +23,7 @@ struct PaymentOptionView: View {
     var body: some View {
         VStack{
             HStack(alignment: .center) {
-                SVGImageView(url: imageUrl, fallbackImage: fallbackImage)
+                SVGImageView(url: imageUrl.asUrl, fallbackImage: fallbackImage)
                 VStack(alignment: .leading) {
                     Text(title)
                         .font(.custom("Poppins-SemiBold", size: 14))

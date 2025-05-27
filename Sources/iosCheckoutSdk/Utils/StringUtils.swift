@@ -61,3 +61,13 @@ extension String {
         return result
     }
 }
+
+// MARK: - String to URL Extension
+extension String {
+    /// Convert string to a URL, encoding spaces
+    var asUrl: URL {
+        let encoded = self.replacingOccurrences(of: " ", with: "%20")
+        return URL(string: encoded) ?? URL(fileURLWithPath: "")
+    }
+}
+

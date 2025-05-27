@@ -317,7 +317,7 @@ struct EmiChooseBankView : View {
     var body: some View {
         VStack {
             HStack(alignment: .center) {
-                SVGImageView(url: bankUrl, fallbackImage: fallbackImage)
+                SVGImageView(url: bankUrl.asUrl, fallbackImage: fallbackImage)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(bankName)
                         .font(.custom("Poppins-SemiBold", size: 14))
