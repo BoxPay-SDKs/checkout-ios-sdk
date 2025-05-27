@@ -56,7 +56,9 @@ class CheckoutViewModel: ObservableObject {
     func getRecommendedFields(shopperToken:String) {
         Task {
             do {
-                let uniqueId = await userDataManager.getUniqueId()
+                guard let uniqueId = await userDataManager.getUniqueId() else {
+                    return
+                }
                 let response = try await apiManager.request(
                     endpoint: "shoppers/\(uniqueId)/recommended-instruments",
                     method: .GET,
