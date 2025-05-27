@@ -13,6 +13,7 @@ class CheckoutViewModel: ObservableObject {
     @Published var emiMethod: Bool = false
     @Published var bnplMethod: Bool = false
     @Published var actions: PaymentAction?
+    @Published var recommendedIds : [RecommendedResponse] = []
 
     @Published var checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
@@ -69,6 +70,7 @@ class CheckoutViewModel: ObservableObject {
                     responseType: [RecommendedResponse].self
                 )
                 print("respinse \(response)")
+                self.recommendedIds = response
             }
         }
     }

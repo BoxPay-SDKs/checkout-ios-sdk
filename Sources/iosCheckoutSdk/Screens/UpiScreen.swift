@@ -19,6 +19,10 @@ struct UpiScreen: View {
     @Binding var isUpiCollectVisible: Bool
     
     let handleUpiPayment: (_ selectedIntent : String?, _ shopperVpa : String?, _ methodType:String) -> ()
+    
+    @Binding var savedUpiIds : [RecommendedResponse]
+    @Binding var selectedSavedUpiId : String
+    let onProceedSavedUpiId: () -> ()
 
     @State private var upiCollectVisible = false
     @State private var upiCollectError = false
@@ -30,6 +34,27 @@ struct UpiScreen: View {
 
     var body: some View {
         VStack(alignment: .leading) {
+            if (!savedUpiIds.isEmpty) {
+                ForEach(Array(savedUpiIds.enumerated()), id: \.offset) { index, item in
+                    PaymentOptionView(
+                        isSelected: selectedSavedUpiId == item.instrumentRef,
+                        imageUrl: item.logoUrl ?? "",
+                        title: item.displayValue ?? "",
+                        currencySymbol: currencySymbol,
+                        amount: totalAmount,
+                        instrumentValue: item.instrumentRef ?? "",
+                        brandColor: brandColor,
+                        onClick: { string in
+                            selectedSavedUpiId = string
+                        },
+                        onProceedButton: {
+                            onProceedSavedUpiId()
+                        },
+                        fallbackImage: "ic_upi_semi_bold"
+                    )
+                    Divider()
+                }
+            }
             if isUpiIntentVisible {
                 HStack {
                     if isGpayVisible {
