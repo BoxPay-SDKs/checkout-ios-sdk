@@ -64,7 +64,7 @@ class CheckoutViewModel: ObservableObject {
                         "Authorization" : "Session \(shopperToken)"
                     ],
                     body: nil,
-                    responseType: RecommendedResponse.self
+                    responseType: [RecommendedResponse].self
                 )
                 print("respinse \(response)")
             }
