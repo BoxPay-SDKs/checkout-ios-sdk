@@ -21,6 +21,7 @@ struct UpiScreen: View {
     let handleUpiPayment: (_ selectedIntent : String?, _ shopperVpa : String?, _ methodType:String) -> ()
     
     @Binding var savedUpiIds : [RecommendedResponse]
+    @Binding var selectedSavedUpiId : String
     let onProceedSavedUpiId: (_ selectedSavedUpiRef : String) -> ()
 
     @State private var upiCollectVisible = false
@@ -30,7 +31,6 @@ struct UpiScreen: View {
     @State private var isRotated = false
     @State private var isFocused = false
     @State private var selectedIntent: String? = nil
-    @State var selectedSavedUpiId : String = ""
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -51,7 +51,7 @@ struct UpiScreen: View {
                             onProceedButton: {
                                 onProceedSavedUpiId(selectedSavedUpiId)
                             },
-                            fallbackImage: "ic_upi_semi_bold"
+                            fallbackImage: "upi_logo"
                         )
                         Divider()
                     }
