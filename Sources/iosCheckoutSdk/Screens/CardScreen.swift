@@ -100,7 +100,7 @@ struct CardScreen : View {
                                 HStack {
                                             // Left section (Bank logo + name)
                                     HStack {
-                                        SVGImageView(url: (bankUrl ?? "").asUrl, fallbackImage: "ic_netbanking_semi_bold")
+                                        SVGImageView(url: URL(string:bankUrl ?? "")!, fallbackImage: "ic_netbanking_semi_bold")
 
                                         Text(bankName ?? "")
                                             .font(.custom("Poppins-SemiBold", size: 14))

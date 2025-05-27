@@ -40,7 +40,7 @@ struct SelectTenureScreen : View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 8) {
-                            SVGImageView(url: selectedBank.iconUrl.asUrl, fallbackImage: fallBackImage)
+                            SVGImageView(url: URL(string: selectedBank.iconUrl)!, fallbackImage: fallBackImage)
                             Text("\(selectedBank.name) | \(selectedCardType)")
                                 .font(.custom("Poppins-SemiBold", size: 14))
                                 .foregroundColor(Color(hex: "#2D2B32"))
