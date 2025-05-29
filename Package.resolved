@@ -1,6 +1,15 @@
 {
-  "originHash" : "def7367cdd11451bbea9b28ccd6fca9c60bf34632332f92e6148de3a82ff9f48",
+  "originHash" : "dd1aeb28060b37b1de5169b4d4130f97fac5b3a60b01ea56e95502eb275ea64f",
   "pins" : [
+    {
+      "identity" : "cocoalumberjack",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/CocoaLumberjack/CocoaLumberjack.git",
+      "state" : {
+        "revision" : "4b8714a7fb84d42393314ce897127b3939885ec3",
+        "version" : "3.8.5"
+      }
+    },
     {
       "identity" : "lottie-ios",
       "kind" : "remoteSourceControl",
@@ -11,30 +20,21 @@
       }
     },
     {
-      "identity" : "sdwebimage",
+      "identity" : "svgkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SDWebImage/SDWebImage.git",
+      "location" : "https://github.com/SVGKit/SVGKit.git",
       "state" : {
-        "revision" : "cac9a55a3ae92478a2c95042dcc8d9695d2129ca",
-        "version" : "5.21.0"
+        "revision" : "58152b9f7c85eab239160b36ffdfd364aa43d666",
+        "version" : "3.0.0"
       }
     },
     {
-      "identity" : "sdwebimagesvgcoder",
+      "identity" : "swift-log",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SDWebImage/SDWebImageSVGCoder.git",
+      "location" : "https://github.com/apple/swift-log",
       "state" : {
-        "revision" : "85b5d58ad02c207c496fa34426dc6560d6ae32f0",
-        "version" : "1.8.0"
-      }
-    },
-    {
-      "identity" : "sdwebimageswiftui",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SDWebImage/SDWebImageSwiftUI.git",
-      "state" : {
-        "revision" : "53573d6dd017e354c0e7d8f1c86b77ef1383c996",
-        "version" : "2.2.7"
+        "revision" : "3d8596ed08bd13520157f0355e35caed215ffbfa",
+        "version" : "1.6.3"
       }
     }
   ],
