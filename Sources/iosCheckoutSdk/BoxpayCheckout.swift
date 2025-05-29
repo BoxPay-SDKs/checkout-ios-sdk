@@ -29,6 +29,7 @@ public struct BoxpayCheckout : View {
     @State private var isUserIntentProcessing = false
     
     @State private var selectedRecommendedInstrumentValue : String = ""
+    @State private var selectedRecommendedDisplayValue : String = ""
     @State private var selectedSavedInstrumentValue : String = ""
     
     @State private var navigateToCardScreen = false
@@ -100,9 +101,10 @@ public struct BoxpayCheckout : View {
                                         onClick: { string in
                                             selectedSavedInstrumentValue = ""
                                             selectedRecommendedInstrumentValue = string
+                                            selectedRecommendedDisplayValue = item.displayValue ?? ""
                                         },
                                         onProceedButton: {
-                                            viewModel.postRecommendedOrSavedInstrumentRef(selectedRecommendedInstrumentValue)
+                                            upiViewModel.postRecommendedOrSavedInstrumentRef(selectedRecommendedInstrumentValue, methodType: "UpiCollect", selectedRecommendedDisplayValue)
                                         },
                                         fallbackImage: "upi_logo"
                                     )
@@ -134,11 +136,14 @@ public struct BoxpayCheckout : View {
                             handleUpiPayment: upiViewModel.initiateUpiPostRequest,
                             savedUpiIds: $viewModel.recommendedIds,
                             selectedSavedUpiId : $selectedSavedInstrumentValue,
-                            onClickSavedUpi: {selectedUpiId in
+                            onClickSavedUpi: {selectedUpiId, selectedUpiDisplayValue in
                                 selectedRecommendedInstrumentValue = ""
                                 selectedSavedInstrumentValue = selectedUpiId
+                                selectedRecommendedDisplayValue = selectedUpiDisplayValue
                             },
-                            onProceedSavedUpiId: viewModel.postRecommendedOrSavedInstrumentRef
+                            onProceedSavedUpiId: { strign in
+                                upiViewModel.postRecommendedOrSavedInstrumentRef(selectedSavedInstrumentValue, methodType: "UpiCollect", selectedRecommendedDisplayValue)
+                            }
                         )
 
                         

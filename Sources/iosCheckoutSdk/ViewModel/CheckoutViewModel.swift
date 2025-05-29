@@ -202,8 +202,4 @@ class CheckoutViewModel: ObservableObject {
         // This will return the symbol for the currency, e.g., "$", "€", "₹", etc.
         return formatter.currencySymbol ?? "₹"
     }
-    
-    func postRecommendedOrSavedInstrumentRef(_ selectedInstrumentRef : String) {
-        
-    }
 }

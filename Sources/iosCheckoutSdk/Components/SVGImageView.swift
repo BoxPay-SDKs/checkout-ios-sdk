@@ -8,11 +8,9 @@ struct SVGImageView: View {
     var body: some View {
         WebImage(url: url)
             .onFailure { error in
-                // You can add logging or any error handling here
                 print("Failed to load SVG: \(error.localizedDescription)")
             }
             .placeholder {
-                // Placeholder while loading (you can customize)
                 ShimmerView(height: 30, width: 30)
             }
             .resizable()

@@ -117,4 +117,102 @@ class UpiViewModel: ObservableObject {
             self.isLoading = false
         }
     }
+    
+    func postRecommendedOrSavedInstrumentRef(_ selectedInstrumentRef : String, methodType : String, _ shopperVpa: String) {
+        self.isLoading = true
+        Task {
+            let deliveryAddress: [String: Any?] = await[
+                "address1": userDataManager.getAddress1(),
+                "address2": userDataManager.getAddress2(),
+                "city": userDataManager.getCity(),
+                "state": userDataManager.getState(),
+                "countryCode": userDataManager.getCountryCode(),
+                "postalCode": userDataManager.getPinCode(),
+                "labelType": userDataManager.getLabelType(),
+                "labelName": userDataManager.getLabelName()
+            ]
+
+            let isDeliveryEmpty = deliveryAddress.values.allSatisfy { ($0 as? String)?.isEmpty ?? true }
+
+            let payload: [String: Any] = await[
+                "browserData": [
+                    "screenHeight": Int(UIScreen.main.bounds.height),
+                    "screenWidth": Int(UIScreen.main.bounds.width),
+                    "acceptHeader": "application/json",
+                    "userAgentHeader": "iOS App",
+                    "browserLanguage": Locale.current.identifier,
+                    "ipAddress": "null",
+                    "colorDepth": 24,
+                    "javaEnabled": true,
+                    "timeZoneOffSet": TimeZone.current.secondsFromGMT() / 60,
+                    "packageId": Bundle.main.bundleIdentifier ?? "com.boxpay.checkout.sdk"
+                ],
+                "instrumentDetails": [
+                    "type": "upi/collect",
+                    "upi": [
+                        "instrumentRef" : selectedInstrumentRef
+                    ]
+                ],
+                "shopper": [
+                    "email": userDataManager.getEmail(),
+                    "firstName": userDataManager.getFirstName(),
+                    "lastName": userDataManager.getLastName(),
+                    "phoneNumber": userDataManager.getPhone(),
+                    "uniqueReference": userDataManager.getUniqueId(),
+                    "dateOfBirth": userDataManager.getDOB(),
+                    "panNumber": userDataManager.getPan(),
+                    "deliveryAddress": isDeliveryEmpty ? nil : deliveryAddress
+                ],
+                "deviceDetails": [
+                    "browser": "iOS",
+                    "platformVersion": UIDevice.current.systemVersion,
+                    "deviceType": UIDevice.current.model,
+                    "deviceName": UIDevice.current.name,
+                    "deviceBrandName": "Apple"
+                ]
+            ]
+
+            guard JSONSerialization.isValidJSONObject(payload),
+                  let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
+                await MainActor.run { self.isLoading = false }
+                return
+            }
+
+            do {
+                let response: GeneralPaymentInitilizationResponse = try await apiManager.request(
+                    method: .POST,
+                    headers: StringUtils.getRequestHeaders(),
+                    body: jsonData,
+                    responseType: GeneralPaymentInitilizationResponse.self
+                )
+                await self.checkoutManager.setStatus(response.status.status.uppercased())
+                await self.checkoutManager.setTransactionId(response.transactionId)
+                self.actions = await PaymentActionUtils.handle(
+                    timeStamp: response.transactionTimestampLocale,
+                    reasonCode: response.status.reasonCode,
+                    reason: response.status.reason,
+                    methodType: methodType,
+                    response: PaymentActionResponse(action: response.actions),
+                    shopperVpa: shopperVpa
+                )
+
+            } catch {
+                let errorDescription = error.localizedDescription.lowercased()
+                if errorDescription.contains("expired") {
+                    await self.checkoutManager.setStatus("EXPIRED")
+                } else {
+                    await self.checkoutManager.setStatus("FAILED")
+                }
+                self.actions = await PaymentActionUtils.handle(
+                    timeStamp: "",
+                    reasonCode: "",
+                    reason: error.localizedDescription,
+                    methodType: "",
+                    response: PaymentActionResponse(action: nil),
+                    shopperVpa: ""
+                )
+            }
+            self.isLoading = false
+        }
+    }
 }

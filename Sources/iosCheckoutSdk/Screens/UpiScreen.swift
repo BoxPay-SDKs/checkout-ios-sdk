@@ -22,7 +22,7 @@ struct UpiScreen: View {
     
     @Binding var savedUpiIds : [RecommendedResponse]
     @Binding var selectedSavedUpiId : String
-    let onClickSavedUpi : (_ selectedSavedUpiRef : String) -> ()
+    let onClickSavedUpi : (_ selectedSavedUpiRef : String, _ selectedSavedUpiDisplayValue : String) -> ()
     let onProceedSavedUpiId: (_ selectedSavedUpiRef : String) -> ()
 
     @State private var upiCollectVisible = false
@@ -47,7 +47,7 @@ struct UpiScreen: View {
                             instrumentValue: item.instrumentRef ?? "",
                             brandColor: brandColor,
                             onClick: { string in
-                                onClickSavedUpi(string)
+                                onClickSavedUpi(string, item.displayValue ?? "")
                             },
                             onProceedButton: {
                                 onProceedSavedUpiId(selectedSavedUpiId)
