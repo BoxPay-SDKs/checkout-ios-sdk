@@ -35,7 +35,7 @@ struct PaymentOptionView: View {
                             .foregroundColor(Color(hex: "#1CA672"))
                             .padding(.bottom, 2)
                         .padding(.horizontal, 4)
-                        .background(Color(hex: "#1CA672").opacity(0.8))
+                        .background(Color(hex: "#E8F6F1"))
                         .cornerRadius(6)
                         
                     }
