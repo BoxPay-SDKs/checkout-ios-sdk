@@ -177,11 +177,14 @@ class UpiViewModel: ObservableObject {
                 await MainActor.run { self.isLoading = false }
                 return
             }
+            let shopperToken = await checkoutManager.getShopperToken()
 
             do {
                 let response: GeneralPaymentInitilizationResponse = try await apiManager.request(
                     method: .POST,
-                    headers: StringUtils.getRequestHeaders(),
+                    headers: StringUtils.getRequestHeaders().merging([
+                        "Authorization": "Session \(shopperToken)"
+                    ]) { (_, new) in new },
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
                 )
