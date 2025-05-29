@@ -18,7 +18,8 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/airbnb/lottie-ios.git", from: "4.5.1"),
-        .package(url: "https://github.com/SVGKit/SVGKit.git", from: "3.0.0")
+        .package(url: "https://github.com/SDWebImage/SDWebImageSwiftUI.git", from: "3.1.3"),
+        .package(url: "https://github.com/SDWebImage/SDWebImageSVGCoder.git", from: "1.7.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -27,7 +28,8 @@ let package = Package(
             name: "iosCheckoutSdk",
             dependencies: [
                 .product(name: "Lottie", package: "lottie-ios"),
-                .product(name: "SVGKit", package: "SVGKit")
+                .product(name: "SDWebImageSwiftUI", package: "SDWebImageSwiftUI"),
+                .product(name: "SDWebImageSVGCoder", package: "SDWebImageSVGCoder")
             ],
             path: "Sources/iosCheckoutSdk",
             resources: [
