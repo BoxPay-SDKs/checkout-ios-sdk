@@ -272,7 +272,6 @@ struct EmiScreen : View {
         Task {
             switch action {
             case .showFailed(let message):
-                print("❌ Failed: - \(message)")
                 viewModel.isLoading = false
                 await viewModel.checkoutManager.setStatus("FAILED")
                 fetchStatusViewModel.stopFetchingStatus()

@@ -367,8 +367,6 @@ public struct BoxpayCheckout : View {
             if UIApplication.shared.canOpenURL(url) {
                 isUserIntentProcessing = true
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
-            } else {
-                print("Cannot open URL: \(urlString)")
             }
         }
     }

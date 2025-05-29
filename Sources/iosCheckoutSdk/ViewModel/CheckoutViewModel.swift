@@ -69,7 +69,6 @@ class CheckoutViewModel: ObservableObject {
                     body: nil,
                     responseType: [RecommendedResponse].self
                 )
-                print("respinse \(response)")
                 self.recommendedIds = response
             }
         }
