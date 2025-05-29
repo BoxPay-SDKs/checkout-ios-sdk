@@ -106,7 +106,8 @@ public struct BoxpayCheckout : View {
                                         onProceedButton: {
                                             upiViewModel.postRecommendedOrSavedInstrumentRef(selectedRecommendedInstrumentValue, methodType: "UpiCollect", selectedRecommendedDisplayValue)
                                         },
-                                        fallbackImage: "upi_logo"
+                                        fallbackImage: "upi_logo",
+                                        showLastUsed : item.instrumentRef == viewModel.recommendedIds[0].instrumentRef
                                     )
                                     if index < min(1, viewModel.recommendedIds.prefix(2).count - 1) {
                                         Divider() // Optional: Adjust Divider's padding if needed
