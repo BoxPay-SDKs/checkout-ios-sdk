@@ -7,6 +7,7 @@
 
 import SwiftUICore
 import SwiftUI
+import SDWebImageSVGCoder
 
 public struct BoxpayCheckout : View {
     var token : String
@@ -59,6 +60,8 @@ public struct BoxpayCheckout : View {
             self.shopperToken = shopperToken
             self.configurationOption = configurationOptions
             self.onPaymentResult = onPaymentResult
+            let SVGCoder = SDImageSVGCoder.shared
+            SDImageCodersManager.shared.addCoder(SVGCoder)
         }
     
     public var body: some View {

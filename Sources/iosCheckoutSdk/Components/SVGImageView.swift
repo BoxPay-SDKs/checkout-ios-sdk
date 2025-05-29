@@ -1,61 +1,27 @@
-//
-//  SVGImageView.swift
-//  checkout-ios-sdk
-//
-//  Created by Ishika Bansal on 13/05/25.
-//
-
-
-import SwiftUICore
 import SwiftUI
-import WebKit
-import SVGKit
-
+import SDWebImageSwiftUI
 
 struct SVGImageView: View {
     let url: URL
     var fallbackImage: String
 
-    @State private var svgImage: SVGKImage?
-    @State private var didFail: Bool = false
+    @State private var hasFailed = false
 
     var body: some View {
-        Group {
-            if let svgImage = svgImage {
-                Image(uiImage: svgImage.uiImage)
+        ZStack {
+            if hasFailed {
+                Image(fallbackImage)
                     .resizable()
-                    .frame(width: 30, height: 30)
-                    .clipShape(Circle())
-            } else if didFail {
-                Image(frameworkAsset: fallbackImage, isTemplate: false)
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .clipShape(Circle())
+                    .scaledToFit()
             } else {
-                ShimmerView(height: 30, width: 30)
-                    .clipShape(Circle())
+                WebImage(url: URL(string: url))
+                    .resizable()
+                    .onFailure { _ in
+                        hasFailed = true
+                    }
+                    .scaledToFit()
             }
         }
-        .onAppear {
-            loadSVG()
-        }
+        .frame(width: 30, height: 30)
     }
-
-    private func loadSVG() {
-        DispatchQueue.global(qos: .userInitiated).async {
-            if let data = try? Data(contentsOf: url),
-               let svg = SVGKImage(data: data),
-               svg.hasSize() || svg.domDocument != nil { // more defensive check
-                svg.size = CGSize(width: 30, height: 30)
-                DispatchQueue.main.async {
-                    self.svgImage = svg
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self.didFail = true
-                }
-            }
-        }
-    }
-
 }
