@@ -9,6 +9,9 @@ import SwiftUICore
 import SwiftUI
 
 struct AddAddressScreen : View {
+    let emailRegex = "^(?!.*\\.\\.)(?!.*\\.\\@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+    let numberRegex = "^[0-9]+$"
+    
     @State private var fullNameTextField = ""
     @State private var mobileNumberTextField = ""
     @State private var mobileNumberMinLength = 0
@@ -47,14 +50,24 @@ struct AddAddressScreen : View {
     @State private var cityErrorText = ""
     @State private var stateErrorText = ""
     @State private var mainAddressErrorText = ""
+    
+    var brandColor : String
      
     @Environment(\.presentationMode) private var presentationMode
     var body: some View {
         ZStack{
             VStack(alignment: .leading){
-                HeaderView(text: "Add Address", showDesc: false, showSecure: false, itemCount: 0, currencySymbol: "", amount: "", onBackPress: {
-                    presentationMode.wrappedValue.dismiss()
-                })
+                HeaderView(
+                    text: "Add Address",
+                    showDesc: false,
+                    showSecure: false,
+                    itemCount: 0,
+                    currencySymbol: "",
+                    amount: "",
+                    onBackPress: {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                )
                 ScrollView {
                     VStack(spacing: 20) {
                         FloatingLabelTextField(
@@ -83,6 +96,7 @@ struct AddAddressScreen : View {
                                 onChangeMobileNumber(updatedText: string)
                             },
                             isFocused: $isMobileNumberTextFieldFocused,
+                            keyboardType: .numberPad,
                             trailingIcon: .constant(""),
                             leadingIcon: .constant(""),
                             isSecureText: .constant(false)
@@ -121,6 +135,7 @@ struct AddAddressScreen : View {
                                         onChangePostalCode(updatedText: string)
                                     },
                                     isFocused: $isPostalCodeTextFieldFocused,
+                                    keyboardType: .numberPad,
                                     trailingIcon: .constant(""),
                                     leadingIcon: .constant(""),
                                     isSecureText: .constant(false)
@@ -195,9 +210,6 @@ struct AddAddressScreen : View {
                             placeholder: "Area,Colony,Street, Sector",
                             text: $secondaryAddressTextField,
                             isValid: .constant(nil),
-                            onChange: { string in
-                                onChangeSecondaryAddress(updatedText: string)
-                            },
                             isFocused: $isSecondaryAddressTextFieldFocused,
                             trailingIcon: .constant(""),
                             leadingIcon: .constant(""),
@@ -207,20 +219,70 @@ struct AddAddressScreen : View {
                     .padding(.top, 20)
                 }
                 .padding(.horizontal, 16)
+                
+                Button(action: {
+                    if isAllDetailsValid() {
+                        
+                    }
+                }){
+                    Text("Make Payment")
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color(hex: brandColor))
+                        .cornerRadius(8)
+                        .font(.custom("Poppins-Regular", size: 16))
+                }
+                .padding(.top, 12)
+                .padding(.horizontal, 16)
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
     }
     
     private func onChangeFullName(updatedText : String) {
+        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
         
+        if trimmedText.isEmpty {
+            fullNameErrorText = "Required"
+            isFullNameValid = false
+        } else {
+            fullNameErrorText = ""
+            isFullNameValid = true
+        }
     }
     
-    private func onChangeMobileNumber(updatedText : String) {
+    private func onChangeMobileNumber(updatedText: String) {
+        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
+        let mobileNumberPredicate = NSPredicate(format: "SELF MATCHES %@", numberRegex)
         
+        if trimmedText.isEmpty {
+            mobileNumberErrorText = "Required"
+            isMobileNumberValid = false
+        } else if trimmedText.count < mobileNumberMinLength || trimmedText.count > mobileNumberMaxLength || !mobileNumberPredicate.evaluate(with: trimmedText) {
+            mobileNumberErrorText = "Mobile number must be \(mobileNumberMaxLength) digits"
+            isMobileNumberValid = false
+        } else {
+            mobileNumberErrorText = ""
+            isMobileNumberValid = true
+        }
     }
     
     private func onChangeEmailId(updatedText : String) {
+        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
+        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
         
+        if trimmedText.isEmpty {
+            emailIdErrorText = "Required"
+            isEmailIdValid = false
+        } else if !emailPredicate.evaluate(with: trimmedText) {
+            emailIdErrorText = "Invalid Email"
+            isEmailIdValid = false
+        } else {
+            emailIdErrorText = ""
+            isEmailIdValid = true
+        }
     }
     
     private func onChangePostalCode(updatedText : String) {
@@ -228,19 +290,74 @@ struct AddAddressScreen : View {
     }
     
     private func onChangeCity(updatedText : String) {
+        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
         
+        if trimmedText.isEmpty {
+            cityErrorText = "Required"
+            isCityValid = false
+        } else {
+            cityErrorText = ""
+            isCityValid = true
+        }
     }
     
     private func onChangeState(updatedText : String) {
+        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
         
+        if trimmedText.isEmpty {
+            stateErrorText = "Required"
+            isStateValid = false
+        } else {
+            stateErrorText = ""
+            isStateValid = true
+        }
     }
     
     private func onChangeMainAddress(updatedText : String) {
+        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
         
+        if trimmedText.isEmpty {
+            mainAddressErrorText = "Required"
+            isMainAddressValid = false
+        } else {
+            mainAddressErrorText = ""
+            isMainAddressValid = true
+        }
     }
     
-    private func onChangeSecondaryAddress(updatedText : String) {
+    private func isAllDetailsValid() -> Bool {
+        var isAllValid = true
         
+        if (isFullNameValid == nil || isFullNameValid == false) {
+            onChangeFullName(updatedText: fullNameTextField)
+            isAllValid = false
+        }
+        if (isMobileNumberValid == nil || isMobileNumberValid == false) {
+            onChangeMobileNumber(updatedText: mobileNumberTextField)
+            isAllValid = false
+        }
+        if (isEmailIdValid == nil || isEmailIdValid == false) {
+            onChangeEmailId(updatedText: emailIdTextField)
+            isAllValid = false
+        }
+        if (isPostalCodeValid == nil || isPostalCodeValid == false) {
+            onChangePostalCode(updatedText: postalCodeTextField)
+            isAllValid = false
+        }
+        if (isCityValid == nil || isCityValid == false) {
+            onChangeCity(updatedText: cityTextField)
+            isAllValid = false
+        }
+        if (isStateValid == nil || isStateValid == false) {
+            onChangeState(updatedText: stateTextField)
+            isAllValid = false
+        }
+        if (isMainAddressValid == nil || isMainAddressValid == false) {
+            onChangeMainAddress(updatedText: mainAddressTextField)
+            isAllValid = false
+        }
+        
+        return isAllValid
     }
 }
 

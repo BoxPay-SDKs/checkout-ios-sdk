@@ -98,7 +98,7 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
 
             textField.leftPadding = 36
         } else {
-            textField.leftPadding = 12
+            textField.leftPadding = 8
         }
         
         // Trailing icon
