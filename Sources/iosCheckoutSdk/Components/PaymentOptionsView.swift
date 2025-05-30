@@ -19,15 +19,26 @@ struct PaymentOptionView: View {
     var onClick : (String) -> Void
     var onProceedButton : () -> Void
     var fallbackImage : String
+    var showLastUsed : Bool = false
     
     var body: some View {
         VStack{
             HStack(alignment: .center) {
-                SVGImageView(url: imageUrl, fallbackImage: fallbackImage)
+                SVGImageView(url: URL(string: imageUrl)!, fallbackImage: fallbackImage)
                 VStack(alignment: .leading) {
                     Text(title)
                         .font(.custom("Poppins-SemiBold", size: 14))
                         .foregroundColor(Color(hex: "#4F4D55"))
+                    if(showLastUsed) {
+                        Text("Last Used")
+                            .font(.custom("Poppins-Medium", size: 8))
+                            .foregroundColor(Color(hex: "#1CA672"))
+                            .padding(.bottom, 2)
+                        .padding(.horizontal, 4)
+                        .background(Color(hex: "#E8F6F1"))
+                        .cornerRadius(6)
+                        
+                    }
                 }
                 
                 Spacer()

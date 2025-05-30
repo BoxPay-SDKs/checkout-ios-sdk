@@ -13,6 +13,7 @@ class CheckoutViewModel: ObservableObject {
     @Published var emiMethod: Bool = false
     @Published var bnplMethod: Bool = false
     @Published var actions: PaymentAction?
+    @Published var recommendedIds : [RecommendedResponse] = []
 
     @Published var checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
@@ -35,7 +36,7 @@ class CheckoutViewModel: ObservableObject {
     @Published var brandColor = ""
     
     @Published var isInitialized = false
-        func initialize(token: String, shopperToken: String, config: ConfigOptions?, callback: @escaping (PaymentResultObject) -> Void) {
+        func initialize(token: String, shopperToken: String?, config: ConfigOptions?, callback: @escaping (PaymentResultObject) -> Void) {
             Task {
                 PaymentCallBackManager.shared.setCallback(callback)
                 await checkoutManager.setBaseURL(config?[ConfigurationOption.enableTextEnv] == true)
@@ -44,13 +45,34 @@ class CheckoutViewModel: ObservableObject {
                 if !token.isEmpty {
                     await checkoutManager.setMainToken(token)
                 }
-                if !shopperToken.isEmpty {
-                    await checkoutManager.setShopperToken(shopperToken)
+                if let shopperTokenPresent = shopperToken {
+                    await checkoutManager.setShopperToken(shopperTokenPresent)
                 }
 
-                isInitialized = true // ✅ Mark as initialized
+                isInitialized = true
+                getCheckoutSession()
             }
         }
+    
+    func getRecommendedFields(shopperToken:String) {
+        Task {
+            do {
+                guard let uniqueId = await userDataManager.getUniqueId() else {
+                    return
+                }
+                let response = try await apiManager.request(
+                    endpoint: "shoppers/\(uniqueId)/recommended-instruments",
+                    method: .GET,
+                    headers: [
+                        "Authorization" : "Session \(shopperToken)"
+                    ],
+                    body: nil,
+                    responseType: [RecommendedResponse].self
+                )
+                self.recommendedIds = response
+            }
+        }
+    }
 
     /// Fetches the checkout session using the main token
     func getCheckoutSession() {
@@ -162,6 +184,11 @@ class CheckoutViewModel: ObservableObject {
             await userDataManager.setLabelName(userData.deliveryAddress?.labelName)
             await userDataManager.setDOB(userData.dateOfBirth)
             await userDataManager.setPan(userData.panNumber)
+        
+        let shopperToken = await checkoutManager.getShopperToken()
+        if (!shopperToken.isEmpty) {
+            getRecommendedFields(shopperToken: shopperToken)
+        }
     }
 
     func getCurrencySymbol(from currencyCode: String?) -> String {

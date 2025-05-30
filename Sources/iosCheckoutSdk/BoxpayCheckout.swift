@@ -11,7 +11,7 @@ import SDWebImageSVGCoder
 
 public struct BoxpayCheckout : View {
     var token : String
-    var shopperToken : String
+    var shopperToken : String?
     var configurationOption : ConfigOptions?
     var onPaymentResult : (PaymentResultObject) -> Void
     @Environment(\.presentationMode) var presentationMode
@@ -28,6 +28,10 @@ public struct BoxpayCheckout : View {
     @State private var shopperVpa = ""
     @State private var showCancelPopup = false
     @State private var isUserIntentProcessing = false
+    
+    @State private var selectedRecommendedInstrumentValue : String = ""
+    @State private var selectedRecommendedDisplayValue : String = ""
+    @State private var selectedSavedInstrumentValue : String = ""
     
     @State private var navigateToCardScreen = false
     @State private var navigateToWalletScreen = false
@@ -47,7 +51,7 @@ public struct BoxpayCheckout : View {
     
     public init(
             token: String,
-            shopperToken: String,
+            shopperToken: String?,
             configurationOptions: ConfigOptions? = nil,
             onPaymentResult: @escaping (PaymentResultObject) -> Void
         ){
@@ -84,12 +88,68 @@ public struct BoxpayCheckout : View {
                     ScrollView {
                         TitleHeaderView(text: "Address")
                         AddressSectionView(address: formattedAddress())
+                        if (!viewModel.recommendedIds.isEmpty) {
+                            TitleHeaderView(text: "Recommended")
+                                .padding(.bottom, 8)
+                            VStack(spacing:0) {
+                                ForEach(Array(viewModel.recommendedIds.prefix(2).enumerated()), id: \.offset) { index, item in
+                                    PaymentOptionView(
+                                        isSelected: selectedRecommendedInstrumentValue == item.instrumentRef,
+                                        imageUrl: item.logoUrl ?? "",
+                                        title: item.displayValue ?? "",
+                                        currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
+                                        amount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
+                                        instrumentValue: item.instrumentRef ?? "",
+                                        brandColor: viewModel.brandColor,
+                                        onClick: { string in
+                                            selectedSavedInstrumentValue = ""
+                                            selectedRecommendedInstrumentValue = string
+                                            selectedRecommendedDisplayValue = item.displayValue ?? ""
+                                        },
+                                        onProceedButton: {
+                                            upiViewModel.postRecommendedOrSavedInstrumentRef(selectedRecommendedInstrumentValue, methodType: "UpiCollect", selectedRecommendedDisplayValue)
+                                        },
+                                        fallbackImage: "upi_logo",
+                                        showLastUsed : item.instrumentRef == viewModel.recommendedIds[0].instrumentRef
+                                    )
+                                    if index < min(1, viewModel.recommendedIds.prefix(2).count - 1) {
+                                        Divider() // Optional: Adjust Divider's padding if needed
+                                    }
+                                }
+                            }
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(radius: 1)
+                            .padding(.horizontal, 16)
+                            .padding(.top, 8)
+                        }
                         if(viewModel.upiIntentMethod || viewModel.upiCollectMethod) {
                             TitleHeaderView(text: "Pay by any UPI")
                                 .padding(.bottom, 8)
                         }
                         
-                        UpiScreen(isUpiIntentVisible: $viewModel.upiIntentMethod, isGpayVisible: isGooglePayInstalled(), isPaytmVisible: isPaytmInstalled(), isPhonePeVisible: isPhonePeInstalled(),brandColor : viewModel.brandColor, totalAmount : viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "", currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",  isUpiCollectVisible: $viewModel.upiCollectMethod, handleUpiPayment: upiViewModel.initiateUpiPostRequest)
+                        UpiScreen(
+                            isUpiIntentVisible: $viewModel.upiIntentMethod,
+                            isGpayVisible: isGooglePayInstalled(),
+                            isPaytmVisible: isPaytmInstalled(),
+                            isPhonePeVisible: isPhonePeInstalled(),
+                            brandColor: viewModel.brandColor,
+                            totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
+                            currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
+                            isUpiCollectVisible: $viewModel.upiCollectMethod,
+                            handleUpiPayment: upiViewModel.initiateUpiPostRequest,
+                            savedUpiIds: $viewModel.recommendedIds,
+                            selectedSavedUpiId : $selectedSavedInstrumentValue,
+                            onClickSavedUpi: {selectedUpiId, selectedUpiDisplayValue in
+                                selectedRecommendedInstrumentValue = ""
+                                selectedSavedInstrumentValue = selectedUpiId
+                                selectedRecommendedDisplayValue = selectedUpiDisplayValue
+                            },
+                            onProceedSavedUpiId: { strign in
+                                upiViewModel.postRecommendedOrSavedInstrumentRef(selectedSavedInstrumentValue, methodType: "UpiCollect", selectedRecommendedDisplayValue)
+                            }
+                        )
+
                         
                         if(viewModel.cardsMethod || viewModel.walletsMethod || viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                             TitleHeaderView(text: "More Payment Options")
@@ -164,11 +224,8 @@ public struct BoxpayCheckout : View {
                     }
         }
         .onAppear {
-            viewModel.initialize(token: token, shopperToken: shopperToken, config: configurationOption, callback: onPaymentResult)
-        }
-        .onChange(of : viewModel.isInitialized) { initialized in
-            if(initialized) {
-                viewModel.getCheckoutSession()
+            if !viewModel.isInitialized {
+                viewModel.initialize(token: token, shopperToken: shopperToken, config: configurationOption, callback: onPaymentResult)
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -313,8 +370,6 @@ public struct BoxpayCheckout : View {
             if UIApplication.shared.canOpenURL(url) {
                 isUserIntentProcessing = true
                 UIApplication.shared.open(url, options: [:], completionHandler: nil)
-            } else {
-                print("Cannot open URL: \(urlString)")
             }
         }
     }

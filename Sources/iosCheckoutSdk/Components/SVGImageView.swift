@@ -2,7 +2,7 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct SVGImageView: View {
-    let url: String
+    let url: URL
     var fallbackImage: String
 
     @State private var hasFailed = false

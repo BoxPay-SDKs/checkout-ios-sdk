@@ -272,7 +272,6 @@ struct EmiScreen : View {
         Task {
             switch action {
             case .showFailed(let message):
-                print("❌ Failed: - \(message)")
                 viewModel.isLoading = false
                 await viewModel.checkoutManager.setStatus("FAILED")
                 fetchStatusViewModel.stopFetchingStatus()
@@ -317,7 +316,7 @@ struct EmiChooseBankView : View {
     var body: some View {
         VStack {
             HStack(alignment: .center) {
-                SVGImageView(url: bankUrl, fallbackImage: fallbackImage)
+                SVGImageView(url: URL(string: bankUrl)!, fallbackImage: fallbackImage)
                 VStack(alignment: .leading, spacing: 0) {
                     Text(bankName)
                         .font(.custom("Poppins-SemiBold", size: 14))
