@@ -225,7 +225,7 @@ public struct BoxpayCheckout : View {
             NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: AddAddressScreen(brandColor : viewModel.brandColor), isActive: $navigateToAddressScreen) {
+            NavigationLink(destination: AddAddressScreen(), isActive: $navigateToAddressScreen) {
                         EmptyView()
                     }
         }
