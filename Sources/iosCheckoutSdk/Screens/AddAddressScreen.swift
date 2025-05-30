@@ -9,51 +9,10 @@ import SwiftUICore
 import SwiftUI
 
 struct AddAddressScreen : View {
-    let emailRegex = "^(?!.*\\.\\.)(?!.*\\.\\@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-    let numberRegex = "^[0-9]+$"
-    
-    @State private var fullNameTextField = ""
-    @State private var mobileNumberTextField = ""
-    @State private var mobileNumberMinLength = 0
-    @State private var mobileNumberMaxLength = 0
-    @State private var emailIdTextField = ""
-    @State private var postalCodeTextField = ""
-    @State private var postalCodeMaxLength = 0
-    @State private var cityTextField = ""
-    @State private var stateTextField = ""
-    @State private var mainAddressTextField = ""
-    @State private var secondaryAddressTextField = ""
-    @State private var selectedCountryName = ""
-    @State private var selectedCountryCode = ""
-    
-    @State private var isFullNameTextFieldFocused = false
-    @State private var isMobileNumberTextFieldFocused = false
-    @State private var isEmailIdTextFieldFocused = false
-    @State private var isPostalCodeTextFieldFocused = false
-    @State private var isCityTextFieldFocused = false
-    @State private var isStateTextFieldFocused = false
-    @State private var isMainAddressTextFieldFocused = false
-    @State private var isSecondaryAddressTextFieldFocused = false
-    
-    @State private var isFullNameValid : Bool? = nil
-    @State private var isMobileNumberValid : Bool? = nil
-    @State private var isEmailIdValid : Bool? = nil
-    @State private var isPostalCodeValid : Bool? = nil
-    @State private var isCityValid : Bool? = nil
-    @State private var isStateValid : Bool? = nil
-    @State private var isMainAddressValid : Bool? = nil
-    
-    @State private var fullNameErrorText = ""
-    @State private var mobileNumberErrorText = ""
-    @State private var emailIdErrorText = ""
-    @State private var postalCodeErrorText = ""
-    @State private var cityErrorText = ""
-    @State private var stateErrorText = ""
-    @State private var mainAddressErrorText = ""
-    
-    var brandColor : String
-     
+    @StateObject private var viewModel = AddAddressViewModel()
+
     @Environment(\.presentationMode) private var presentationMode
+
     var body: some View {
         ZStack{
             VStack(alignment: .leading){
@@ -73,18 +32,18 @@ struct AddAddressScreen : View {
                         VStack(alignment: .leading){
                             FloatingLabelTextField(
                                 placeholder: "Full Name*",
-                                text: $fullNameTextField,
-                                isValid: $isFullNameValid,
+                                text: $viewModel.fullNameTextField,
+                                isValid: $viewModel.isFullNameValid,
                                 onChange: { string in
-                                    onChangeFullName(updatedText: string)
+                                    viewModel.onChangeFullName(updatedText: string)
                                 },
-                                isFocused: $isFullNameTextFieldFocused,
+                                isFocused: $viewModel.isFullNameTextFieldFocused,
                                 trailingIcon: .constant(""),
                                 leadingIcon: .constant(""),
                                 isSecureText: .constant(false)
                             )
-                            if(isFullNameValid == false) {
-                                Text("\(fullNameErrorText)")
+                            if(viewModel.isFullNameValid == false) {
+                                Text("\(viewModel.fullNameErrorText)")
                                     .font(.custom("Poppins-Regular", size: 12))
                                     .foregroundColor(Color(hex: "#E12121"))
                             }
@@ -93,19 +52,19 @@ struct AddAddressScreen : View {
                         VStack(alignment: .leading) {
                             FloatingLabelTextField(
                                 placeholder: "Mobile Number*",
-                                text: $mobileNumberTextField,
-                                isValid: $isMobileNumberValid,
+                                text: $viewModel.mobileNumberTextField,
+                                isValid: $viewModel.isMobileNumberValid,
                                 onChange: { string in
-                                    onChangeMobileNumber(updatedText: string)
+                                    viewModel.onChangeMobileNumber(updatedText: string)
                                 },
-                                isFocused: $isMobileNumberTextFieldFocused,
+                                isFocused: $viewModel.isMobileNumberTextFieldFocused,
                                 keyboardType: .numberPad,
                                 trailingIcon: .constant(""),
                                 leadingIcon: .constant(""),
                                 isSecureText: .constant(false)
                             )
-                            if(isMobileNumberValid == false) {
-                                Text("\(mobileNumberErrorText)")
+                            if(viewModel.isMobileNumberValid == false) {
+                                Text("\(viewModel.mobileNumberErrorText)")
                                     .font(.custom("Poppins-Regular", size: 12))
                                     .foregroundColor(Color(hex: "#E12121"))
                             }
@@ -114,82 +73,82 @@ struct AddAddressScreen : View {
                         VStack(alignment: .leading) {
                             FloatingLabelTextField(
                                 placeholder: "Email ID*",
-                                text: $emailIdTextField,
-                                isValid: $isEmailIdValid,
+                                text: $viewModel.emailIdTextField,
+                                isValid: $viewModel.isEmailIdValid,
                                 onChange: { string in
-                                    onChangeEmailId(updatedText: string)
+                                    viewModel.onChangeEmailId(updatedText: string)
                                 },
-                                isFocused: $isEmailIdTextFieldFocused,
+                                isFocused: $viewModel.isEmailIdTextFieldFocused,
                                 trailingIcon: .constant(""),
                                 leadingIcon: .constant(""),
                                 isSecureText: .constant(false)
                             )
-                            if(isEmailIdValid == false) {
-                                Text("\(emailIdErrorText)")
+                            if(viewModel.isEmailIdValid == false) {
+                                Text("\(viewModel.emailIdErrorText)")
                                     .font(.custom("Poppins-Regular", size: 12))
                                     .foregroundColor(Color(hex: "#E12121"))
                             }
                         }
                         
-                        HStack(spacing: 10){
+                        HStack(alignment : .top , spacing: 10){
                             VStack(alignment: .leading){
                                 FloatingLabelTextField(
                                     placeholder: "ZIP/Postal Code*",
-                                    text: $postalCodeTextField,
-                                    isValid: $isPostalCodeValid,
+                                    text: $viewModel.postalCodeTextField,
+                                    isValid: $viewModel.isPostalCodeValid,
                                     onChange: { string in
-                                        onChangePostalCode(updatedText: string)
+                                        viewModel.onChangePostalCode(updatedText: string)
                                     },
-                                    isFocused: $isPostalCodeTextFieldFocused,
+                                    isFocused: $viewModel.isPostalCodeTextFieldFocused,
                                     keyboardType: .numberPad,
                                     trailingIcon: .constant(""),
                                     leadingIcon: .constant(""),
                                     isSecureText: .constant(false)
                                 )
-                                if(isPostalCodeValid == false) {
-                                    Text("\(postalCodeErrorText)")
+                                .fixedSize(horizontal: false, vertical: true)
+                                if(viewModel.isPostalCodeValid == false) {
+                                    Text("\(viewModel.postalCodeErrorText)")
                                         .font(.custom("Poppins-Regular", size: 12))
                                         .foregroundColor(Color(hex: "#E12121"))
                                 }
                             }
-                            .fixedSize(horizontal: false, vertical: true)
                             
                             VStack(alignment: .leading) {
                                 FloatingLabelTextField(
                                     placeholder: "City*",
-                                    text: $cityTextField,
-                                    isValid: $isCityValid,
+                                    text: $viewModel.cityTextField,
+                                    isValid: $viewModel.isCityValid,
                                     onChange: { string in
-                                        onChangeCity(updatedText: string)
+                                        viewModel.onChangeCity(updatedText: string)
                                     },
-                                    isFocused: $isCityTextFieldFocused,
+                                    isFocused: $viewModel.isCityTextFieldFocused,
                                     trailingIcon: .constant(""),
                                     leadingIcon: .constant(""),
                                     isSecureText: .constant(false)
                                 )
-                                if(isCityValid == false) {
-                                    Text("\(cityErrorText)")
+                                .fixedSize(horizontal: false, vertical: true)
+                                if(viewModel.isCityValid == false) {
+                                    Text("\(viewModel.cityErrorText)")
                                         .font(.custom("Poppins-Regular", size: 12))
                                         .foregroundColor(Color(hex: "#E12121"))
                                 }
                             }
-                            .fixedSize(horizontal: false, vertical: true)
                         }
                         VStack(alignment: .leading) {
                             FloatingLabelTextField(
                                 placeholder: "State*",
-                                text: $stateTextField,
-                                isValid: $isStateValid,
+                                text: $viewModel.stateTextField,
+                                isValid: $viewModel.isStateValid,
                                 onChange: { string in
-                                    onChangeState(updatedText: string)
+                                    viewModel.onChangeState(updatedText: string)
                                 },
-                                isFocused: $isStateTextFieldFocused,
+                                isFocused: $viewModel.isStateTextFieldFocused,
                                 trailingIcon: .constant(""),
                                 leadingIcon: .constant(""),
                                 isSecureText: .constant(false)
                             )
-                            if(isStateValid == false) {
-                                Text("\(stateErrorText)")
+                            if(viewModel.isStateValid == false) {
+                                Text("\(viewModel.stateErrorText)")
                                     .font(.custom("Poppins-Regular", size: 12))
                                     .foregroundColor(Color(hex: "#E12121"))
                             }
@@ -198,18 +157,18 @@ struct AddAddressScreen : View {
                         VStack(alignment: .leading) {
                             FloatingLabelTextField(
                                 placeholder: "House number, Apartment*",
-                                text: $mainAddressTextField,
-                                isValid: $isMainAddressValid,
+                                text: $viewModel.mainAddressTextField,
+                                isValid: $viewModel.isMainAddressValid,
                                 onChange: { string in
-                                    onChangeMainAddress(updatedText: string)
+                                    viewModel.onChangeMainAddress(updatedText: string)
                                 },
-                                isFocused: $isMainAddressTextFieldFocused,
+                                isFocused: $viewModel.isMainAddressTextFieldFocused,
                                 trailingIcon: .constant(""),
                                 leadingIcon: .constant(""),
                                 isSecureText: .constant(false)
                             )
-                            if(isMainAddressValid == false) {
-                                Text("\(mainAddressErrorText)")
+                            if(viewModel.isMainAddressValid == false) {
+                                Text("\(viewModel.mainAddressErrorText)")
                                     .font(.custom("Poppins-Regular", size: 12))
                                     .foregroundColor(Color(hex: "#E12121"))
                             }
@@ -217,9 +176,9 @@ struct AddAddressScreen : View {
                         
                         FloatingLabelTextField(
                             placeholder: "Area,Colony,Street, Sector",
-                            text: $secondaryAddressTextField,
+                            text: $viewModel.secondaryAddressTextField,
                             isValid: .constant(nil),
-                            isFocused: $isSecondaryAddressTextFieldFocused,
+                            isFocused: $viewModel.isSecondaryAddressTextFieldFocused,
                             trailingIcon: .constant(""),
                             leadingIcon: .constant(""),
                             isSecureText: .constant(false)
@@ -230,7 +189,7 @@ struct AddAddressScreen : View {
                 .padding(.horizontal, 16)
                 
                 Button(action: {
-                    if isAllDetailsValid() {
+                    if viewModel.isAllDetailsValid() {
                         
                     }
                 }){
@@ -238,7 +197,7 @@ struct AddAddressScreen : View {
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color(hex: brandColor))
+                        .background(Color(hex: viewModel.brandColor))
                         .cornerRadius(8)
                         .font(.custom("Poppins-Regular", size: 16))
                 }
@@ -249,129 +208,4 @@ struct AddAddressScreen : View {
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
     }
-    
-    private func onChangeFullName(updatedText : String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
-        
-        if trimmedText.isEmpty {
-            fullNameErrorText = "Required"
-            isFullNameValid = false
-        } else {
-            fullNameErrorText = ""
-            isFullNameValid = true
-        }
-    }
-    
-    private func onChangeMobileNumber(updatedText: String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
-        let mobileNumberPredicate = NSPredicate(format: "SELF MATCHES %@", numberRegex)
-        
-        if trimmedText.isEmpty {
-            mobileNumberErrorText = "Required"
-            isMobileNumberValid = false
-        } else if trimmedText.count < mobileNumberMinLength || trimmedText.count > mobileNumberMaxLength || !mobileNumberPredicate.evaluate(with: trimmedText) {
-            mobileNumberErrorText = "Mobile number must be \(mobileNumberMaxLength) digits"
-            isMobileNumberValid = false
-        } else {
-            mobileNumberErrorText = ""
-            isMobileNumberValid = true
-        }
-    }
-    
-    private func onChangeEmailId(updatedText : String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
-        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
-        
-        if trimmedText.isEmpty {
-            emailIdErrorText = "Required"
-            isEmailIdValid = false
-        } else if !emailPredicate.evaluate(with: trimmedText) {
-            emailIdErrorText = "Invalid Email"
-            isEmailIdValid = false
-        } else {
-            emailIdErrorText = ""
-            isEmailIdValid = true
-        }
-    }
-    
-    private func onChangePostalCode(updatedText : String) {
-        
-    }
-    
-    private func onChangeCity(updatedText : String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
-        
-        if trimmedText.isEmpty {
-            cityErrorText = "Required"
-            isCityValid = false
-        } else {
-            cityErrorText = ""
-            isCityValid = true
-        }
-    }
-    
-    private func onChangeState(updatedText : String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
-        
-        if trimmedText.isEmpty {
-            stateErrorText = "Required"
-            isStateValid = false
-        } else {
-            stateErrorText = ""
-            isStateValid = true
-        }
-    }
-    
-    private func onChangeMainAddress(updatedText : String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
-        
-        if trimmedText.isEmpty {
-            mainAddressErrorText = "Required"
-            isMainAddressValid = false
-        } else {
-            mainAddressErrorText = ""
-            isMainAddressValid = true
-        }
-    }
-    
-    private func isAllDetailsValid() -> Bool {
-        var isAllValid = true
-        
-        if (isFullNameValid == nil || isFullNameValid == false) {
-            onChangeFullName(updatedText: fullNameTextField)
-            isAllValid = false
-        }
-        if (isMobileNumberValid == nil || isMobileNumberValid == false) {
-            onChangeMobileNumber(updatedText: mobileNumberTextField)
-            isAllValid = false
-        }
-        if (isEmailIdValid == nil || isEmailIdValid == false) {
-            onChangeEmailId(updatedText: emailIdTextField)
-            isAllValid = false
-        }
-        if (isPostalCodeValid == nil || isPostalCodeValid == false) {
-            onChangePostalCode(updatedText: postalCodeTextField)
-            isAllValid = false
-        }
-        if (isCityValid == nil || isCityValid == false) {
-            onChangeCity(updatedText: cityTextField)
-            isAllValid = false
-        }
-        if (isStateValid == nil || isStateValid == false) {
-            onChangeState(updatedText: stateTextField)
-            isAllValid = false
-        }
-        if (isMainAddressValid == nil || isMainAddressValid == false) {
-            onChangeMainAddress(updatedText: mainAddressTextField)
-            isAllValid = false
-        }
-        
-        return isAllValid
-    }
 }
-
-//struct AddAddressScreen_Previews: PreviewProvider {
-//    static var previews: some View {
-//        AddAddressScreen()
-//    }
-//}
