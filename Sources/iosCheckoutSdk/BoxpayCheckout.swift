@@ -396,46 +396,50 @@ public struct BoxpayCheckout : View {
 
 private struct AddressSectionView: View {
     let address : String
-    var onClick : (() -> Void)?
+    var onClick : (() -> Void)
     var body: some View {
         if(address != ""){
-            VStack(alignment: .leading) {
-                HStack {
-                    Image(frameworkAsset: "map_pin_gray")
-                        .resizable()
-                        .foregroundColor(.green)
-                        .frame(width: 20, height: 20)
-                        .scaledToFit()
-                    
-                    VStack(alignment: .leading, spacing: 1) {
-                        HStack {
-                            Text("Deliver at ")
-                                .font(.custom("Poppins-Regular",size: 12))
-                                .foregroundColor(Color(hex: "#4F4D55")) +
-                            Text("Others")
-                                .font(.custom("Poppins-SemiBold", size: 12))
+            Button(action: {
+                onClick()
+            }) {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Image(frameworkAsset: "map_pin_gray")
+                            .resizable()
+                            .foregroundColor(.green)
+                            .frame(width: 20, height: 20)
+                            .scaledToFit()
+                        
+                        VStack(alignment: .leading, spacing: 1) {
+                            HStack {
+                                Text("Deliver at ")
+                                    .font(.custom("Poppins-Regular",size: 12))
+                                    .foregroundColor(Color(hex: "#4F4D55")) +
+                                Text("Others")
+                                    .font(.custom("Poppins-SemiBold", size: 12))
+                                    .foregroundColor(Color(hex: "#4F4D55"))
+                            }
+                            Text(address)
+                                .font(.custom("Poppins-SemiBold",size: 14))
                                 .foregroundColor(Color(hex: "#4F4D55"))
+                                .lineLimit(1)
+                                .frame(maxWidth: .infinity, alignment: .leading) // Ensures full width
                         }
-                        Text(address)
-                            .font(.custom("Poppins-SemiBold",size: 14))
-                            .foregroundColor(Color(hex: "#4F4D55"))
-                            .lineLimit(1)
-                            .frame(maxWidth: .infinity, alignment: .leading) // Ensures full width
+                        
+                        Spacer()
+                        
+                        Image(frameworkAsset: "chevron")
+                            .frame(width: 10, height: 10)
+                            .rotationEffect(.degrees(90))
+                        
                     }
-                    
-                    Spacer()
-                    
-                    Image(frameworkAsset: "chevron")
-                        .frame(width: 10, height: 10)
-                        .rotationEffect(.degrees(90))
-                    
+                    .padding(12)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .shadow(radius: 1)
+                    .padding(.horizontal, 16)
                 }
-                .padding(12)
-                .frame(maxWidth: .infinity)
-                .background(Color.white)
-                .cornerRadius(12)
-                .shadow(radius: 1)
-                .padding(.horizontal, 16)
             }
         }
     }
