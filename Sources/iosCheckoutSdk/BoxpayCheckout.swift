@@ -38,6 +38,7 @@ public struct BoxpayCheckout : View {
     @State private var navigateToNetBankingScreen = false
     @State private var navigateToBnplScreen = false
     @State private var navigateToEmiScreen = false
+    @State private var navigateToAddressScreen = false
     
     @State private var isCheckoutMainScreenFocused = false
     
@@ -222,6 +223,9 @@ public struct BoxpayCheckout : View {
             NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
+            NavigationLink(destination: AddAddressScreen(), isActive: $navigateToAddressScreen) {
+                        EmptyView()
+                    }
         }
         .onAppear {
             if !viewModel.isInitialized {
@@ -390,6 +394,7 @@ public struct BoxpayCheckout : View {
 
 private struct AddressSectionView: View {
     let address : String
+    var onClick : (() -> Void)?
     var body: some View {
         if(address != ""){
             VStack(alignment: .leading) {
@@ -417,6 +422,10 @@ private struct AddressSectionView: View {
                     }
                     
                     Spacer()
+                    
+                    Image(frameworkAsset: "chevron")
+                        .frame(width: 10, height: 10)
+                        .rotationEffect(.degrees(90))
                     
                 }
                 .padding(12)
