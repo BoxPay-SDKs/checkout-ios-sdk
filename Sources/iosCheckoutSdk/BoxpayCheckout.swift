@@ -88,7 +88,9 @@ public struct BoxpayCheckout : View {
                     )
                     ScrollView {
                         TitleHeaderView(text: "Address")
-                        AddressSectionView(address: formattedAddress())
+                        AddressSectionView(address: formattedAddress(), onClick:{
+                            navigateToAddressScreen = true
+                        })
                         if (!viewModel.recommendedIds.isEmpty) {
                             TitleHeaderView(text: "Recommended")
                                 .padding(.bottom, 8)
