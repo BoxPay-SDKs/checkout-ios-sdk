@@ -70,59 +70,65 @@ struct AddAddressScreen : View {
                 )
                 ScrollView {
                     VStack(spacing: 20) {
-                        FloatingLabelTextField(
-                            placeholder: "Full Name*",
-                            text: $fullNameTextField,
-                            isValid: $isFullNameValid,
-                            onChange: { string in
-                                onChangeFullName(updatedText: string)
-                            },
-                            isFocused: $isFullNameTextFieldFocused,
-                            trailingIcon: .constant(""),
-                            leadingIcon: .constant(""),
-                            isSecureText: .constant(false)
-                        )
-                        if(isFullNameValid == false) {
-                            Text("\(fullNameErrorText)")
-                                .font(.custom("Poppins-Regular", size: 12))
-                                .foregroundColor(Color(hex: "#E12121"))
+                        VStack(alignment: .leading){
+                            FloatingLabelTextField(
+                                placeholder: "Full Name*",
+                                text: $fullNameTextField,
+                                isValid: $isFullNameValid,
+                                onChange: { string in
+                                    onChangeFullName(updatedText: string)
+                                },
+                                isFocused: $isFullNameTextFieldFocused,
+                                trailingIcon: .constant(""),
+                                leadingIcon: .constant(""),
+                                isSecureText: .constant(false)
+                            )
+                            if(isFullNameValid == false) {
+                                Text("\(fullNameErrorText)")
+                                    .font(.custom("Poppins-Regular", size: 12))
+                                    .foregroundColor(Color(hex: "#E12121"))
+                            }
                         }
                         
-                        FloatingLabelTextField(
-                            placeholder: "Mobile Number*",
-                            text: $mobileNumberTextField,
-                            isValid: $isMobileNumberValid,
-                            onChange: { string in
-                                onChangeMobileNumber(updatedText: string)
-                            },
-                            isFocused: $isMobileNumberTextFieldFocused,
-                            keyboardType: .numberPad,
-                            trailingIcon: .constant(""),
-                            leadingIcon: .constant(""),
-                            isSecureText: .constant(false)
-                        )
-                        if(isMobileNumberValid == false) {
-                            Text("\(mobileNumberErrorText)")
-                                .font(.custom("Poppins-Regular", size: 12))
-                                .foregroundColor(Color(hex: "#E12121"))
+                        VStack(alignment: .leading) {
+                            FloatingLabelTextField(
+                                placeholder: "Mobile Number*",
+                                text: $mobileNumberTextField,
+                                isValid: $isMobileNumberValid,
+                                onChange: { string in
+                                    onChangeMobileNumber(updatedText: string)
+                                },
+                                isFocused: $isMobileNumberTextFieldFocused,
+                                keyboardType: .numberPad,
+                                trailingIcon: .constant(""),
+                                leadingIcon: .constant(""),
+                                isSecureText: .constant(false)
+                            )
+                            if(isMobileNumberValid == false) {
+                                Text("\(mobileNumberErrorText)")
+                                    .font(.custom("Poppins-Regular", size: 12))
+                                    .foregroundColor(Color(hex: "#E12121"))
+                            }
                         }
                         
-                        FloatingLabelTextField(
-                            placeholder: "Email ID*",
-                            text: $emailIdTextField,
-                            isValid: $isEmailIdValid,
-                            onChange: { string in
-                                onChangeEmailId(updatedText: string)
-                            },
-                            isFocused: $isEmailIdTextFieldFocused,
-                            trailingIcon: .constant(""),
-                            leadingIcon: .constant(""),
-                            isSecureText: .constant(false)
-                        )
-                        if(isEmailIdValid == false) {
-                            Text("\(emailIdErrorText)")
-                                .font(.custom("Poppins-Regular", size: 12))
-                                .foregroundColor(Color(hex: "#E12121"))
+                        VStack(alignment: .leading) {
+                            FloatingLabelTextField(
+                                placeholder: "Email ID*",
+                                text: $emailIdTextField,
+                                isValid: $isEmailIdValid,
+                                onChange: { string in
+                                    onChangeEmailId(updatedText: string)
+                                },
+                                isFocused: $isEmailIdTextFieldFocused,
+                                trailingIcon: .constant(""),
+                                leadingIcon: .constant(""),
+                                isSecureText: .constant(false)
+                            )
+                            if(isEmailIdValid == false) {
+                                Text("\(emailIdErrorText)")
+                                    .font(.custom("Poppins-Regular", size: 12))
+                                    .foregroundColor(Color(hex: "#E12121"))
+                            }
                         }
                         
                         HStack(spacing: 10){
@@ -140,14 +146,14 @@ struct AddAddressScreen : View {
                                     leadingIcon: .constant(""),
                                     isSecureText: .constant(false)
                                 )
-                                .fixedSize(horizontal: false, vertical: true)
-                                
                                 if(isPostalCodeValid == false) {
                                     Text("\(postalCodeErrorText)")
                                         .font(.custom("Poppins-Regular", size: 12))
                                         .foregroundColor(Color(hex: "#E12121"))
                                 }
                             }
+                            .fixedSize(horizontal: false, vertical: true)
+                            
                             VStack(alignment: .leading) {
                                 FloatingLabelTextField(
                                     placeholder: "City*",
@@ -161,49 +167,52 @@ struct AddAddressScreen : View {
                                     leadingIcon: .constant(""),
                                     isSecureText: .constant(false)
                                 )
-                                .fixedSize(horizontal: false, vertical: true)
-                                
                                 if(isCityValid == false) {
                                     Text("\(cityErrorText)")
                                         .font(.custom("Poppins-Regular", size: 12))
                                         .foregroundColor(Color(hex: "#E12121"))
                                 }
                             }
+                            .fixedSize(horizontal: false, vertical: true)
                         }
-                        FloatingLabelTextField(
-                            placeholder: "State*",
-                            text: $stateTextField,
-                            isValid: $isStateValid,
-                            onChange: { string in
-                                onChangeState(updatedText: string)
-                            },
-                            isFocused: $isStateTextFieldFocused,
-                            trailingIcon: .constant(""),
-                            leadingIcon: .constant(""),
-                            isSecureText: .constant(false)
-                        )
-                        if(isStateValid == false) {
-                            Text("\(stateErrorText)")
-                                .font(.custom("Poppins-Regular", size: 12))
-                                .foregroundColor(Color(hex: "#E12121"))
+                        VStack(alignment: .leading) {
+                            FloatingLabelTextField(
+                                placeholder: "State*",
+                                text: $stateTextField,
+                                isValid: $isStateValid,
+                                onChange: { string in
+                                    onChangeState(updatedText: string)
+                                },
+                                isFocused: $isStateTextFieldFocused,
+                                trailingIcon: .constant(""),
+                                leadingIcon: .constant(""),
+                                isSecureText: .constant(false)
+                            )
+                            if(isStateValid == false) {
+                                Text("\(stateErrorText)")
+                                    .font(.custom("Poppins-Regular", size: 12))
+                                    .foregroundColor(Color(hex: "#E12121"))
+                            }
                         }
                         
-                        FloatingLabelTextField(
-                            placeholder: "House number, Apartment*",
-                            text: $mainAddressTextField,
-                            isValid: $isMainAddressValid,
-                            onChange: { string in
-                                onChangeMainAddress(updatedText: string)
-                            },
-                            isFocused: $isMainAddressTextFieldFocused,
-                            trailingIcon: .constant(""),
-                            leadingIcon: .constant(""),
-                            isSecureText: .constant(false)
-                        )
-                        if(isMainAddressValid == false) {
-                            Text("\(mainAddressErrorText)")
-                                .font(.custom("Poppins-Regular", size: 12))
-                                .foregroundColor(Color(hex: "#E12121"))
+                        VStack(alignment: .leading) {
+                            FloatingLabelTextField(
+                                placeholder: "House number, Apartment*",
+                                text: $mainAddressTextField,
+                                isValid: $isMainAddressValid,
+                                onChange: { string in
+                                    onChangeMainAddress(updatedText: string)
+                                },
+                                isFocused: $isMainAddressTextFieldFocused,
+                                trailingIcon: .constant(""),
+                                leadingIcon: .constant(""),
+                                isSecureText: .constant(false)
+                            )
+                            if(isMainAddressValid == false) {
+                                Text("\(mainAddressErrorText)")
+                                    .font(.custom("Poppins-Regular", size: 12))
+                                    .foregroundColor(Color(hex: "#E12121"))
+                            }
                         }
                         
                         FloatingLabelTextField(
