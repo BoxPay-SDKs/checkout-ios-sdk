@@ -21,9 +21,8 @@ class AddAddressViewModel: ObservableObject {
     @Published var mainAddressTextField = ""
     @Published var secondaryAddressTextField = ""
     @Published var selectedCountryCode = "IN"
-    @Published var selectedCountryName = "India"
     @Published var selectedCountryNumberCode = "+91"
-    @Published var countryTextField = ""
+    @Published var countryTextField = "India"
     
     @Published var isFullNameTextFieldFocused = false
     @Published var isMobileNumberTextFieldFocused = false
@@ -259,10 +258,10 @@ class AddAddressViewModel: ObservableObject {
     func onSelectCountryPicker(selectedCountry: String) {
         if let (code, country) = countryData.first(where: { $0.value.fullName == selectedCountry }) {
             selectedCountryCode = code
-            selectedCountryName = country.fullName
+            countryTextField = country.fullName
             selectedCountryNumberCode = country.isdCode
             print("selectedCountryCode \(selectedCountryCode)")
-            print("selectedCountryName \(selectedCountryName)")
+            print("selectedCountryName \(countryTextField)")
             print("selectedCountryNumberCode \(selectedCountryNumberCode)")
         } else {
             print("Selected country not found in data")
