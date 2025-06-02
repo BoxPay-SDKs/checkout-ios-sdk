@@ -52,7 +52,7 @@ struct AddAddressScreen : View {
                                             VStack(alignment: .leading, spacing: 0) {
                                                 ForEach(viewModel.countryNames, id: \.self) { country in
                                                     Button(action: {
-                                                        viewModel.onChangeCountryTextField(updatedText: country)
+                                                        viewModel.onSelectCountryPicker(selectedCountry: country)
                                                     }) {
                                                         Text(country)
                                                             .foregroundColor(Color(hex: "#0A090B"))
