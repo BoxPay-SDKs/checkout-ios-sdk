@@ -15,13 +15,15 @@ class AddAddressViewModel: ObservableObject {
     @Published var mobileNumberMaxLength = 10
     @Published var emailIdTextField = ""
     @Published var postalCodeTextField = ""
-    @Published var postalCodeMaxLength = 0
+    @Published var postalCodeMaxLength = 6
     @Published var cityTextField = ""
     @Published var stateTextField = ""
     @Published var mainAddressTextField = ""
     @Published var secondaryAddressTextField = ""
-    @Published var selectedCountryName = "IN"
-    @Published var selectedCountryCode = "+91"
+    @Published var selectedCountryCode = "IN"
+    @Published var selectedCountryName = "India"
+    @Published var selectedCountryNumberCode = "+91"
+    @Published var countryTextField = ""
     
     @Published var isFullNameTextFieldFocused = false
     @Published var isMobileNumberTextFieldFocused = false
@@ -31,6 +33,7 @@ class AddAddressViewModel: ObservableObject {
     @Published var isStateTextFieldFocused = false
     @Published var isMainAddressTextFieldFocused = false
     @Published var isSecondaryAddressTextFieldFocused = false
+    @Published var countryTextFieldFocused = false
     
     @Published var isFullNameValid : Bool? = nil
     @Published var isMobileNumberValid : Bool? = nil
@@ -122,7 +125,18 @@ class AddAddressViewModel: ObservableObject {
     }
     
     func onChangePostalCode(updatedText : String) {
+        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
         
+        if trimmedText.isEmpty {
+            postalCodeErrorText = "Required"
+            isPostalCodeValid = false
+        } else if selectedCountryNumberCode == "+91" && trimmedText.count < 6 {
+            postalCodeErrorText = "Zip/Postal code must be 6 digits"
+            isPostalCodeValid = false
+        } else {
+            postalCodeErrorText = ""
+            isPostalCodeValid = true
+        }
     }
     
     func onChangeCity(updatedText : String) {
@@ -204,13 +218,12 @@ class AddAddressViewModel: ObservableObject {
             do {
                 let data = try Data(contentsOf: url)
                 let decoded = try JSONDecoder().decode([String: Country].self, from: data)
-                let sorted = decoded.sorted { $0.value.fullName < $1.value.fullName }
+                let sorted = decoded.sorted { $0.key < $1.key }
 
                 DispatchQueue.main.async {
                     self.countryData = Dictionary(uniqueKeysWithValues: sorted)
                     self.countryCodes = sorted.map { $0.key }
                     self.countryNames = sorted.map { $0.value.fullName }
-                    self.selectedCountryCode = sorted.first?.key ?? ""
                     self.updatePhoneLengths()
                 }
             } catch {

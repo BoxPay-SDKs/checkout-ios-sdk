@@ -71,6 +71,8 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
 
     @Binding var isSecureText: Bool
 
+    var leadingViewType: LeadingViewType? = nil
+
     // MARK: - makeUIView
     func makeUIView(context: Context) -> UITextField {
         let textField = PaddedTextField()
@@ -85,21 +87,40 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
 
         let bundle = Bundle.module
 
-        // Leading icon
-        if let leadingIconName = leadingIconName, !leadingIconName.isEmpty {
-            let leadingImage = UIImage(named: leadingIconName, in: bundle, compatibleWith: nil)
-            let leadingButton = UIButton(type: .custom)
-            leadingButton.setImage(leadingImage?.withRenderingMode(.alwaysOriginal), for: .normal)
-            leadingButton.tintColor = textColor
-            leadingButton.imageView?.contentMode = .scaleAspectFit
-            leadingButton.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
-            textField.leftView = leadingButton
+        switch leadingViewType {
+        case .icon(let name):
+            let image = UIImage(named: name, in: Bundle.module, compatibleWith: nil)
+            let button = UIButton(type: .custom)
+            button.setImage(image?.withRenderingMode(.alwaysOriginal), for: .normal)
+            button.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+            textField.leftView = button
             textField.leftViewMode = .always
-
             textField.leftPadding = 36
-        } else {
+
+        case .picker(let options, let onSelect):
+            let pickerButton = UIButton(type: .custom)
+            pickerButton.setTitle("▼", for: .normal)
+            pickerButton.setTitleColor(.black, for: .normal)
+            pickerButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
+            pickerButton.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
+            pickerButton.addAction(UIAction(handler: { _ in
+                // Simple popup or alert for selection
+                let alert = UIAlertController(title: "Select Option", message: nil, preferredStyle: .actionSheet)
+                options.forEach { option in
+                    alert.addAction(UIAlertAction(title: option, style: .default, handler: { _ in
+                        onSelect(option)
+                    }))
+                }
+                UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true)
+            }), for: .touchUpInside)
+            textField.leftView = pickerButton
+            textField.leftViewMode = .always
+            textField.leftPadding = 36
+
+        case .none:
             textField.leftPadding = 8
         }
+
         
         // Trailing icon
         if let trailingIconName = trailingIconName, !trailingIconName.isEmpty {

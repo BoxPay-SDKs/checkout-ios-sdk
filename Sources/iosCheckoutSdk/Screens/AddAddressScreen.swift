@@ -31,6 +31,18 @@ struct AddAddressScreen : View {
                     VStack(spacing: 20) {
                         VStack(alignment: .leading){
                             FloatingLabelTextField(
+                                placeholder: "Country",
+                                text: $viewModel.countryTextField,
+                                isValid: .constant(nil),
+                                isFocused: $viewModel.countryTextFieldFocused,
+                                keyboardType: .default,
+                                trailingIcon: .constant("chevron"),
+                                leadingIcon: .constant(nil),
+                                onClickIcon: nil,
+                                isSecureText: .constant(false),
+                                suggestions: viewModel.countryNames
+                            )
+                            FloatingLabelTextField(
                                 placeholder: "Full Name*",
                                 text: $viewModel.fullNameTextField,
                                 isValid: $viewModel.isFullNameValid,
