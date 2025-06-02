@@ -29,40 +29,51 @@ struct AddAddressScreen : View {
                 )
                 ScrollView {
                     VStack(spacing: 20) {
-                        FloatingLabelTextField(
-                            placeholder: "Country*",
-                            text: $viewModel.countryTextField,
-                            isValid: .constant(nil),
-                            onChange: { string in
-                                viewModel.onChangeCountryTextField(updatedText: string)
-                            },
-                            isFocused: $viewModel.isCountryTextFieldFocused,
-                            trailingIcon: .constant(""),
-                            leadingIcon: .constant(""),
-                            isSecureText: .constant(false)
-                        )
-                        if viewModel.isCountryTextFieldFocused && !viewModel.countryNames.isEmpty {
-                            VStack(alignment: .leading, spacing: 0) {
-                                ForEach(viewModel.countryNames, id: \.self) { country in
-                                    Button(action: {
-                                        viewModel.onSelectCountryPicker(selectedCountry: country)
-                                    }) {
-                                        Text(country)
-                                            .padding(.vertical, 8)
-                                            .padding(.horizontal)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .background(Color.white)
+                        ZStack(alignment: .top) {
+                                FloatingLabelTextField(
+                                    placeholder: "Country*",
+                                    text: $viewModel.countryTextField,
+                                    isValid: .constant(nil),
+                                    onChange: { string in
+                                        viewModel.onChangeCountryTextField(updatedText: string)
+                                    },
+                                    isFocused: $viewModel.isCountryTextFieldFocused,
+                                    trailingIcon: .constant("chevron"),
+                                    leadingIcon: .constant(""),
+                                    isSecureText: .constant(false)
+                                )
+                                .zIndex(0) // keep the field below the dropdown
+                                
+                                // Only show the dropdown if the field is focused and there are results:
+                                if viewModel.isCountryTextFieldFocused && !viewModel.countryNames.isEmpty {
+                                    ScrollView(showsIndicators: true) {
+                                        VStack(spacing: 0) {
+                                            ForEach(viewModel.countryNames, id: \.self) { country in
+                                                Button(action: {
+                                                    viewModel.onChangeCountryTextField(updatedText: country)
+                                                }) {
+                                                    Text(country)
+                                                        .foregroundColor(.primary)
+                                                        .padding(.vertical, 8)
+                                                        .padding(.horizontal, 12)
+                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                        .background(Color.white)
+                                                }
+                                                Divider() // optional: separator between rows
+                                            }
+                                        }
                                     }
+                                    .frame(maxHeight: 200)
+                                    .background(Color.white)
+                                    .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                    )
+                                    .offset(y: 56)
+                                    .zIndex(1)
                                 }
                             }
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.gray.opacity(0.4))
-                            )
-                            .frame(height: 200)
-                        }
                         VStack(alignment: .leading){
                             FloatingLabelTextField(
                                 placeholder: "Full Name*",
