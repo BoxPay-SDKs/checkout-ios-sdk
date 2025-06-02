@@ -42,7 +42,6 @@ struct AddAddressScreen : View {
                                     leadingIcon: .constant(""),
                                     isSecureText: .constant(false)
                                 )
-                                .zIndex(0) // keep the field below the dropdown
                                 
                                 // Only show the dropdown if the field is focused and there are results:
                                 if viewModel.isCountryTextFieldFocused && !viewModel.countryNames.isEmpty {
