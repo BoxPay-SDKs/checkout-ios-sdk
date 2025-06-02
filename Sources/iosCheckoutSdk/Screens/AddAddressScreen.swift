@@ -44,7 +44,7 @@ struct AddAddressScreen : View {
                                         leadingIcon: .constant(""),
                                         isSecureText: .constant(false)
                                     )
-                                    .frame(height: 56)
+                                    .frame(height: 40)
                                     
                                     // Dropdown overlayed
                                     if viewModel.isCountryTextFieldFocused && !viewModel.countryNames.isEmpty {
@@ -53,15 +53,14 @@ struct AddAddressScreen : View {
                                                 ForEach(viewModel.countryNames, id: \.self) { country in
                                                     Button(action: {
                                                         viewModel.onChangeCountryTextField(updatedText: country)
-                                                        viewModel.isCountryTextFieldFocused = false
-                                                        viewModel.countryNames = []
                                                     }) {
                                                         Text(country)
-                                                            .foregroundColor(.primary)
+                                                            .foregroundColor(Color(hex: "#0A090B"))
                                                             .padding(.vertical, 8)
                                                             .padding(.horizontal, 12)
                                                             .frame(maxWidth: .infinity, alignment: .leading)
                                                             .background(Color.white)
+                                                            .font(.custom("Poppins-Regular", size: 16))
                                                     }
                                                     Divider()
                                                 }
