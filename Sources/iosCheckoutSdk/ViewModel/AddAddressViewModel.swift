@@ -33,7 +33,7 @@ class AddAddressViewModel: ObservableObject {
     @Published var isStateTextFieldFocused = false
     @Published var isMainAddressTextFieldFocused = false
     @Published var isSecondaryAddressTextFieldFocused = false
-    @Published var countryTextFieldFocused = false
+    @Published var isCountryTextFieldFocused = false
     
     @Published var isFullNameValid : Bool? = nil
     @Published var isMobileNumberValid : Bool? = nil
@@ -54,6 +54,8 @@ class AddAddressViewModel: ObservableObject {
     @Published var countryData: [String: Country] = [:]
     @Published var countryCodes: [String] = []
     @Published var countryNames: [String] = []
+    private var allCountryNames: [String] = [] // Full list of countries
+
     
     let emailRegex = "^(?!.*\\.\\.)(?!.*\\.\\@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
     let numberRegex = "^[0-9]+$"
@@ -90,6 +92,18 @@ class AddAddressViewModel: ObservableObject {
             fullNameErrorText = ""
             isFullNameValid = true
         }
+    }
+    
+    func onChangeCountryTextField(updatedText : String) {
+        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
+        
+        if trimmedText.isEmpty {
+                countryNames = allCountryNames
+            } else {
+                countryNames = allCountryNames.filter {
+                    $0.lowercased().contains(trimmedText.lowercased())
+                }.sorted()
+            }
     }
     
     func onChangeMobileNumber(updatedText: String) {
@@ -224,6 +238,7 @@ class AddAddressViewModel: ObservableObject {
                     self.countryData = Dictionary(uniqueKeysWithValues: sorted)
                     self.countryCodes = sorted.map { $0.key }
                     self.countryNames = sorted.map { $0.value.fullName }
+                    self.allCountryNames = sorted.map { $0.value.fullName }
                     self.updatePhoneLengths()
                 }
             } catch {
@@ -240,4 +255,18 @@ class AddAddressViewModel: ObservableObject {
             mobileNumberMaxLength = 0
         }
     }
+    
+    func onSelectCountryPicker(selectedCountry: String) {
+        if let (code, country) = countryData.first(where: { $0.value.fullName == selectedCountry }) {
+            selectedCountryCode = code
+            selectedCountryName = country.fullName
+            selectedCountryNumberCode = country.isdCode
+            print("selectedCountryCode \(selectedCountryCode)")
+            print("selectedCountryName \(selectedCountryName)")
+            print("selectedCountryNumberCode \(selectedCountryNumberCode)")
+        } else {
+            print("Selected country not found in data")
+        }
+    }
+
 }

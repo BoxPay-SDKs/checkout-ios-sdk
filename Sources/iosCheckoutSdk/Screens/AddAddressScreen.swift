@@ -29,19 +29,40 @@ struct AddAddressScreen : View {
                 )
                 ScrollView {
                     VStack(spacing: 20) {
-                        VStack(alignment: .leading){
-                            FloatingLabelTextField(
-                                placeholder: "Country",
-                                text: $viewModel.countryTextField,
-                                isValid: .constant(nil),
-                                isFocused: $viewModel.countryTextFieldFocused,
-                                keyboardType: .default,
-                                trailingIcon: .constant("chevron"),
-                                leadingIcon: .constant(nil),
-                                onClickIcon: nil,
-                                isSecureText: .constant(false),
-                                suggestions: viewModel.countryNames
+                        FloatingLabelTextField(
+                            placeholder: "Country*",
+                            text: $viewModel.countryTextField,
+                            isValid: .constant(nil),
+                            onChange: { string in
+                                viewModel.onChangeCountryTextField(updatedText: string)
+                            },
+                            isFocused: $viewModel.isCountryTextFieldFocused,
+                            trailingIcon: .constant(""),
+                            leadingIcon: .constant(""),
+                            isSecureText: .constant(false)
+                        )
+                        if viewModel.isCountryTextFieldFocused && !viewModel.countryNames.isEmpty {
+                            VStack(alignment: .leading, spacing: 0) {
+                                ForEach(viewModel.countryNames, id: \.self) { country in
+                                    Button(action: {
+                                        viewModel.onSelectCountryPicker(selectedCountry: country)
+                                    }) {
+                                        Text(country)
+                                            .padding(.vertical, 8)
+                                            .padding(.horizontal)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .background(Color.white)
+                                    }
+                                }
+                            }
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.gray.opacity(0.4))
                             )
+                        }
+                        VStack(alignment: .leading){
                             FloatingLabelTextField(
                                 placeholder: "Full Name*",
                                 text: $viewModel.fullNameTextField,
