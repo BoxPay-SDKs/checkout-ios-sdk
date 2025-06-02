@@ -29,21 +29,19 @@ struct AddAddressScreen : View {
                 )
                 ScrollView {
                     VStack(spacing: 20) {
+                        FloatingLabelTextField(
+                            placeholder: "Country*",
+                            text: $viewModel.countryTextField,
+                            isValid: .constant(nil),
+                            onChange: { string in
+                                viewModel.onChangeCountryTextField(updatedText: string)
+                            },
+                            isFocused: $viewModel.isCountryTextFieldFocused,
+                            trailingIcon: .constant("chevron"),
+                            leadingIcon: .constant(""),
+                            isSecureText: .constant(false)
+                        )
                         ZStack(alignment: .top) {
-                                FloatingLabelTextField(
-                                    placeholder: "Country*",
-                                    text: $viewModel.countryTextField,
-                                    isValid: .constant(nil),
-                                    onChange: { string in
-                                        viewModel.onChangeCountryTextField(updatedText: string)
-                                    },
-                                    isFocused: $viewModel.isCountryTextFieldFocused,
-                                    trailingIcon: .constant("chevron"),
-                                    leadingIcon: .constant(""),
-                                    isSecureText: .constant(false)
-                                )
-                                
-                                // Only show the dropdown if the field is focused and there are results:
                                 if viewModel.isCountryTextFieldFocused && !viewModel.countryNames.isEmpty {
                                     ScrollView(showsIndicators: true) {
                                         VStack(spacing: 0) {
