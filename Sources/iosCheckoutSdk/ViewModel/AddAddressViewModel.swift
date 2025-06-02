@@ -260,13 +260,13 @@ class AddAddressViewModel: ObservableObject {
             selectedCountryCode = code
             countryTextField = country.fullName
             selectedCountryNumberCode = country.isdCode
+            countryNames = []
             print("selectedCountryCode \(selectedCountryCode)")
             print("selectedCountryName \(countryTextField)")
             print("selectedCountryNumberCode \(selectedCountryNumberCode)")
         } else {
             print("Selected country not found in data")
         }
-        isCountryTextFieldFocused = false
     }
 
 }
