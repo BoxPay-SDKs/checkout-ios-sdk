@@ -61,6 +61,7 @@ struct AddAddressScreen : View {
                                 RoundedRectangle(cornerRadius: 8)
                                     .stroke(Color.gray.opacity(0.4))
                             )
+                            .frame(height: 200)
                         }
                         VStack(alignment: .leading){
                             FloatingLabelTextField(
