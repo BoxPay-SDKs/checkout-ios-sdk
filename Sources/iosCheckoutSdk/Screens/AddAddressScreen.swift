@@ -105,7 +105,7 @@ struct AddAddressScreen : View {
                             ).background(
                                 GeometryReader { geo in
                                     Color.clear
-                                        .preference(key: CountryFieldBoundsPreferenceKey.self, value: geo.frame(in: .global))
+                                        .preference(key: CountryFieldBoundsPreferenceKey.self, value: geo.frame(in: .named("formCoordinateSpace")))
                                 }
                             )
                             .onPreferenceChange(CountryFieldBoundsPreferenceKey.self) { value in
@@ -208,6 +208,7 @@ struct AddAddressScreen : View {
                                 isSecureText: .constant(false)
                             )
                         }
+                        .coordinateSpace(name: "formCoordinateSpace")
                         .padding(.top, 20)
                         if viewModel.isCountryTextFieldFocused {
                                 GeometryReader { geo in
@@ -238,6 +239,7 @@ struct AddAddressScreen : View {
                                                 }
                                             }
                                         }
+                                        .padding(.top, 20)
                                         .background(Color.white)
                                         .cornerRadius(8)
                                         .overlay(
@@ -246,7 +248,8 @@ struct AddAddressScreen : View {
                                         )
                                     }
                                     .frame(maxHeight: 200)
-                                    .position(x: geo.size.width / 2, y: 90) // Y offset to place below TextField
+                                    .position(x: countryFieldFrame.midX,
+                                                  y: countryFieldFrame.maxY + 10) // Y offset to place below TextField
                                     .zIndex(1)
                                 }
                             }
