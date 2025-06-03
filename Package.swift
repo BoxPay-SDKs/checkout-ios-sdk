@@ -37,7 +37,8 @@ let package = Package(
                 .process("PaymentFailed.json"),
                 .process("PaymentSuccessful.json"),
                 .process("SessionExpired.json"),
-                .process("Fonts")
+                .process("Fonts"),
+                .process("CountryCodes.json")
             ]
         ),
 

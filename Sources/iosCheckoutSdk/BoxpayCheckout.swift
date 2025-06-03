@@ -38,8 +38,10 @@ public struct BoxpayCheckout : View {
     @State private var navigateToNetBankingScreen = false
     @State private var navigateToBnplScreen = false
     @State private var navigateToEmiScreen = false
+    @State private var navigateToAddressScreen = false
     
     @State private var isCheckoutMainScreenFocused = false
+    @State private var isAddressUpdated = false
     
     @State private var paymentUrl : String? = nil
     @State private var paymentHtmlString: String? = nil
@@ -87,7 +89,9 @@ public struct BoxpayCheckout : View {
                     )
                     ScrollView {
                         TitleHeaderView(text: "Address")
-                        AddressSectionView(address: formattedAddress())
+                        AddressSectionView(address: $viewModel.address, onClick:{
+                            navigateToAddressScreen = true
+                        })
                         if (!viewModel.recommendedIds.isEmpty) {
                             TitleHeaderView(text: "Recommended")
                                 .padding(.bottom, 8)
@@ -222,6 +226,9 @@ public struct BoxpayCheckout : View {
             NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
+            NavigationLink(destination: AddAddressScreen(isAddressUpdated: $isAddressUpdated), isActive: $navigateToAddressScreen) {
+                        EmptyView()
+                    }
         }
         .onAppear {
             if !viewModel.isInitialized {
@@ -293,7 +300,13 @@ public struct BoxpayCheckout : View {
                 triggerPaymentStatusCallBack()
             }
         }
-
+        .onChange(of: isAddressUpdated) { focused in
+            if focused {
+                Task {
+                    viewModel.address = await viewModel.formattedAddress()
+                }
+            }
+        }
         .sheet(isPresented: $showWebView) {
             WebView(
                 url: URL(string: paymentUrl ?? ""), htmlString: paymentHtmlString,
@@ -305,13 +318,6 @@ public struct BoxpayCheckout : View {
             )
         }
     }
-    
-    private func formattedAddress() -> String {
-        if let address = viewModel.sessionData?.paymentDetails.shopper.deliveryAddress {
-               return "\(address.address1 ?? ""), \(address.address2 ?? ""), \(address.city ?? ""), \(address.state ?? ""), \(address.postalCode ?? "")"
-           }
-           return ""
-       }
     
     private func isGooglePayInstalled() -> Bool {
         return UIApplication.shared.canOpenURL(URL(string: "tez://")!)
@@ -389,42 +395,51 @@ public struct BoxpayCheckout : View {
 }
 
 private struct AddressSectionView: View {
-    let address : String
+    @Binding var address : String
+    var onClick : (() -> Void)
     var body: some View {
         if(address != ""){
-            VStack(alignment: .leading) {
-                HStack {
-                    Image(frameworkAsset: "map_pin_gray")
-                        .resizable()
-                        .foregroundColor(.green)
-                        .frame(width: 20, height: 20)
-                        .scaledToFit()
-                    
-                    VStack(alignment: .leading, spacing: 1) {
-                        HStack {
-                            Text("Deliver at ")
-                                .font(.custom("Poppins-Regular",size: 12))
-                                .foregroundColor(Color(hex: "#4F4D55")) +
-                            Text("Others")
-                                .font(.custom("Poppins-SemiBold", size: 12))
+            Button(action: {
+                onClick()
+            }) {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Image(frameworkAsset: "map_pin_gray")
+                            .resizable()
+                            .foregroundColor(.green)
+                            .frame(width: 20, height: 20)
+                            .scaledToFit()
+                        
+                        VStack(alignment: .leading, spacing: 1) {
+                            HStack {
+                                Text("Deliver at ")
+                                    .font(.custom("Poppins-Regular",size: 12))
+                                    .foregroundColor(Color(hex: "#4F4D55")) +
+                                Text("Others")
+                                    .font(.custom("Poppins-SemiBold", size: 12))
+                                    .foregroundColor(Color(hex: "#4F4D55"))
+                            }
+                            Text(address)
+                                .font(.custom("Poppins-SemiBold",size: 14))
                                 .foregroundColor(Color(hex: "#4F4D55"))
+                                .lineLimit(1)
+                                .frame(maxWidth: .infinity, alignment: .leading) // Ensures full width
                         }
-                        Text(address)
-                            .font(.custom("Poppins-SemiBold",size: 14))
-                            .foregroundColor(Color(hex: "#4F4D55"))
-                            .lineLimit(1)
-                            .frame(maxWidth: .infinity, alignment: .leading) // Ensures full width
+                        
+                        Spacer()
+                        
+                        Image(frameworkAsset: "chevron")
+                            .frame(width: 10, height: 10)
+                            .rotationEffect(.degrees(90))
+                        
                     }
-                    
-                    Spacer()
-                    
+                    .padding(12)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .shadow(radius: 1)
+                    .padding(.horizontal, 16)
                 }
-                .padding(12)
-                .frame(maxWidth: .infinity)
-                .background(Color.white)
-                .cornerRadius(12)
-                .shadow(radius: 1)
-                .padding(.horizontal, 16)
             }
         }
     }

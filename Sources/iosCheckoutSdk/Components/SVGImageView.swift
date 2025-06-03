@@ -14,7 +14,7 @@ struct SVGImageView: View {
                     .resizable()
                     .scaledToFit()
             } else {
-                WebImage(url: URL(string: url))
+                WebImage(url: url)
                     .resizable()
                     .onFailure { _ in
                         hasFailed = true

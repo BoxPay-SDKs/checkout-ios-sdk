@@ -85,7 +85,6 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
 
         let bundle = Bundle.module
 
-        // Leading icon
         if let leadingIconName = leadingIconName, !leadingIconName.isEmpty {
             let leadingImage = UIImage(named: leadingIconName, in: bundle, compatibleWith: nil)
             let leadingButton = UIButton(type: .custom)
@@ -95,11 +94,11 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
             leadingButton.frame = CGRect(x: 0, y: 0, width: 24, height: 24)
             textField.leftView = leadingButton
             textField.leftViewMode = .always
-
             textField.leftPadding = 36
         } else {
             textField.leftPadding = 12
         }
+
         
         // Trailing icon
         if let trailingIconName = trailingIconName, !trailingIconName.isEmpty {
