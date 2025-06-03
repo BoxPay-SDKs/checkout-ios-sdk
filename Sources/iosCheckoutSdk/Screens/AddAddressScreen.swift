@@ -75,19 +75,6 @@ struct AddAddressScreen : View {
                                     }
                                 }
                             VStack(alignment: .leading) {
-//                                FloatingLabelTextField(
-//                                    placeholder: "Mobile Number*",
-//                                    text: $viewModel.mobileNumberTextField,
-//                                    isValid: $viewModel.isMobileNumberValid,
-//                                    onChange: { string in
-//                                        viewModel.onChangeMobileNumber(updatedText: string)
-//                                    },
-//                                    isFocused: $viewModel.isMobileNumberTextFieldFocused,
-//                                    keyboardType: .numberPad,
-//                                    trailingIcon: .constant(""),
-//                                    leadingIcon: .constant(""),
-//                                    isSecureText: .constant(false)
-//                                )
                                 FloatingLabelWithCodeTextField(
                                     placeholder: "Mobile Number*",
                                     countryCode: $viewModel.selectedCountryNumberCode,
@@ -106,6 +93,17 @@ struct AddAddressScreen : View {
                                     leadingIcon: .constant(""),
                                     isSecureText: .constant(false)
                                 )
+                                .background(
+                                    GeometryReader { geo in
+                                        Color.clear
+                                            .preference(key: CountryCodeFieldBoundsPreferenceKey.self, value: geo.frame(in: .global))
+                                    }
+                                )
+                                .onPreferenceChange(CountryCodeFieldBoundsPreferenceKey.self) { value in
+                                    DispatchQueue.main.async {
+                                        countryCodeFieldFrame = value
+                                    }
+                                }
                                 if(viewModel.isMobileNumberValid == false) {
                                     Text("\(viewModel.mobileNumberErrorText)")
                                         .font(.custom("Poppins-Regular", size: 12))
@@ -266,6 +264,49 @@ struct AddAddressScreen : View {
                                     }
                                     .frame(maxHeight: 200)
                                     .position(x: geo.size.width / 2, y: 170) // Y offset to place below TextField
+                                    .zIndex(1)
+                                    .allowsHitTesting(false)
+                                }
+                            }
+                        if viewModel.isCountryCodeTextFieldFocused {
+                                GeometryReader { geo in
+                                    ScrollView {
+                                        VStack(alignment: .leading, spacing: 0) {
+                                            if viewModel.countryCodes.isEmpty {
+                                                Text("No results found")
+                                                    .foregroundColor(Color(hex: "#0A090B"))
+                                                    .padding(.vertical, 8)
+                                                    .padding(.horizontal, 12)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                    .background(Color.white)
+                                                    .font(.custom("Poppins-Regular", size: 16))
+                                            } else {
+                                                ForEach(viewModel.countryCodes, id: \.self) { countryCode in
+                                                    Button(action: {
+                                                        viewModel.onSelectedCountryCodePicker(selectedCode: countryCode)
+                                                    }) {
+                                                        Text(countryCode)
+                                                            .foregroundColor(Color(hex: "#0A090B"))
+                                                            .padding(.vertical, 8)
+                                                            .padding(.horizontal, 12)
+                                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                                            .background(Color.white)
+                                                            .font(.custom("Poppins-Regular", size: 16))
+                                                    }
+                                                    Divider()
+                                                }
+                                            }
+                                        }
+                                        .background(Color.white)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                        )
+                                    }
+                                    .frame(maxHeight: 200)
+                                    .frame(width: 40)
+                                    .position(x: geo.size.width / 2, y: 280) // Y offset to place below TextField
                                     .zIndex(1)
                                     .allowsHitTesting(false)
                                 }

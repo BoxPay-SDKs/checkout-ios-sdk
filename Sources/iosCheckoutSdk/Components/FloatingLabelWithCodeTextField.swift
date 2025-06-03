@@ -48,16 +48,16 @@ struct FloatingLabelWithCodeTextField: View {
                 .animation(.easeOut(duration: 0.2), value: isFocused || isCodeFocused || !text.isEmpty)
                 .font(.custom("Poppins-Regular", size: (isFocused || isCodeFocused) ? 14 : 16))
 
-            HStack(spacing: 8) {
+            HStack(spacing: 0) {
                 // Small editable country code text field
                 TextField("", text: $countryCode, onEditingChanged: { focused in
                     isCodeFocused = focused
                 })
-                .frame(width: 60)
+                .frame(width: 40)
                 .keyboardType(.phonePad)
                 .font(.custom("Poppins-Regular", size: 16))
                 .foregroundColor(Color(hex: "#0A090B"))
-                .multilineTextAlignment(.center)
+                .multilineTextAlignment(.leading)
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
                 .padding(.leading, 12)
@@ -85,8 +85,6 @@ struct FloatingLabelWithCodeTextField: View {
                 .padding(.bottom, 8)
                 .padding(.trailing, 12)
             }
-            .padding(.leading, 4)
         }
-        .frame(height: 56)
     }
 }
