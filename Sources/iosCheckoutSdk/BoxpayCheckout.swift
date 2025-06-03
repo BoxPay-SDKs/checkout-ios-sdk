@@ -303,7 +303,7 @@ public struct BoxpayCheckout : View {
         .onChange(of: isAddressUpdated) { focused in
             if focused {
                 Task {
-                    viewModel.address = viewModel.formattedAddress()
+                    viewModel.address = await viewModel.formattedAddress()
                 }
             }
         }
