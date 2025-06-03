@@ -50,20 +50,26 @@ struct FloatingLabelWithCodeTextField: View {
 
             HStack(spacing: 0) {
                 // Small editable country code text field
-                TextField("", text: $countryCode, onEditingChanged: { focused in
-                    isCodeFocused = focused
-                })
-                .frame(width: 40)
-                .keyboardType(.phonePad)
-                .font(.custom("Poppins-Regular", size: 16))
-                .foregroundColor(Color(hex: "#0A090B"))
-                .multilineTextAlignment(.leading)
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-                .padding(.leading, 12)
-                .onChange(of: countryCode) { newValue in
-                    onChangeCode(newValue)
+                HStack(spacing: 0) {
+                    TextField("", text: $countryCode, onEditingChanged: { focused in
+                        isCodeFocused = focused
+                    })
+                    .keyboardType(.phonePad)
+                    .font(.custom("Poppins-Regular", size: 16))
+                    .foregroundColor(Color(hex: "#0A090B"))
+                    .multilineTextAlignment(.leading)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    .padding(.leading, 12)
+                    .onChange(of: countryCode) { newValue in
+                        onChangeCode(newValue)
+                    }
+                    Image(frameworkAsset: "chevron")
+                        .frame(width: 10, height: 10)
+                        .rotationEffect(.degrees(180))
                 }
+                .frame(width: 40)
+                .padding(.top, 2)
                 
                 // Main custom text field
                 CustomTextFieldRepresentable(

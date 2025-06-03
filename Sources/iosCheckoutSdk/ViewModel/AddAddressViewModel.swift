@@ -80,8 +80,9 @@ class AddAddressViewModel: ObservableObject {
             self.cityTextField = await userDataManager.getCity() ?? ""
             self.mainAddressTextField = await userDataManager.getAddress1() ?? ""
             self.secondaryAddressTextField = await userDataManager.getAddress2() ?? ""
+            
+            loadCountryData()
         }
-        loadCountryData()
     }
     
     func onChangeFullName(updatedText : String) {
