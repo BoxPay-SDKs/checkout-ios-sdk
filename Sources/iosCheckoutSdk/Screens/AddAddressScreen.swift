@@ -90,42 +90,58 @@ struct AddAddressScreen : View {
                                         .foregroundColor(Color(hex: "#E12121"))
                                 }
                             }
-//                            FloatingLabelTextField(
-//                                placeholder: "Country*",
-//                                text: $viewModel.countryTextField,
-//                                isValid: .constant(nil),
-//                                onChange: { string in
-//                                    viewModel.onChangeCountryTextField(updatedText: string)
-//                                },
-//                                isFocused: $viewModel.isCountryTextFieldFocused,
-//                                trailingIcon: .constant("chevron"),
-//                                leadingIcon: .constant(""),
-//                                isSecureText: .constant(false)
-//                            )
-                            Picker("Country*", selection: $viewModel.countryTextField) {
-                                ForEach(viewModel.countryNames, id: \.self) { country in
-                                    Button(action: {
-                                        viewModel.onSelectCountryPicker(selectedCountry: country)
-                                    }) {
-                                        Text(country)
-                                            .foregroundColor(Color(hex: "#0A090B"))
-                                            .padding(.vertical, 8)
-                                            .padding(.horizontal, 12)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            .background(Color.white)
-                                            .font(.custom("Poppins-Regular", size: 16))
+                            ZStack {
+                                FloatingLabelTextField(
+                                    placeholder: "Country*",
+                                    text: $viewModel.countryTextField,
+                                    isValid: .constant(nil),
+                                    onChange: { string in
+                                        viewModel.onChangeCountryTextField(updatedText: string)
+                                    },
+                                    isFocused: $viewModel.isCountryTextFieldFocused,
+                                    trailingIcon: .constant("chevron"),
+                                    leadingIcon: .constant(""),
+                                    isSecureText: .constant(false)
+                                )
+                                if viewModel.isCountryTextFieldFocused {
+                                    ScrollView {
+                                        VStack(alignment: .leading, spacing: 0) {
+                                            if viewModel.countryNames.isEmpty {
+                                                Text("No results found")
+                                                    .foregroundColor(Color(hex: "#0A090B"))
+                                                    .padding(.vertical, 8)
+                                                    .padding(.horizontal, 12)
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                                    .background(Color.white)
+                                                    .font(.custom("Poppins-Regular", size: 16))
+                                            } else {
+                                                ForEach(viewModel.countryNames, id: \.self) { country in
+                                                    Button(action: {
+                                                        viewModel.onSelectCountryPicker(selectedCountry: country)
+                                                    }) {
+                                                        Text(country)
+                                                            .foregroundColor(Color(hex: "#0A090B"))
+                                                            .padding(.vertical, 8)
+                                                            .padding(.horizontal, 12)
+                                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                                            .background(Color.white)
+                                                            .font(.custom("Poppins-Regular", size: 16))
+                                                    }
+                                                    Divider()
+                                                }
+                                            }
+                                        }
+                                        .background(Color.white)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                        )
                                     }
-                                    Divider()
-                                }
+                                    .frame(maxHeight: 200)
+                                    .zIndex(1)
+                                    }
                             }
-                            .pickerStyle(WheelPickerStyle())
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(Color.white)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color.gray, lineWidth: 1)
-                            )
                             
                             HStack(alignment : .top , spacing: 10){
                                 VStack(alignment: .leading){
@@ -222,6 +238,7 @@ struct AddAddressScreen : View {
                             )
                         }
                         .padding(.top, 20)
+                        
                     }
                 }
                 .padding(.horizontal, 16)
