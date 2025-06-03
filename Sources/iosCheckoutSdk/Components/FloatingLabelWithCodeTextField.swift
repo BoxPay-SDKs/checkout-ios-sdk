@@ -50,7 +50,7 @@ struct FloatingLabelWithCodeTextField: View {
 
             HStack(spacing: 0) {
                 // Small editable country code text field
-                HStack(spacing: 0) {
+                HStack(spacing: 4) {
                     TextField("", text: $countryCode, onEditingChanged: { focused in
                         isCodeFocused = focused
                     })
@@ -69,7 +69,7 @@ struct FloatingLabelWithCodeTextField: View {
                         .rotationEffect(.degrees(180))
                 }
                 .frame(width: 70)
-                .padding(.top, 2)
+                .padding(.top, 4)
                 
                 // Main custom text field
                 CustomTextFieldRepresentable(
