@@ -107,37 +107,91 @@ struct AddAddressScreen : View {
                                     .frame(height: 40)
                                     
                                     // Dropdown overlayed
-                                    if viewModel.isCountryTextFieldFocused && !viewModel.countryNames.isEmpty {
-                                        ScrollView {
-                                            VStack(alignment: .leading, spacing: 0) {
-                                                ForEach(viewModel.countryNames, id: \.self) { country in
-                                                    Button(action: {
-                                                        viewModel.onSelectCountryPicker(selectedCountry: country)
-                                                    }) {
-                                                        Text(country)
-                                                            .foregroundColor(Color(hex: "#0A090B"))
-                                                            .padding(.vertical, 8)
-                                                            .padding(.horizontal, 12)
-                                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                                            .background(Color.white)
-                                                            .font(.custom("Poppins-Regular", size: 16))
+//                                    if viewModel.isCountryTextFieldFocused {
+//                                        ScrollView {
+//                                            VStack(alignment: .leading, spacing: 0) {
+//                                                if viewModel.countryNames.isEmpty {
+//                                                    Text("No results found")
+//                                                        .foregroundColor(Color(hex: "#0A090B"))
+//                                                        .padding(.vertical, 8)
+//                                                        .padding(.horizontal, 12)
+//                                                        .frame(maxWidth: .infinity, alignment: .leading)
+//                                                        .background(Color.white)
+//                                                        .font(.custom("Poppins-Regular", size: 16))
+//                                                }
+//                                                else {
+//                                                    ForEach(viewModel.countryNames, id: \.self) { country in
+//                                                        Button(action: {
+//                                                            viewModel.onSelectCountryPicker(selectedCountry: country)
+//                                                        }) {
+//                                                            Text(country)
+//                                                                .foregroundColor(Color(hex: "#0A090B"))
+//                                                                .padding(.vertical, 8)
+//                                                                .padding(.horizontal, 12)
+//                                                                .frame(maxWidth: .infinity, alignment: .leading)
+//                                                                .background(Color.white)
+//                                                                .font(.custom("Poppins-Regular", size: 16))
+//                                                        }
+//                                                        Divider()
+//                                                    }
+//                                                }
+//                                            }
+//                                        }
+//                                        .frame(maxHeight: 200)
+//                                        .background(Color.white)
+//                                        .cornerRadius(8)
+//                                        .overlay(
+//                                            RoundedRectangle(cornerRadius: 8)
+//                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+//                                        )
+//                                        .offset(y: 56) // Adjust according to your field height
+//                                        .zIndex(1)
+//                                    }
+                                }
+                            .background(
+                                        // Overlay the dropdown *on top* of other content
+                                        VStack {
+                                            if viewModel.isCountryTextFieldFocused {
+                                                ScrollView {
+                                                    VStack(alignment: .leading, spacing: 0) {
+                                                        if viewModel.countryNames.isEmpty {
+                                                            Text("No results found")
+                                                                .foregroundColor(Color(hex: "#0A090B"))
+                                                                .padding(.vertical, 8)
+                                                                .padding(.horizontal, 12)
+                                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                                                .background(Color.white)
+                                                                .font(.custom("Poppins-Regular", size: 16))
+                                                        } else {
+                                                            ForEach(viewModel.countryNames, id: \.self) { country in
+                                                                Button(action: {
+                                                                    viewModel.onSelectCountryPicker(selectedCountry: country)
+                                                                }) {
+                                                                    Text(country)
+                                                                        .foregroundColor(Color(hex: "#0A090B"))
+                                                                        .padding(.vertical, 8)
+                                                                        .padding(.horizontal, 12)
+                                                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                                                        .background(Color.white)
+                                                                        .font(.custom("Poppins-Regular", size: 16))
+                                                                }
+                                                                Divider()
+                                                            }
+                                                        }
                                                     }
-                                                    Divider()
                                                 }
+                                                .frame(maxHeight: 200)
+                                                .background(Color.white)
+                                                .cornerRadius(8)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                                )
+                                                .offset(y: 44) // offset from text field height
+                                                .zIndex(1)
                                             }
                                         }
-                                        .frame(maxHeight: 200)
-                                        .background(Color.white)
-                                        .cornerRadius(8)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-                                        )
-                                        .offset(y: 56) // Adjust according to your field height
-                                        .zIndex(1)
-                                    }
-                                }
-                                .zIndex(1)
+                                    )
                             HStack(alignment : .top , spacing: 10){
                                 VStack(alignment: .leading){
                                     FloatingLabelTextField(

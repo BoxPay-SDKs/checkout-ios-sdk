@@ -266,7 +266,7 @@ class AddAddressViewModel: ObservableObject {
         } else {
             print("Selected country not found in data")
         }
-        countryNames = []
+        isCountryTextFieldFocused = false
     }
 
 }
