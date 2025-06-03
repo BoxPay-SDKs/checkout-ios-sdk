@@ -68,7 +68,7 @@ struct FloatingLabelWithCodeTextField: View {
                         .frame(width: 10, height: 10)
                         .rotationEffect(.degrees(180))
                 }
-                .frame(width: 70)
+                .frame(width: 80)
                 .padding(.top, 4)
                 
                 // Main custom text field

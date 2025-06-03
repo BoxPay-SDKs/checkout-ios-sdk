@@ -287,6 +287,7 @@ class AddAddressViewModel: ObservableObject {
             selectedCountryNumberCode = country.isdCode
         }
         isCountryTextFieldFocused = false
+        updatePhoneLengths()
     }
 
     func onSelectedCountryCodePicker(selectedCode : String) {
@@ -296,6 +297,7 @@ class AddAddressViewModel: ObservableObject {
             selectedCountryNumberCode = country.isdCode
         }
         isCountryCodeTextFieldFocused = false
+        updatePhoneLengths()
     }
     
     func updateUserData() {
@@ -303,7 +305,7 @@ class AddAddressViewModel: ObservableObject {
             let (firstName, lastName) = extractNames(from: fullNameTextField)
             await userDataManager.setFirstName(firstName)
             await userDataManager.setLastName(lastName)
-            await userDataManager.setPhone("\(selectedCountryCode)\(mobileNumberTextField)")
+            await userDataManager.setPhone("\(selectedCountryNumberCode)\(mobileNumberTextField)")
             await userDataManager.setEmail(emailIdTextField)
             await userDataManager.setPinCode(postalCodeTextField)
             await userDataManager.setCountryCode(selectedCountryCode)
