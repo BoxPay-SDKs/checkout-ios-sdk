@@ -30,55 +30,6 @@ struct AddAddressScreen : View {
                 ScrollView {
                     ZStack(alignment: .topLeading) {
                         VStack(spacing: 20) {
-                            ZStack(alignment: .topLeading) {
-                                    // Country Text Field
-                                    FloatingLabelTextField(
-                                        placeholder: "Country*",
-                                        text: $viewModel.countryTextField,
-                                        isValid: .constant(nil),
-                                        onChange: { string in
-                                            viewModel.onChangeCountryTextField(updatedText: string)
-                                        },
-                                        isFocused: $viewModel.isCountryTextFieldFocused,
-                                        trailingIcon: .constant("chevron"),
-                                        leadingIcon: .constant(""),
-                                        isSecureText: .constant(false)
-                                    )
-                                    .frame(height: 40)
-                                    
-                                    // Dropdown overlayed
-                                    if viewModel.isCountryTextFieldFocused && !viewModel.countryNames.isEmpty {
-                                        ScrollView {
-                                            VStack(alignment: .leading, spacing: 0) {
-                                                ForEach(viewModel.countryNames, id: \.self) { country in
-                                                    Button(action: {
-                                                        viewModel.onSelectCountryPicker(selectedCountry: country)
-                                                    }) {
-                                                        Text(country)
-                                                            .foregroundColor(Color(hex: "#0A090B"))
-                                                            .padding(.vertical, 8)
-                                                            .padding(.horizontal, 12)
-                                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                                            .background(Color.white)
-                                                            .font(.custom("Poppins-Regular", size: 16))
-                                                    }
-                                                    Divider()
-                                                }
-                                            }
-                                        }
-                                        .frame(maxHeight: 200)
-                                        .background(Color.white)
-                                        .cornerRadius(8)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-                                        )
-                                        .offset(y: 56) // Adjust according to your field height
-                                        .zIndex(1)
-                                    }
-                                }
-                                .zIndex(1) // Important: bring the whole ZStack above the Full Name field
-
                                 // Full Name Field - stays in place
                                 VStack(alignment: .leading) {
                                     FloatingLabelTextField(
@@ -139,7 +90,54 @@ struct AddAddressScreen : View {
                                         .foregroundColor(Color(hex: "#E12121"))
                                 }
                             }
-                            
+                            ZStack(alignment: .topLeading) {
+                                    // Country Text Field
+                                    FloatingLabelTextField(
+                                        placeholder: "Country*",
+                                        text: $viewModel.countryTextField,
+                                        isValid: .constant(nil),
+                                        onChange: { string in
+                                            viewModel.onChangeCountryTextField(updatedText: string)
+                                        },
+                                        isFocused: $viewModel.isCountryTextFieldFocused,
+                                        trailingIcon: .constant("chevron"),
+                                        leadingIcon: .constant(""),
+                                        isSecureText: .constant(false)
+                                    )
+                                    .frame(height: 40)
+                                    
+                                    // Dropdown overlayed
+                                    if viewModel.isCountryTextFieldFocused && !viewModel.countryNames.isEmpty {
+                                        ScrollView {
+                                            VStack(alignment: .leading, spacing: 0) {
+                                                ForEach(viewModel.countryNames, id: \.self) { country in
+                                                    Button(action: {
+                                                        viewModel.onSelectCountryPicker(selectedCountry: country)
+                                                    }) {
+                                                        Text(country)
+                                                            .foregroundColor(Color(hex: "#0A090B"))
+                                                            .padding(.vertical, 8)
+                                                            .padding(.horizontal, 12)
+                                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                                            .background(Color.white)
+                                                            .font(.custom("Poppins-Regular", size: 16))
+                                                    }
+                                                    Divider()
+                                                }
+                                            }
+                                        }
+                                        .frame(maxHeight: 200)
+                                        .background(Color.white)
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
+                                        )
+                                        .offset(y: 56) // Adjust according to your field height
+                                        .zIndex(1)
+                                    }
+                                }
+                                .zIndex(1)
                             HStack(alignment : .top , spacing: 10){
                                 VStack(alignment: .leading){
                                     FloatingLabelTextField(
