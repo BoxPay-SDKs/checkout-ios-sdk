@@ -77,9 +77,9 @@ class AddAddressViewModel: ObservableObject {
             self.postalCodeTextField = await userDataManager.getPinCode() ?? ""
             self.cityTextField = await userDataManager.getCity() ?? ""
             self.stateTextField = await userDataManager.getState() ?? ""
-            self.cityTextField = await userDataManager.getCity() ?? ""
             self.mainAddressTextField = await userDataManager.getAddress1() ?? ""
             self.secondaryAddressTextField = await userDataManager.getAddress2() ?? ""
+            self.selectedCountryCode = await userDataManager.getCountryCode() ?? ""
             
             loadCountryData()
         }
@@ -257,7 +257,10 @@ class AddAddressViewModel: ObservableObject {
                     self.allCountryNames = sorted.map { $0.value.fullName }
                     self.updatePhoneLengths()
                 }
-                
+                if let (code, country) = countryData.first(where: { $0.key == selectedCountryCode }) {
+                    countryTextField = country.fullName
+                    selectedCountryNumberCode = country.isdCode
+                }
                 if !self.mobileNumberTextField.isEmpty, self.mobileNumberTextField.hasPrefix(self.selectedCountryNumberCode) {
                         self.mobileNumberTextField = String(self.mobileNumberTextField.dropFirst(self.selectedCountryNumberCode.count))
                     }
@@ -268,7 +271,7 @@ class AddAddressViewModel: ObservableObject {
         }
 
     func updatePhoneLengths() {
-        if let lengths = countryData[selectedCountryCode ?? ""]?.phoneNumberLength, !lengths.isEmpty {
+        if let lengths = countryData[selectedCountryCode]?.phoneNumberLength, !lengths.isEmpty {
             mobileNumberMinLength = lengths.min() ?? 0
             mobileNumberMaxLength = lengths.max() ?? 0
         } else {
@@ -294,4 +297,33 @@ class AddAddressViewModel: ObservableObject {
         }
         isCountryCodeTextFieldFocused = false
     }
+    
+    func updateUserData() {
+        Task {
+            let (firstName, lastName) = extractNames(from: fullNameTextField)
+            await userDataManager.setFirstName(firstName)
+            await userDataManager.setLastName(lastName)
+            await userDataManager.setPhone("\(selectedCountryCode)\(mobileNumberTextField)")
+            await userDataManager.setEmail(emailIdTextField)
+            await userDataManager.setPinCode(postalCodeTextField)
+            await userDataManager.setCountryCode(selectedCountryCode)
+            await userDataManager.setCity(cityTextField)
+            await userDataManager.setState(stateTextField)
+            await userDataManager.setAddress1(mainAddressTextField)
+            await userDataManager.setAddress2(secondaryAddressTextField)
+        }
+    }
+    
+    func extractNames(from fullName: String) -> (firstName: String, lastName: String) {
+        let components = fullName.split(separator: " ")
+        
+        guard let first = components.first else {
+            return ("", "")
+        }
+
+        let last = components.dropFirst().joined(separator: " ")
+        
+        return (String(first), last)
+    }
+
 }
