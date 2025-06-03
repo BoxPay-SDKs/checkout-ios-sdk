@@ -10,7 +10,6 @@ import SwiftUI
 
 struct AddAddressScreen : View {
     @StateObject private var viewModel = AddAddressViewModel()
-    @State private var countryFieldFrame: CGRect = .zero
 
     @Environment(\.presentationMode) private var presentationMode
 
@@ -91,28 +90,42 @@ struct AddAddressScreen : View {
                                         .foregroundColor(Color(hex: "#E12121"))
                                 }
                             }
-                            FloatingLabelTextField(
-                                placeholder: "Country*",
-                                text: $viewModel.countryTextField,
-                                isValid: .constant(nil),
-                                onChange: { string in
-                                    viewModel.onChangeCountryTextField(updatedText: string)
-                                },
-                                isFocused: $viewModel.isCountryTextFieldFocused,
-                                trailingIcon: .constant("chevron"),
-                                leadingIcon: .constant(""),
-                                isSecureText: .constant(false)
-                            ).background(
-                                GeometryReader { geo in
-                                    Color.clear
-                                        .preference(key: CountryFieldBoundsPreferenceKey.self, value: geo.frame(in: .global))
-                                }
-                            )
-                            .onPreferenceChange(CountryFieldBoundsPreferenceKey.self) { value in
-                                DispatchQueue.main.async {
-                                    countryFieldFrame = value
+//                            FloatingLabelTextField(
+//                                placeholder: "Country*",
+//                                text: $viewModel.countryTextField,
+//                                isValid: .constant(nil),
+//                                onChange: { string in
+//                                    viewModel.onChangeCountryTextField(updatedText: string)
+//                                },
+//                                isFocused: $viewModel.isCountryTextFieldFocused,
+//                                trailingIcon: .constant("chevron"),
+//                                leadingIcon: .constant(""),
+//                                isSecureText: .constant(false)
+//                            )
+                            Picker("Country*", selection: $viewModel.countryTextField) {
+                                ForEach(viewModel.countryNames, id: \.self) { country in
+                                    Button(action: {
+                                        viewModel.onSelectCountryPicker(selectedCountry: country)
+                                    }) {
+                                        Text(country)
+                                            .foregroundColor(Color(hex: "#0A090B"))
+                                            .padding(.vertical, 8)
+                                            .padding(.horizontal, 12)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .background(Color.white)
+                                            .font(.custom("Poppins-Regular", size: 16))
+                                    }
+                                    Divider()
                                 }
                             }
+                            .pickerStyle(WheelPickerStyle())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(Color.white)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.gray, lineWidth: 1)
+                            )
                             
                             HStack(alignment : .top , spacing: 10){
                                 VStack(alignment: .leading){
@@ -209,47 +222,6 @@ struct AddAddressScreen : View {
                             )
                         }
                         .padding(.top, 20)
-                        if viewModel.isCountryTextFieldFocused {
-                                GeometryReader { geo in
-                                    ScrollView {
-                                        VStack(alignment: .leading, spacing: 0) {
-                                            if viewModel.countryNames.isEmpty {
-                                                Text("No results found")
-                                                    .foregroundColor(Color(hex: "#0A090B"))
-                                                    .padding(.vertical, 8)
-                                                    .padding(.horizontal, 12)
-                                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                                    .background(Color.white)
-                                                    .font(.custom("Poppins-Regular", size: 16))
-                                            } else {
-                                                ForEach(viewModel.countryNames, id: \.self) { country in
-                                                    Button(action: {
-                                                        viewModel.onSelectCountryPicker(selectedCountry: country)
-                                                    }) {
-                                                        Text(country)
-                                                            .foregroundColor(Color(hex: "#0A090B"))
-                                                            .padding(.vertical, 8)
-                                                            .padding(.horizontal, 12)
-                                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                                            .background(Color.white)
-                                                            .font(.custom("Poppins-Regular", size: 16))
-                                                    }
-                                                    Divider()
-                                                }
-                                            }
-                                        }
-                                        .background(Color.white)
-                                        .cornerRadius(8)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-                                        )
-                                    }
-                                    .frame(maxHeight: 200)
-                                    .position(x: geo.size.width / 2, y: 360) // Y offset to place below TextField
-                                    .zIndex(1)
-                                }
-                            }
                     }
                 }
                 .padding(.horizontal, 16)
@@ -273,13 +245,5 @@ struct AddAddressScreen : View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
-    }
-}
-
-struct CountryFieldBoundsPreferenceKey: PreferenceKey {
-    static let defaultValue: CGRect = .zero
-
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        value = nextValue()
     }
 }
