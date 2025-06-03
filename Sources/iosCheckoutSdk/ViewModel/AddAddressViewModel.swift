@@ -20,9 +20,9 @@ class AddAddressViewModel: ObservableObject {
     @Published var stateTextField = ""
     @Published var mainAddressTextField = ""
     @Published var secondaryAddressTextField = ""
-    @Published var selectedCountryCode = "GY"
-    @Published var selectedCountryNumberCode = "+592"
-    @Published var countryTextField = "Guyana"
+    @Published var selectedCountryCode:String? = "IN"
+    @Published var selectedCountryNumberCode = "+91"
+    @Published var countryTextField = "India"
     
     @Published var isFullNameTextFieldFocused = false
     @Published var isMobileNumberTextFieldFocused = false
@@ -33,6 +33,7 @@ class AddAddressViewModel: ObservableObject {
     @Published var isMainAddressTextFieldFocused = false
     @Published var isSecondaryAddressTextFieldFocused = false
     @Published var isCountryTextFieldFocused = false
+    @Published var isCountryCodeTextFieldFocused = false
     
     @Published var isFullNameValid : Bool? = nil
     @Published var isMobileNumberValid : Bool? = nil
@@ -51,9 +52,11 @@ class AddAddressViewModel: ObservableObject {
     @Published var mainAddressErrorText = ""
     
     @Published var countryData: [String: Country] = [:]
-    @Published var countryCodes: [String] = []
     @Published var countryNames: [String] = []
     private var allCountryNames: [String] = [] // Full list of countries
+    
+    @Published var countryCodes: [String] = []
+    private var allCountryCodes: [String] = []
 
     
     let emailRegex = "^(?!.*\\.\\.)(?!.*\\.\\@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
@@ -100,6 +103,18 @@ class AddAddressViewModel: ObservableObject {
                 countryNames = allCountryNames
             } else {
                 countryNames = allCountryNames.filter {
+                    $0.lowercased().contains(trimmedText.lowercased())
+                }.sorted()
+            }
+    }
+    
+    func onChangeCountryCodeTextField(updatedText : String) {
+        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
+        
+        if trimmedText.isEmpty {
+            countryCodes = allCountryCodes
+            } else {
+                countryCodes = allCountryCodes.filter {
                     $0.lowercased().contains(trimmedText.lowercased())
                 }.sorted()
             }
@@ -235,18 +250,24 @@ class AddAddressViewModel: ObservableObject {
 
                 DispatchQueue.main.async {
                     self.countryData = Dictionary(uniqueKeysWithValues: sorted)
-                    self.countryCodes = sorted.map { $0.key }
+                    self.countryCodes = sorted.map { $0.value.isdCode }
                     self.countryNames = sorted.map { $0.value.fullName }
+                    self.allCountryCodes = sorted.map { $0.value.isdCode}
                     self.allCountryNames = sorted.map { $0.value.fullName }
                     self.updatePhoneLengths()
                 }
+                
+                if !self.mobileNumberTextField.isEmpty, self.mobileNumberTextField.hasPrefix(self.selectedCountryCode ?? "") {
+                        self.mobileNumberTextField = String(self.mobileNumberTextField.dropFirst(self.selectedCountryCode?.count ?? 0))
+                    }
+                
             } catch {
                 print("Error loading JSON: \(error)")
             }
         }
 
     func updatePhoneLengths() {
-        if let lengths = countryData[selectedCountryCode]?.phoneNumberLength, !lengths.isEmpty {
+        if let lengths = countryData[selectedCountryCode ?? ""]?.phoneNumberLength, !lengths.isEmpty {
             mobileNumberMinLength = lengths.min() ?? 0
             mobileNumberMaxLength = lengths.max() ?? 0
         } else {
@@ -269,4 +290,17 @@ class AddAddressViewModel: ObservableObject {
         isCountryTextFieldFocused = false
     }
 
+    func onSelectedCountryCodePicker(selectedCode : String) {
+        if let (code, country) = countryData.first(where: { $0.value.isdCode == selectedCode }) {
+            selectedCountryCode = code
+            countryTextField = country.fullName
+            selectedCountryNumberCode = country.isdCode
+            print("selectedCountryCode \(selectedCountryCode)")
+            print("selectedCountryName \(countryTextField)")
+            print("selectedCountryNumberCode \(selectedCountryNumberCode)")
+        } else {
+            print("Selected country code not found in data")
+        }
+        isCountryCodeTextFieldFocused = false
+    }
 }

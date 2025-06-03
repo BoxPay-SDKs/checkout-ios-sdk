@@ -11,6 +11,7 @@ import SwiftUI
 struct AddAddressScreen : View {
     @StateObject private var viewModel = AddAddressViewModel()
     @State private var countryFieldFrame: CGRect = .zero
+    @State private var countryCodeFieldFrame: CGRect = .zero
 
     @Environment(\.presentationMode) private var presentationMode
 
@@ -74,14 +75,32 @@ struct AddAddressScreen : View {
                                     }
                                 }
                             VStack(alignment: .leading) {
-                                FloatingLabelTextField(
+//                                FloatingLabelTextField(
+//                                    placeholder: "Mobile Number*",
+//                                    text: $viewModel.mobileNumberTextField,
+//                                    isValid: $viewModel.isMobileNumberValid,
+//                                    onChange: { string in
+//                                        viewModel.onChangeMobileNumber(updatedText: string)
+//                                    },
+//                                    isFocused: $viewModel.isMobileNumberTextFieldFocused,
+//                                    keyboardType: .numberPad,
+//                                    trailingIcon: .constant(""),
+//                                    leadingIcon: .constant(""),
+//                                    isSecureText: .constant(false)
+//                                )
+                                FloatingLabelWithCodeTextField(
                                     placeholder: "Mobile Number*",
+                                    countryCode: $viewModel.selectedCountryNumberCode,
                                     text: $viewModel.mobileNumberTextField,
                                     isValid: $viewModel.isMobileNumberValid,
-                                    onChange: { string in
+                                    isFocused: $viewModel.isMobileNumberTextFieldFocused,
+                                    isCodeFocused: $viewModel.isCountryCodeTextFieldFocused,
+                                    onChangeText: { string in
                                         viewModel.onChangeMobileNumber(updatedText: string)
                                     },
-                                    isFocused: $viewModel.isMobileNumberTextFieldFocused,
+                                    onChangeCode: { string in
+                                        viewModel.onChangeCountryCodeTextField(updatedText: string)
+                                    },
                                     keyboardType: .numberPad,
                                     trailingIcon: .constant(""),
                                     leadingIcon: .constant(""),
@@ -246,7 +265,7 @@ struct AddAddressScreen : View {
                                         )
                                     }
                                     .frame(maxHeight: 200)
-                                    .position(x: geo.size.width / 2, y: 180) // Y offset to place below TextField
+                                    .position(x: geo.size.width / 2, y: 170) // Y offset to place below TextField
                                     .zIndex(1)
                                     .allowsHitTesting(false)
                                 }
@@ -278,6 +297,14 @@ struct AddAddressScreen : View {
 }
 
 struct CountryFieldBoundsPreferenceKey: PreferenceKey {
+    static let defaultValue: CGRect = .zero
+
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        value = nextValue()
+    }
+}
+
+struct CountryCodeFieldBoundsPreferenceKey: PreferenceKey {
     static let defaultValue: CGRect = .zero
 
     static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
