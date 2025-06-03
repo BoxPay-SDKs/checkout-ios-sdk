@@ -316,8 +316,8 @@ struct AddAddressScreen : View {
                 
                 Button(action: {
                     if viewModel.isAllDetailsValid() {
-                        viewModel.updateUserData()
                         isAddressUpdated = true
+                        viewModel.updateUserData()
                         presentationMode.wrappedValue.dismiss()
                     }
                 }){
