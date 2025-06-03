@@ -257,7 +257,7 @@ class AddAddressViewModel: ObservableObject {
                     self.allCountryNames = sorted.map { $0.value.fullName }
                     self.updatePhoneLengths()
                     
-                    if let (code, country) = self.countryData.first(where: { $0.key == self.selectedCountryCode }) {
+                    if let (_, country) = self.countryData.first(where: { $0.key == self.selectedCountryCode }) {
                         self.countryTextField = country.fullName
                         self.selectedCountryNumberCode = country.isdCode
                     }

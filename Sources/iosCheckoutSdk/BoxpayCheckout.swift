@@ -89,7 +89,7 @@ public struct BoxpayCheckout : View {
                     )
                     ScrollView {
                         TitleHeaderView(text: "Address")
-                        AddressSectionView(address: viewModel.address, onClick:{
+                        AddressSectionView(address: $viewModel.address, onClick:{
                             navigateToAddressScreen = true
                         })
                         if (!viewModel.recommendedIds.isEmpty) {
@@ -395,7 +395,7 @@ public struct BoxpayCheckout : View {
 }
 
 private struct AddressSectionView: View {
-    let address : String
+    @Binding var address : String
     var onClick : (() -> Void)
     var body: some View {
         if(address != ""){
