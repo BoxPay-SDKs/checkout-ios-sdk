@@ -34,6 +34,7 @@ class CheckoutViewModel: ObservableObject {
     }
     
     @Published var brandColor = ""
+    @Published var address = ""
     
     @Published var isInitialized = false
         func initialize(token: String, shopperToken: String?, config: ConfigOptions?, callback: @escaping (PaymentResultObject) -> Void) {
@@ -189,6 +190,7 @@ class CheckoutViewModel: ObservableObject {
         if (!shopperToken.isEmpty) {
             getRecommendedFields(shopperToken: shopperToken)
         }
+        address = await formattedAddress()
     }
 
     func getCurrencySymbol(from currencyCode: String?) -> String {
@@ -201,4 +203,21 @@ class CheckoutViewModel: ObservableObject {
         // This will return the symbol for the currency, e.g., "$", "€", "₹", etc.
         return formatter.currencySymbol ?? "₹"
     }
+    
+    func formattedAddress() async -> String {
+        let address1 = await userDataManager.getAddress1()
+        let address2 = await userDataManager.getAddress2()
+        let city = await userDataManager.getCity()
+        let state = await userDataManager.getState()
+        let postalCode = await userDataManager.getPinCode()
+
+        let components = [address1, address2, city, state, postalCode]
+
+        let filteredComponents = components
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        return filteredComponents.joined(separator: ", ")
+    }
+
 }

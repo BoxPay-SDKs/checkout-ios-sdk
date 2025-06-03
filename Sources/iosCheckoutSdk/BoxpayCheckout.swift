@@ -41,6 +41,7 @@ public struct BoxpayCheckout : View {
     @State private var navigateToAddressScreen = false
     
     @State private var isCheckoutMainScreenFocused = false
+    @State private var isAddressUpdated = false
     
     @State private var paymentUrl : String? = nil
     @State private var paymentHtmlString: String? = nil
@@ -88,7 +89,7 @@ public struct BoxpayCheckout : View {
                     )
                     ScrollView {
                         TitleHeaderView(text: "Address")
-                        AddressSectionView(address: formattedAddress(), onClick:{
+                        AddressSectionView(address: viewModel.address, onClick:{
                             navigateToAddressScreen = true
                         })
                         if (!viewModel.recommendedIds.isEmpty) {
@@ -225,7 +226,7 @@ public struct BoxpayCheckout : View {
             NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: AddAddressScreen(), isActive: $navigateToAddressScreen) {
+            NavigationLink(destination: AddAddressScreen(isAddressUpdated: $isAddressUpdated), isActive: $navigateToAddressScreen) {
                         EmptyView()
                     }
         }
@@ -299,7 +300,13 @@ public struct BoxpayCheckout : View {
                 triggerPaymentStatusCallBack()
             }
         }
-
+        .onChange(of: isAddressUpdated) { focused in
+            if focused {
+                Task {
+                    viewModel.address = viewModel.formattedAddress()
+                }
+            }
+        }
         .sheet(isPresented: $showWebView) {
             WebView(
                 url: URL(string: paymentUrl ?? ""), htmlString: paymentHtmlString,
@@ -311,13 +318,6 @@ public struct BoxpayCheckout : View {
             )
         }
     }
-    
-    private func formattedAddress() -> String {
-        if let address = viewModel.sessionData?.paymentDetails.shopper.deliveryAddress {
-               return "\(address.address1 ?? ""), \(address.address2 ?? ""), \(address.city ?? ""), \(address.state ?? ""), \(address.postalCode ?? "")"
-           }
-           return ""
-       }
     
     private func isGooglePayInstalled() -> Bool {
         return UIApplication.shared.canOpenURL(URL(string: "tez://")!)

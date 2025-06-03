@@ -9,6 +9,7 @@ import SwiftUICore
 import SwiftUI
 
 struct AddAddressScreen : View {
+    @Binding var isAddressUpdated: Bool
     @StateObject private var viewModel = AddAddressViewModel()
     @State private var countryFieldFrame: CGRect = .zero
     @State private var countryCodeFieldFrame: CGRect = .zero
@@ -316,6 +317,7 @@ struct AddAddressScreen : View {
                 Button(action: {
                     if viewModel.isAllDetailsValid() {
                         viewModel.updateUserData()
+                        isAddressUpdated = true
                         presentationMode.wrappedValue.dismiss()
                     }
                 }){

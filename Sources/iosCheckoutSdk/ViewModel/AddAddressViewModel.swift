@@ -256,15 +256,15 @@ class AddAddressViewModel: ObservableObject {
                     self.allCountryCodes = sorted.map { $0.value.isdCode}
                     self.allCountryNames = sorted.map { $0.value.fullName }
                     self.updatePhoneLengths()
-                }
-                if let (code, country) = countryData.first(where: { $0.key == selectedCountryCode }) {
-                    countryTextField = country.fullName
-                    selectedCountryNumberCode = country.isdCode
-                }
-                if !self.mobileNumberTextField.isEmpty, self.mobileNumberTextField.hasPrefix(self.selectedCountryNumberCode) {
+                    
+                    if let (code, country) = self.countryData.first(where: { $0.key == self.selectedCountryCode }) {
+                        self.countryTextField = country.fullName
+                        self.selectedCountryNumberCode = country.isdCode
+                    }
+                    if !self.mobileNumberTextField.isEmpty, self.mobileNumberTextField.hasPrefix(self.selectedCountryNumberCode) {
                         self.mobileNumberTextField = String(self.mobileNumberTextField.dropFirst(self.selectedCountryNumberCode.count))
                     }
-                
+                }
             } catch {
                 print("Error loading JSON: \(error)")
             }
