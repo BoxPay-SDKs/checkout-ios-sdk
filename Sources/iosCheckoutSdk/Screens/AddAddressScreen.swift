@@ -246,9 +246,9 @@ struct AddAddressScreen : View {
                                         )
                                     }
                                     .frame(maxHeight: 200)
-                                    .position(x: geo.size.width / 2, y: 160) // Y offset to place below TextField
+                                    .position(x: geo.size.width / 2, y: 180) // Y offset to place below TextField
                                     .zIndex(1)
-                                    .allowsHitTesting(!viewModel.countryNames.isEmpty) // ✅ Allow touches to pass through when empty
+                                    .allowsHitTesting(false)
                                 }
                             }
                     }

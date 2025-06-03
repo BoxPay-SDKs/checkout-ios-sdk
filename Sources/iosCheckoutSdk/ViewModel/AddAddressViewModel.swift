@@ -20,9 +20,9 @@ class AddAddressViewModel: ObservableObject {
     @Published var stateTextField = ""
     @Published var mainAddressTextField = ""
     @Published var secondaryAddressTextField = ""
-    @Published var selectedCountryCode = "IN"
-    @Published var selectedCountryNumberCode = "+91"
-    @Published var countryTextField = "India"
+    @Published var selectedCountryCode = "GY"
+    @Published var selectedCountryNumberCode = "+592"
+    @Published var countryTextField = "Guyana"
     
     @Published var isFullNameTextFieldFocused = false
     @Published var isMobileNumberTextFieldFocused = false
