@@ -20,7 +20,7 @@ class AddAddressViewModel: ObservableObject {
     @Published var stateTextField = ""
     @Published var mainAddressTextField = ""
     @Published var secondaryAddressTextField = ""
-    @Published var selectedCountryCode:String? = "IN"
+    @Published var selectedCountryCode = "IN"
     @Published var selectedCountryNumberCode = "+91"
     @Published var countryTextField = "India"
     
@@ -258,8 +258,8 @@ class AddAddressViewModel: ObservableObject {
                     self.updatePhoneLengths()
                 }
                 
-                if !self.mobileNumberTextField.isEmpty, self.mobileNumberTextField.hasPrefix(self.selectedCountryCode ?? "") {
-                        self.mobileNumberTextField = String(self.mobileNumberTextField.dropFirst(self.selectedCountryCode?.count ?? 0))
+                if !self.mobileNumberTextField.isEmpty, self.mobileNumberTextField.hasPrefix(self.selectedCountryNumberCode) {
+                        self.mobileNumberTextField = String(self.mobileNumberTextField.dropFirst(self.selectedCountryNumberCode.count))
                     }
                 
             } catch {
@@ -282,11 +282,6 @@ class AddAddressViewModel: ObservableObject {
             selectedCountryCode = code
             countryTextField = country.fullName
             selectedCountryNumberCode = country.isdCode
-            print("selectedCountryCode \(selectedCountryCode)")
-            print("selectedCountryName \(countryTextField)")
-            print("selectedCountryNumberCode \(selectedCountryNumberCode)")
-        } else {
-            print("Selected country not found in data")
         }
         isCountryTextFieldFocused = false
     }
@@ -296,11 +291,6 @@ class AddAddressViewModel: ObservableObject {
             selectedCountryCode = code
             countryTextField = country.fullName
             selectedCountryNumberCode = country.isdCode
-            print("selectedCountryCode \(selectedCountryCode)")
-            print("selectedCountryName \(countryTextField)")
-            print("selectedCountryNumberCode \(selectedCountryNumberCode)")
-        } else {
-            print("Selected country code not found in data")
         }
         isCountryCodeTextFieldFocused = false
     }
