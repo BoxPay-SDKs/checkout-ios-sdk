@@ -246,7 +246,7 @@ struct AddAddressScreen : View {
                                         )
                                     }
                                     .frame(maxHeight: 200)
-                                    .position(x: geo.size.width / 2, y: -90) // Y offset to place below TextField
+                                    .position(x: geo.size.width / 2, y: 0) // Y offset to place below TextField
                                     .zIndex(1)
                                 }
                             }
