@@ -10,6 +10,7 @@ import SwiftUI
 
 struct AddAddressScreen : View {
     @StateObject private var viewModel = AddAddressViewModel()
+    @State private var countryFieldFrame: CGRect = .zero
 
     @Environment(\.presentationMode) private var presentationMode
 
@@ -101,7 +102,17 @@ struct AddAddressScreen : View {
                                 trailingIcon: .constant("chevron"),
                                 leadingIcon: .constant(""),
                                 isSecureText: .constant(false)
+                            ).background(
+                                GeometryReader { geo in
+                                    Color.clear
+                                        .preference(key: CountryFieldBoundsPreferenceKey.self, value: geo.frame(in: .global))
+                                }
                             )
+                            .onPreferenceChange(CountryFieldBoundsPreferenceKey.self) { value in
+                                DispatchQueue.main.async {
+                                    countryFieldFrame = value
+                                }
+                            }
                             
                             HStack(alignment : .top , spacing: 10){
                                 VStack(alignment: .leading){
@@ -262,5 +273,13 @@ struct AddAddressScreen : View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
+    }
+}
+
+struct CountryFieldBoundsPreferenceKey: PreferenceKey {
+    static let defaultValue: CGRect = .zero
+
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        value = nextValue()
     }
 }
