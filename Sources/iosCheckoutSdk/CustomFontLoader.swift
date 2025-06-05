@@ -26,7 +26,7 @@ private class FontLoader {
 }
 
 public struct CustomFontLoader {
-    public static func loadFonts() {
+    private static let _once: Void = {
         FontLoader.loadFont(named: "Poppins-Regular", from: .module)
         FontLoader.loadFont(named: "Poppins-Medium", from: .module)
         FontLoader.loadFont(named: "Poppins-Bold", from: .module)
@@ -37,5 +37,10 @@ public struct CustomFontLoader {
         FontLoader.loadFont(named: "Inter-Bold", from: .module)
         FontLoader.loadFont(named: "Inter-SemiBold", from: .module)
         FontLoader.loadFont(named: "Inter-ExtraBold", from: .module)
+    }()
+    
+    public static func loadFonts() {
+        _ = _once
     }
 }
+
