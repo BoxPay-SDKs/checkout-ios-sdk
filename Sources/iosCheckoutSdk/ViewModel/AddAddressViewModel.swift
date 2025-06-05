@@ -66,6 +66,7 @@ class AddAddressViewModel: ObservableObject {
     @Published var isMobileNumberEnabled = false
     @Published var isEmailIdEnabled = false
     @Published var isEmailIdEditable = false
+    @Published var dataUpdationCompleted = false
 
     
     let emailRegex = "^(?!.*\\.\\.)(?!.*\\.\\@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
@@ -224,38 +225,54 @@ class AddAddressViewModel: ObservableObject {
     
     func isAllDetailsValid() -> Bool {
         var isAllValid = true
-        
-        if (isFullNameValid == nil || isFullNameValid == false) {
-            onChangeFullName(updatedText: fullNameTextField)
-            isAllValid = false
+
+        // Full Name
+        let fullNameTrimmed = fullNameTextField.trimmingCharacters(in: .whitespaces)
+        isFullNameValid = !fullNameTrimmed.isEmpty
+        if isFullNameValid == false { isAllValid = false }
+
+        // Mobile Number
+        let mobileTrimmed = mobileNumberTextField.trimmingCharacters(in: .whitespaces)
+        let mobilePredicate = NSPredicate(format: "SELF MATCHES %@", numberRegex)
+        isMobileNumberValid = !mobileTrimmed.isEmpty &&
+                              mobileTrimmed.count >= mobileNumberMinLength &&
+                              mobileTrimmed.count <= mobileNumberMaxLength &&
+                              mobilePredicate.evaluate(with: mobileTrimmed)
+        if isMobileNumberValid == false { isAllValid = false }
+
+        // Email
+        let emailTrimmed = emailIdTextField.trimmingCharacters(in: .whitespaces)
+        let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
+        isEmailIdValid = !emailTrimmed.isEmpty && emailPredicate.evaluate(with: emailTrimmed)
+        if isEmailIdValid == false { isAllValid = false }
+
+        // Postal Code
+        let postalTrimmed = postalCodeTextField.trimmingCharacters(in: .whitespaces)
+        if selectedCountryNumberCode == "+91" {
+            isPostalCodeValid = !postalTrimmed.isEmpty && postalTrimmed.count >= 6
+        } else {
+            isPostalCodeValid = !postalTrimmed.isEmpty
         }
-        if (isMobileNumberValid == nil || isMobileNumberValid == false) {
-            onChangeMobileNumber(updatedText: mobileNumberTextField)
-            isAllValid = false
-        }
-        if (isEmailIdValid == nil || isEmailIdValid == false) {
-            onChangeEmailId(updatedText: emailIdTextField)
-            isAllValid = false
-        }
-        if (isPostalCodeValid == nil || isPostalCodeValid == false) {
-            onChangePostalCode(updatedText: postalCodeTextField)
-            isAllValid = false
-        }
-        if (isCityValid == nil || isCityValid == false) {
-            onChangeCity(updatedText: cityTextField)
-            isAllValid = false
-        }
-        if (isStateValid == nil || isStateValid == false) {
-            onChangeState(updatedText: stateTextField)
-            isAllValid = false
-        }
-        if (isMainAddressValid == nil || isMainAddressValid == false) {
-            onChangeMainAddress(updatedText: mainAddressTextField)
-            isAllValid = false
-        }
-        
+        if isPostalCodeValid == false { isAllValid = false }
+
+        // City
+        let cityTrimmed = cityTextField.trimmingCharacters(in: .whitespaces)
+        isCityValid = !cityTrimmed.isEmpty
+        if isCityValid == false { isAllValid = false }
+
+        // State
+        let stateTrimmed = stateTextField.trimmingCharacters(in: .whitespaces)
+        isStateValid = !stateTrimmed.isEmpty
+        if isStateValid == false { isAllValid = false }
+
+        // Main Address
+        let addressTrimmed = mainAddressTextField.trimmingCharacters(in: .whitespaces)
+        isMainAddressValid = !addressTrimmed.isEmpty
+        if isMainAddressValid == false { isAllValid = false }
+
         return isAllValid
     }
+
     
     func loadCountryData() {
             guard let url = Bundle.module.url(forResource: "CountryCodes", withExtension: "json") else {
@@ -331,6 +348,8 @@ class AddAddressViewModel: ObservableObject {
             await userDataManager.setState(stateTextField)
             await userDataManager.setAddress1(mainAddressTextField)
             await userDataManager.setAddress2(secondaryAddressTextField)
+            
+            self.dataUpdationCompleted = true
         }
     }
     

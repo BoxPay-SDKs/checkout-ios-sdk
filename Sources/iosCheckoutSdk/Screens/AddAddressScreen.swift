@@ -326,9 +326,7 @@ struct AddAddressScreen : View {
                 
                 Button(action: {
                     if viewModel.isAllDetailsValid() {
-                        isAddressUpdated = true
                         viewModel.updateUserData()
-                        presentationMode.wrappedValue.dismiss()
                     }
                 }){
                     Text("Save Address")
@@ -345,6 +343,12 @@ struct AddAddressScreen : View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
+        .onChange(of: viewModel.dataUpdationCompleted) { focused in
+            if(focused) {
+                isAddressUpdated = true
+                presentationMode.wrappedValue.dismiss()
+            }
+        }
     }
 }
 

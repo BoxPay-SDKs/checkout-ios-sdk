@@ -167,7 +167,7 @@ struct UpiScreen: View {
                             }
 
                             Button(action: {
-                                if let valid = upiCollectValid {
+                                if let _ = upiCollectValid {
                                     handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect")
                                 } else {
                                     upiCollectError = true
