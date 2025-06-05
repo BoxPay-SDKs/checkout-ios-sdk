@@ -325,6 +325,8 @@ public struct BoxpayCheckout : View {
                     viewModel.fullNameText = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
                     viewModel.phoneNumberText = await viewModel.userDataManager.getPhone() ?? ""
                     viewModel.emailIdText = await viewModel.userDataManager.getEmail() ?? ""
+                    
+                    isAddressUpdated = false
                 }
             }
         }
