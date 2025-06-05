@@ -524,7 +524,7 @@ private struct AddressSectionView: View {
     private var infoHeaderView: some View {
         HStack {
             if isShippingEnabled {
-                Text("Deliver at ")
+                Text("Deliver at")
                     .font(.custom("Poppins-Regular", size: 12))
                     .foregroundColor(Color(hex: "#4F4D55"))
                 Text(labelName)
