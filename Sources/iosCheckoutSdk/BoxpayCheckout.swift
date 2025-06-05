@@ -419,6 +419,8 @@ public struct BoxpayCheckout : View {
                 result: PaymentResultObject(status: status, transactionId: transactionId)
             )
 
+            viewModel.checkoutManager.clearAllFields()
+            viewModel.userDataManager.clearAllFields()
             presentationMode.wrappedValue.dismiss()
         }
     }

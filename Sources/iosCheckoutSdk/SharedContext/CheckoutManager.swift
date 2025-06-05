@@ -95,4 +95,31 @@ public actor CheckoutManager {
     func setIsPANEditable(_ panEditable : Bool) {isPANEditable = panEditable}
     func setIsDOBEnabled(_ dobEnabled : Bool) {isDOBEnabled = dobEnabled}
     func setIsDOBEditable(_ dobEditable: Bool) {isDOBEditable = dobEditable}
+    
+    func clearAllFields() {
+        mainToken = ""
+        shopperToken = ""
+        brandColor = "#000000"
+        isSuccessScreenVisible = true
+        currencySymbol = "₹"
+        totalAmount = ""
+        paymentFailedMessage = "You may have cancelled the payment or there was a delay in response. Please retry."
+        status = "NOACTION"
+        transactionId = ""
+        itemsCount = 0
+        
+        isShippingAddressEnabled = false
+        isShippingAddressEditable = false
+        isFullNameEnabled = false
+        isFullNameEditable = false
+        isMobileNumberEnabled = false
+        isMobileNumberEditable = false
+        isEmailIdEnabled = false
+        isEmailIdEditable = false
+        isPANEnabled = false
+        isPANEditable = false
+        isDOBEnabled = false
+        isDOBEditable = false
+
+    }
 }
