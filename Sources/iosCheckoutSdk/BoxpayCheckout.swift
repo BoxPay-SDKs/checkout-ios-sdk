@@ -89,9 +89,24 @@ public struct BoxpayCheckout : View {
                     )
                     ScrollView {
                         TitleHeaderView(text: "Address")
-                        AddressSectionView(address: $viewModel.address, onClick:{
-                            navigateToAddressScreen = true
-                        })
+                        AddressSectionView(
+                            address: $viewModel.address,
+                            isShippingEnabled: $viewModel.isShippingEnabled,
+                            isShippingEdiable: $viewModel.isShippingEditable,
+                            isFullNameEnabled: $viewModel.isFullNameEnabled,
+                            isFullNameEditable: $viewModel.isFullNameEditable,
+                            isPhoneEnabled: $viewModel.isMobileNumberEnabled,
+                            isPhoneEditable: $viewModel.isMobileNumberEditable,
+                            isEmailEnabled: $viewModel.isEmailIdEnabled,
+                            isEmailEditable: $viewModel.isEmailIdEditable,
+                            fullNameText: $viewModel.fullNameText,
+                            phoneNumberText: $viewModel.phoneNumberText,
+                            emailIdText: $viewModel.emailIdText,
+                            brandColor: viewModel.brandColor,
+                            onClick:{
+                                navigateToAddressScreen = true
+                            }
+                        )
                         if (!viewModel.recommendedIds.isEmpty) {
                             TitleHeaderView(text: "Recommended")
                                 .padding(.bottom, 8)
@@ -395,52 +410,160 @@ public struct BoxpayCheckout : View {
 }
 
 private struct AddressSectionView: View {
-    @Binding var address : String
-    var onClick : (() -> Void)
+    @Binding var address: String
+    @Binding var isShippingEnabled: Bool
+    @Binding var isShippingEdiable : Bool
+    @Binding var isFullNameEnabled: Bool
+    @Binding var isFullNameEditable: Bool
+    @Binding var isPhoneEnabled: Bool
+    @Binding var isPhoneEditable: Bool
+    @Binding var isEmailEnabled: Bool
+    @Binding var isEmailEditable: Bool
+    @Binding var fullNameText: String
+    @Binding var phoneNumberText: String
+    @Binding var emailIdText: String
+    var brandColor: String
+
+    var onClick: () -> Void
+
     var body: some View {
-        if(address != ""){
-            Button(action: {
-                onClick()
-            }) {
-                VStack(alignment: .leading) {
-                    HStack {
-                        Image(frameworkAsset: "map_pin_gray")
-                            .resizable()
-                            .foregroundColor(.green)
-                            .frame(width: 20, height: 20)
-                            .scaledToFit()
-                        
-                        VStack(alignment: .leading, spacing: 1) {
-                            HStack {
-                                Text("Deliver at ")
-                                    .font(.custom("Poppins-Regular",size: 12))
-                                    .foregroundColor(Color(hex: "#4F4D55")) +
-                                Text("Others")
-                                    .font(.custom("Poppins-SemiBold", size: 12))
-                                    .foregroundColor(Color(hex: "#4F4D55"))
-                            }
-                            Text(address)
-                                .font(.custom("Poppins-SemiBold",size: 14))
-                                .foregroundColor(Color(hex: "#4F4D55"))
-                                .lineLimit(1)
-                                .frame(maxWidth: .infinity, alignment: .leading) // Ensures full width
-                        }
-                        
-                        Spacer()
-                        
-                        Image(frameworkAsset: "chevron")
-                            .frame(width: 10, height: 10)
-                            .rotationEffect(.degrees(90))
-                        
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(radius: 1)
-                    .padding(.horizontal, 16)
+        if isShippingEnabled || isFullNameEnabled || isPhoneEnabled || isEmailEnabled {
+            // Only show the Button when at least one relevant field is editable
+            if isEditableSectionAvailable {
+                Button(action: onClick) {
+                    contentView
+                }
+            } else {
+                contentView // show content without button interaction
+            }
+        }
+    }
+
+
+    @ViewBuilder
+    private var contentView: some View {
+        if isShippingEnabled && address.isEmpty {
+            addPromptView(text: "Add new address")
+        } else if needsPersonalDetails {
+            addPromptView(text: "Add personal details")
+        } else {
+            infoDisplayView
+        }
+    }
+    
+    private var isEditableSectionAvailable: Bool {
+        (isShippingEnabled && isShippingEdiable) ||
+        (isFullNameEnabled && isFullNameEditable) ||
+        (isPhoneEnabled && isPhoneEditable) ||
+        (isEmailEnabled && isEmailEditable)
+    }
+
+    private var needsPersonalDetails: Bool {
+        (isEmailEnabled && emailIdText.isEmpty) ||
+        (isPhoneEnabled && phoneNumberText.isEmpty) ||
+        (isFullNameEnabled && fullNameText.isEmpty)
+    }
+
+    private func addPromptView(text: String) -> some View {
+        HStack {
+            Image(frameworkAsset: "add_green", isTemplate: true)
+                .resizable()
+                .foregroundColor(Color(hex: brandColor))
+                .frame(width: 20, height: 20)
+                .scaledToFit()
+            Text(text)
+                .font(.custom("Poppins-SemiBold", size: 14))
+                .foregroundColor(Color(hex: brandColor))
+            Spacer()
+            Image(frameworkAsset: "chevron")
+                .frame(width: 10, height: 10)
+                .rotationEffect(.degrees(90))
+        }
+        .commonCardStyle()
+    }
+
+    private var infoDisplayView: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Image(frameworkAsset: isShippingEnabled ? "map_pin_gray" : "ic_person")
+                    .resizable()
+                    .foregroundColor(.green)
+                    .frame(width: 20, height: 20)
+                    .scaledToFit()
+
+                VStack(alignment: .leading, spacing: 0) {
+                    infoHeaderView
+                    infoSubTextView
+                }
+
+                Spacer()
+
+                Image(frameworkAsset: "chevron")
+                    .frame(width: 10, height: 10)
+                    .rotationEffect(.degrees(90))
+            }
+            .commonCardStyle()
+        }
+    }
+
+    @ViewBuilder
+    private var infoHeaderView: some View {
+        HStack {
+            if isShippingEnabled {
+                Text("Deliver at ")
+                    .font(.custom("Poppins-Regular", size: 12))
+                    .foregroundColor(Color(hex: "#4F4D55"))
+                Text("Others")
+                    .font(.custom("Poppins-SemiBold", size: 12))
+                    .foregroundColor(Color(hex: "#4F4D55"))
+            } else {
+                if isFullNameEnabled {
+                    Text(fullNameText)
+                        .font(.custom("Poppins-SemiBold", size: 14))
+                        .foregroundColor(Color(hex: "#4F4D55"))
+                }
+                if isFullNameEnabled && isPhoneEnabled {
+                    Text(" | ")
+                        .font(.custom("Poppins-SemiBold", size: 14))
+                        .foregroundColor(Color(hex: "#4F4D55"))
+                }
+                if isPhoneEnabled {
+                    Text(phoneNumberText)
+                        .font(.custom("Poppins-SemiBold", size: 14))
+                        .foregroundColor(Color(hex: "#4F4D55"))
                 }
             }
         }
     }
+
+    @ViewBuilder
+    private var infoSubTextView: some View {
+        if isShippingEnabled {
+            Text(address)
+                .font(.custom("Poppins-SemiBold", size: 14))
+                .foregroundColor(Color(hex: "#4F4D55"))
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else if isEmailEnabled {
+            Text(emailIdText)
+                .font(.custom("Poppins-Regular", size: 12))
+                .foregroundColor(Color(hex: "#4F4D55"))
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
 }
+
+// MARK: - View Extension for Common Card Style
+private extension View {
+    func commonCardStyle() -> some View {
+        self
+            .padding(12)
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(radius: 1)
+            .padding(.horizontal, 16)
+    }
+}
+

@@ -14,6 +14,19 @@ class CheckoutViewModel: ObservableObject {
     @Published var bnplMethod: Bool = false
     @Published var actions: PaymentAction?
     @Published var recommendedIds : [RecommendedResponse] = []
+    
+    @Published var isShippingEnabled = false
+    @Published var isShippingEditable = false
+    @Published var isFullNameEnabled = false
+    @Published var isFullNameEditable = false
+    @Published var isMobileNumberEditable = false
+    @Published var isMobileNumberEnabled = false
+    @Published var isEmailIdEnabled = false
+    @Published var isEmailIdEditable = false
+    
+    @Published var fullNameText = ""
+    @Published var phoneNumberText = ""
+    @Published var emailIdText = ""
 
     @Published var checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
@@ -216,6 +229,20 @@ class CheckoutViewModel: ObservableObject {
             getRecommendedFields(shopperToken: shopperToken)
         }
         address = await formattedAddress()
+        self.isShippingEnabled = await checkoutManager.getIsShippingAddressEnabled()
+        self.isShippingEditable = await checkoutManager.getIsShippingAddressEditable()
+        self.isFullNameEnabled = await checkoutManager.getIsFullNameEnabled()
+        self.isFullNameEditable = await checkoutManager.getIsFullNameEditable()
+        self.isMobileNumberEnabled = await checkoutManager.getIsMobileNumberEnabled()
+        self.isMobileNumberEditable = await checkoutManager.getIsMobileNumberEditable()
+        self.isEmailIdEnabled = await checkoutManager.getIsEmailIdEnabled()
+        self.isEmailIdEditable = await checkoutManager.getIsEmailIdEditable()
+        
+        let firstName = await userDataManager.getFirstName() ?? ""
+        let lastName = await userDataManager.getLastName() ?? ""
+        self.fullNameText = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+        self.phoneNumberText = await userDataManager.getPhone() ?? ""
+        self.emailIdText = await userDataManager.getEmail() ?? ""
     }
 
     func getCurrencySymbol(from currencyCode: String?) -> String {
