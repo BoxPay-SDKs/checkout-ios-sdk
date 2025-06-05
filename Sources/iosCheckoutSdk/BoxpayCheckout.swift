@@ -340,7 +340,7 @@ public struct BoxpayCheckout : View {
                 }
             )
         }
-        .onChange(of: viewModel.navigateToAddressToCompleteDetails) {focused in
+        .onChange(of: viewModel.isAddressScreenRequiredToCompleteDetails) {focused in
             if(focused) {
                 navigateToAddressScreen = true
             }
