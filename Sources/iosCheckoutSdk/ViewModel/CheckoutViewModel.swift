@@ -28,6 +28,7 @@ class CheckoutViewModel: ObservableObject {
     @Published var phoneNumberText = ""
     @Published var emailIdText = ""
     @Published var isAddressScreenRequiredToCompleteDetails = false
+    @Published var addressLabelName = ""
 
     @Published var checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
@@ -229,6 +230,11 @@ class CheckoutViewModel: ObservableObject {
             getRecommendedFields(shopperToken: shopperToken)
         }
         address = await formattedAddress()
+        let labelName = await userDataManager.getLabelName()
+        let addressLabelName = (labelName == nil || labelName!.isEmpty)
+            ? await userDataManager.getLabelType()
+            : labelName
+
         self.isShippingEnabled = await checkoutManager.getIsShippingAddressEnabled()
         self.isShippingEditable = await checkoutManager.getIsShippingAddressEditable()
         self.isFullNameEnabled = await checkoutManager.getIsFullNameEnabled()

@@ -104,6 +104,7 @@ public struct BoxpayCheckout : View {
                                 phoneNumberText: $viewModel.phoneNumberText,
                                 emailIdText: $viewModel.emailIdText,
                                 brandColor: viewModel.brandColor,
+                                labelName : $viewModel.addressLabelName,
                                 onClick:{
                                     navigateToAddressScreen = true
                                 }
@@ -440,6 +441,7 @@ private struct AddressSectionView: View {
     @Binding var phoneNumberText: String
     @Binding var emailIdText: String
     var brandColor: String
+    @Binding var labelName : String
 
     var onClick: () -> Void
 
@@ -525,7 +527,7 @@ private struct AddressSectionView: View {
                 Text("Deliver at ")
                     .font(.custom("Poppins-Regular", size: 12))
                     .foregroundColor(Color(hex: "#4F4D55"))
-                Text("Others")
+                Text(labelName)
                     .font(.custom("Poppins-SemiBold", size: 12))
                     .foregroundColor(Color(hex: "#4F4D55"))
             } else {
