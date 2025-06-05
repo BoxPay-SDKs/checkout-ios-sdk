@@ -88,7 +88,7 @@ public struct BoxpayCheckout : View {
                         }
                     )
                     ScrollView {
-                        TitleHeaderView(text: "Address")
+                        TitleHeaderView(text: viewModel.isShippingEnabled ? "Address" : "Personal Details")
                         AddressSectionView(
                             address: $viewModel.address,
                             isShippingEnabled: $viewModel.isShippingEnabled,
@@ -469,7 +469,7 @@ private struct AddressSectionView: View {
             Image(frameworkAsset: "add_green", isTemplate: true)
                 .resizable()
                 .foregroundColor(Color(hex: brandColor))
-                .frame(width: 20, height: 20)
+                .frame(width: 16, height: 16)
                 .scaledToFit()
             Text(text)
                 .font(.custom("Poppins-SemiBold", size: 14))
@@ -523,7 +523,7 @@ private struct AddressSectionView: View {
                         .foregroundColor(Color(hex: "#4F4D55"))
                 }
                 if isFullNameEnabled && isPhoneEnabled {
-                    Text(" | ")
+                    Text("|")
                         .font(.custom("Poppins-SemiBold", size: 14))
                         .foregroundColor(Color(hex: "#4F4D55"))
                 }

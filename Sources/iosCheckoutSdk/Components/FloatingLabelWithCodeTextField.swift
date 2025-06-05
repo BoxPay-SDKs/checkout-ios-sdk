@@ -38,14 +38,14 @@ struct FloatingLabelWithCodeTextField: View {
 
             Text(placeholder)
                 .foregroundColor((isValid == false) ? Color(hex: "#E12121") :
-                                 (isFocused || isCodeFocused || !text.isEmpty) ? Color(hex: "#2D2B32") :
+                                    (isFocused || isCodeFocused || !text.isEmpty || !countryCode.isEmpty) ? Color(hex: "#2D2B32") :
                                  Color(hex: "#E6E6E6"))
                 .background(Color.white)
                 .padding(.horizontal, 5)
-                .scaleEffect((isFocused || isCodeFocused || !text.isEmpty) ? 0.8 : 1.0, anchor: .leading)
-                .offset(y: (isFocused || isCodeFocused || !text.isEmpty) ? -22: 0)
+                .scaleEffect((isFocused || isCodeFocused || !text.isEmpty || !countryCode.isEmpty) ? 0.8 : 1.0, anchor: .leading)
+                .offset(y: (isFocused || isCodeFocused || !text.isEmpty || !countryCode.isEmpty) ? -22: 0)
                 .padding(.leading, 12)
-                .animation(.easeOut(duration: 0.2), value: isFocused || isCodeFocused || !text.isEmpty)
+                .animation(.easeOut(duration: 0.2), value: isFocused || isCodeFocused || !text.isEmpty || !countryCode.isEmpty)
                 .font(.custom("Poppins-Regular", size: (isFocused || isCodeFocused) ? 14 : 16))
 
             HStack(spacing: 0) {
