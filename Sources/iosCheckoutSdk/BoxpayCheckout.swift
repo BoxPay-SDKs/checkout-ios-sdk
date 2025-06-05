@@ -88,26 +88,28 @@ public struct BoxpayCheckout : View {
                         }
                     )
                     ScrollView {
-                        TitleHeaderView(text: viewModel.isShippingEnabled ? "Address" : "Personal Details")
-                        AddressSectionView(
-                            address: $viewModel.address,
-                            isShippingEnabled: $viewModel.isShippingEnabled,
-                            isShippingEdiable: $viewModel.isShippingEditable,
-                            isFullNameEnabled: $viewModel.isFullNameEnabled,
-                            isFullNameEditable: $viewModel.isFullNameEditable,
-                            isPhoneEnabled: $viewModel.isMobileNumberEnabled,
-                            isPhoneEditable: $viewModel.isMobileNumberEditable,
-                            isEmailEnabled: $viewModel.isEmailIdEnabled,
-                            isEmailEditable: $viewModel.isEmailIdEditable,
-                            fullNameText: $viewModel.fullNameText,
-                            phoneNumberText: $viewModel.phoneNumberText,
-                            emailIdText: $viewModel.emailIdText,
-                            brandColor: viewModel.brandColor,
-                            onClick:{
-                                navigateToAddressScreen = true
-                            }
-                        )
-                        .id(viewModel.fullNameText + viewModel.phoneNumberText + viewModel.emailIdText + viewModel.address)
+                        if viewModel.isShippingEnabled || viewModel.isFullNameEnabled || viewModel.isMobileNumberEnabled || viewModel.isEmailIdEnabled {
+                            TitleHeaderView(text: viewModel.isShippingEnabled ? "Address" : "Personal Details")
+                            AddressSectionView(
+                                address: $viewModel.address,
+                                isShippingEnabled: $viewModel.isShippingEnabled,
+                                isShippingEdiable: $viewModel.isShippingEditable,
+                                isFullNameEnabled: $viewModel.isFullNameEnabled,
+                                isFullNameEditable: $viewModel.isFullNameEditable,
+                                isPhoneEnabled: $viewModel.isMobileNumberEnabled,
+                                isPhoneEditable: $viewModel.isMobileNumberEditable,
+                                isEmailEnabled: $viewModel.isEmailIdEnabled,
+                                isEmailEditable: $viewModel.isEmailIdEditable,
+                                fullNameText: $viewModel.fullNameText,
+                                phoneNumberText: $viewModel.phoneNumberText,
+                                emailIdText: $viewModel.emailIdText,
+                                brandColor: viewModel.brandColor,
+                                onClick:{
+                                    navigateToAddressScreen = true
+                                }
+                            )
+                            .id(viewModel.fullNameText + viewModel.phoneNumberText + viewModel.emailIdText + viewModel.address)
+                        }
                         if (!viewModel.recommendedIds.isEmpty) {
                             TitleHeaderView(text: "Recommended")
                                 .padding(.bottom, 8)
@@ -440,15 +442,12 @@ private struct AddressSectionView: View {
     var onClick: () -> Void
 
     var body: some View {
-        if isShippingEnabled || isFullNameEnabled || isPhoneEnabled || isEmailEnabled {
-            // Only show the Button when at least one relevant field is editable
-            if isEditableSectionAvailable {
-                Button(action: onClick) {
-                    contentView
-                }
-            } else {
-                contentView // show content without button interaction
+        if isEditableSectionAvailable {
+            Button(action: onClick) {
+                contentView
             }
+        } else {
+            contentView // show content without button interaction
         }
     }
 
