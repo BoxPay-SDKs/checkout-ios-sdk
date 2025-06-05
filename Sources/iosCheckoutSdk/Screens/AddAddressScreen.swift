@@ -10,6 +10,7 @@ import SwiftUI
 
 struct AddAddressScreen : View {
     @Binding var isAddressUpdated: Bool
+    @Binding var isCheckoutFocused : Bool
     @StateObject private var viewModel = AddAddressViewModel()
     @State private var countryFieldFrame: CGRect = .zero
     @State private var countryCodeFieldFrame: CGRect = .zero
@@ -27,7 +28,12 @@ struct AddAddressScreen : View {
                     currencySymbol: "",
                     amount: "",
                     onBackPress: {
-                        presentationMode.wrappedValue.dismiss()
+                        if(viewModel.isAllDetailsValid()) {
+                            presentationMode.wrappedValue.dismiss()
+                        } else {
+                            isCheckoutFocused = true
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 )
                 ScrollView {

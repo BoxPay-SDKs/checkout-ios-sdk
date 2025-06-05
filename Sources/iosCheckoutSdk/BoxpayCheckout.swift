@@ -242,7 +242,7 @@ public struct BoxpayCheckout : View {
             NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: AddAddressScreen(isAddressUpdated: $isAddressUpdated), isActive: $navigateToAddressScreen) {
+            NavigationLink(destination: AddAddressScreen(isAddressUpdated: $isAddressUpdated,isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToAddressScreen) {
                         EmptyView()
                     }
         }
@@ -339,6 +339,11 @@ public struct BoxpayCheckout : View {
                     fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
                 }
             )
+        }
+        .onChange(of: viewModel.navigateToAddressToCompleteDetails) {focused in
+            if(focused) {
+                navigateToAddressScreen = true
+            }
         }
     }
     

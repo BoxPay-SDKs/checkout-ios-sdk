@@ -228,8 +228,11 @@ class AddAddressViewModel: ObservableObject {
 
         // Full Name
         let fullNameTrimmed = fullNameTextField.trimmingCharacters(in: .whitespaces)
-        isFullNameValid = !fullNameTrimmed.isEmpty
-        if isFullNameValid == false { isAllValid = false }
+        isFullNameValid = !fullNameTrimmed.isEmpty && isFullNameEnabled
+        if isFullNameValid == false {
+            onChangeFullName(updatedText: fullNameTextField)
+            isAllValid = false
+        }
 
         // Mobile Number
         let mobileTrimmed = mobileNumberTextField.trimmingCharacters(in: .whitespaces)
@@ -237,38 +240,58 @@ class AddAddressViewModel: ObservableObject {
         isMobileNumberValid = !mobileTrimmed.isEmpty &&
                               mobileTrimmed.count >= mobileNumberMinLength &&
                               mobileTrimmed.count <= mobileNumberMaxLength &&
-                              mobilePredicate.evaluate(with: mobileTrimmed)
-        if isMobileNumberValid == false { isAllValid = false }
+        mobilePredicate.evaluate(with: mobileTrimmed) && isMobileNumberEnabled
+        if isMobileNumberValid == false {
+            onChangeMobileNumber(updatedText: mobileNumberTextField)
+            isAllValid = false
+        }
 
         // Email
         let emailTrimmed = emailIdTextField.trimmingCharacters(in: .whitespaces)
         let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
-        isEmailIdValid = !emailTrimmed.isEmpty && emailPredicate.evaluate(with: emailTrimmed)
-        if isEmailIdValid == false { isAllValid = false }
+        isEmailIdValid = !emailTrimmed.isEmpty && emailPredicate.evaluate(with: emailTrimmed) && isEmailIdEnabled
+        if isEmailIdValid == false {
+            onChangeEmailId(updatedText: emailIdTextField)
+            isAllValid = false
+        }
 
         // Postal Code
-        let postalTrimmed = postalCodeTextField.trimmingCharacters(in: .whitespaces)
-        if selectedCountryNumberCode == "+91" {
-            isPostalCodeValid = !postalTrimmed.isEmpty && postalTrimmed.count >= 6
-        } else {
-            isPostalCodeValid = !postalTrimmed.isEmpty
+        if(isShippingEnabled) {
+            let postalTrimmed = postalCodeTextField.trimmingCharacters(in: .whitespaces)
+            if selectedCountryNumberCode == "+91" {
+                isPostalCodeValid = !postalTrimmed.isEmpty && postalTrimmed.count >= 6
+            } else {
+                isPostalCodeValid = !postalTrimmed.isEmpty
+            }
+            if isPostalCodeValid == false {
+                onChangePostalCode(updatedText: postalCodeTextField)
+                isAllValid = false
+            }
+
+            // City
+            let cityTrimmed = cityTextField.trimmingCharacters(in: .whitespaces)
+            isCityValid = !cityTrimmed.isEmpty
+            if isCityValid == false {
+                onChangeCity(updatedText: cityTextField)
+                isAllValid = false
+            }
+
+            // State
+            let stateTrimmed = stateTextField.trimmingCharacters(in: .whitespaces)
+            isStateValid = !stateTrimmed.isEmpty
+            if isStateValid == false {
+                onChangeState(updatedText: stateTextField)
+                isAllValid = false
+            }
+
+            // Main Address
+            let addressTrimmed = mainAddressTextField.trimmingCharacters(in: .whitespaces)
+            isMainAddressValid = !addressTrimmed.isEmpty
+            if isMainAddressValid == false {
+                onChangeMainAddress(updatedText: mainAddressTextField)
+                isAllValid = false
+            }
         }
-        if isPostalCodeValid == false { isAllValid = false }
-
-        // City
-        let cityTrimmed = cityTextField.trimmingCharacters(in: .whitespaces)
-        isCityValid = !cityTrimmed.isEmpty
-        if isCityValid == false { isAllValid = false }
-
-        // State
-        let stateTrimmed = stateTextField.trimmingCharacters(in: .whitespaces)
-        isStateValid = !stateTrimmed.isEmpty
-        if isStateValid == false { isAllValid = false }
-
-        // Main Address
-        let addressTrimmed = mainAddressTextField.trimmingCharacters(in: .whitespaces)
-        isMainAddressValid = !addressTrimmed.isEmpty
-        if isMainAddressValid == false { isAllValid = false }
 
         return isAllValid
     }

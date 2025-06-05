@@ -27,6 +27,7 @@ class CheckoutViewModel: ObservableObject {
     @Published var fullNameText = ""
     @Published var phoneNumberText = ""
     @Published var emailIdText = ""
+    @Published var isAddressScreenRequiredToCompleteDetails = false
 
     @Published var checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
@@ -243,6 +244,14 @@ class CheckoutViewModel: ObservableObject {
         self.fullNameText = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
         self.phoneNumberText = await userDataManager.getPhone() ?? ""
         self.emailIdText = await userDataManager.getEmail() ?? ""
+        
+        let isAddressMissing = address.isEmpty && isShippingEnabled
+        let isPersonalInfoMissing = (fullNameText.isEmpty || emailIdText.isEmpty || phoneNumberText.isEmpty) &&
+                                    (isFullNameEnabled || isMobileNumberEnabled || isEmailIdEnabled)
+
+        if isAddressMissing || isPersonalInfoMissing {
+            self.isAddressScreenRequiredToCompleteDetails = true
+        }
     }
 
     func getCurrencySymbol(from currencyCode: String?) -> String {
