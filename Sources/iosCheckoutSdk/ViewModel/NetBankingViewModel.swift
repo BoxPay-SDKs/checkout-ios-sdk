@@ -98,8 +98,15 @@ class NetBankingViewModel : ObservableObject {
                 "labelName": userDataManager.getLabelName()
             ]
 
-            let isDeliveryEmpty = deliveryAddress.values.allSatisfy { ($0 as? String)?.isEmpty ?? true }
-
+            let isDeliveryEmpty = deliveryAddress.values.contains { value in
+                if value == nil {
+                    return true
+                }
+                if let str = value as? String {
+                    return str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                }
+                return false // Non-string & non-nil values considered valid
+            }
             let payload: [String: Any] = await [
                 "browserData": [
                     "screenHeight": Int(UIScreen.main.bounds.height),
