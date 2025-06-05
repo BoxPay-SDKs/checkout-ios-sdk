@@ -131,7 +131,6 @@ class CheckoutViewModel: ObservableObject {
                     shopperVpa: ""
                 )
             }
-            self.isFirstLoad = false
         }
     }
 
@@ -252,6 +251,8 @@ class CheckoutViewModel: ObservableObject {
         if isAddressMissing || isPersonalInfoMissing {
             self.isAddressScreenRequiredToCompleteDetails = true
         }
+        
+        self.isFirstLoad = false
     }
 
     func getCurrencySymbol(from currencyCode: String?) -> String {
