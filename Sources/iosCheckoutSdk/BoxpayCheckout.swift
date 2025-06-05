@@ -107,6 +107,7 @@ public struct BoxpayCheckout : View {
                                 navigateToAddressScreen = true
                             }
                         )
+                        .id(viewModel.fullNameText + viewModel.phoneNumberText + viewModel.emailIdText + viewModel.address)
                         if (!viewModel.recommendedIds.isEmpty) {
                             TitleHeaderView(text: "Recommended")
                                 .padding(.bottom, 8)
@@ -472,9 +473,8 @@ private struct AddressSectionView: View {
     private func addPromptView(text: String) -> some View {
         HStack {
             Image(frameworkAsset: "add_green", isTemplate: true)
-                .resizable()
                 .foregroundColor(Color(hex: brandColor))
-                .frame(width: 16, height: 16)
+                .frame(width:16, height:16)
             Text(text)
                 .font(.custom("Poppins-SemiBold", size: 14))
                 .foregroundColor(Color(hex: brandColor))
