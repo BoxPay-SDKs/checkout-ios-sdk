@@ -14,6 +14,21 @@ class CheckoutViewModel: ObservableObject {
     @Published var bnplMethod: Bool = false
     @Published var actions: PaymentAction?
     @Published var recommendedIds : [RecommendedResponse] = []
+    
+    @Published var isShippingEnabled = false
+    @Published var isShippingEditable = false
+    @Published var isFullNameEnabled = false
+    @Published var isFullNameEditable = false
+    @Published var isMobileNumberEditable = false
+    @Published var isMobileNumberEnabled = false
+    @Published var isEmailIdEnabled = false
+    @Published var isEmailIdEditable = false
+    
+    @Published var fullNameText = ""
+    @Published var phoneNumberText = ""
+    @Published var emailIdText = ""
+    @Published var isAddressScreenRequiredToCompleteDetails = false
+    @Published var addressLabelName = ""
 
     @Published var checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
@@ -117,7 +132,6 @@ class CheckoutViewModel: ObservableObject {
                     shopperVpa: ""
                 )
             }
-            self.isFirstLoad = false
         }
     }
 
@@ -168,6 +182,31 @@ class CheckoutViewModel: ObservableObject {
         await checkoutManager.setBrandColor(sessionData.merchantDetails.checkoutTheme.primaryButtonColor ?? "#1CA672")
         brandColor = sessionData.merchantDetails.checkoutTheme.primaryButtonColor ?? "#1CA672"
         
+        for field in sessionData.configs.enabledFields {
+                switch field.field {
+                case "SHIPPING_ADDRESS":
+                    await checkoutManager.setIsShippingAddressEnabled(true)
+                    await checkoutManager.setIsShippingAddressEditable(field.editable)
+                case "SHOPPER_NAME":
+                    await checkoutManager.setIsFullNameEnabled(true)
+                    await checkoutManager.setIsFullNameEditable(field.editable)
+                case "SHOPPER_PHONE":
+                    await checkoutManager.setIsMobileNumberEnabled(true)
+                    await checkoutManager.setIsMobileNumberEditable(field.editable)
+                case "SHOPPER_EMAIL":
+                    await checkoutManager.setIsEmailIdEnabled(true)
+                    await checkoutManager.setIsEmailIdEditable(field.editable)
+                case "SHOPPER_PAN":
+                    await checkoutManager.setIsPANEnabled(true)
+                    await checkoutManager.setIsPANEditable(field.editable)
+                case "SHOPPER_DOB":
+                    await checkoutManager.setIsDOBEnabled(true)
+                    await checkoutManager.setIsDOBEditable(field.editable)
+                default:
+                    break
+                }
+            }
+        
 
         let userData = sessionData.paymentDetails.shopper
             await userDataManager.setFirstName(userData.firstName)
@@ -191,6 +230,35 @@ class CheckoutViewModel: ObservableObject {
             getRecommendedFields(shopperToken: shopperToken)
         }
         address = await formattedAddress()
+        let labelName = await userDataManager.getLabelName()
+        addressLabelName = (labelName == nil || labelName?.isEmpty == true)
+            ? await userDataManager.getLabelType() ?? ""
+            : labelName ?? ""
+
+        self.isShippingEnabled = await checkoutManager.getIsShippingAddressEnabled()
+        self.isShippingEditable = await checkoutManager.getIsShippingAddressEditable()
+        self.isFullNameEnabled = await checkoutManager.getIsFullNameEnabled()
+        self.isFullNameEditable = await checkoutManager.getIsFullNameEditable()
+        self.isMobileNumberEnabled = await checkoutManager.getIsMobileNumberEnabled()
+        self.isMobileNumberEditable = await checkoutManager.getIsMobileNumberEditable()
+        self.isEmailIdEnabled = await checkoutManager.getIsEmailIdEnabled()
+        self.isEmailIdEditable = await checkoutManager.getIsEmailIdEditable()
+        
+        let firstName = await userDataManager.getFirstName() ?? ""
+        let lastName = await userDataManager.getLastName() ?? ""
+        self.fullNameText = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+        self.phoneNumberText = await userDataManager.getPhone() ?? ""
+        self.emailIdText = await userDataManager.getEmail() ?? ""
+        
+        let isAddressMissing = address.isEmpty && isShippingEnabled
+        let isPersonalInfoMissing = (fullNameText.isEmpty || emailIdText.isEmpty || phoneNumberText.isEmpty) &&
+                                    (isFullNameEnabled || isMobileNumberEnabled || isEmailIdEnabled)
+
+        if isAddressMissing || isPersonalInfoMissing {
+            self.isAddressScreenRequiredToCompleteDetails = true
+        }
+        
+        self.isFirstLoad = false
     }
 
     func getCurrencySymbol(from currencyCode: String?) -> String {

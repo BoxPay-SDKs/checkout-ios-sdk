@@ -88,10 +88,29 @@ public struct BoxpayCheckout : View {
                         }
                     )
                     ScrollView {
-                        TitleHeaderView(text: "Address")
-                        AddressSectionView(address: $viewModel.address, onClick:{
-                            navigateToAddressScreen = true
-                        })
+                        if viewModel.isShippingEnabled || viewModel.isFullNameEnabled || viewModel.isMobileNumberEnabled || viewModel.isEmailIdEnabled {
+                            TitleHeaderView(text: viewModel.isShippingEnabled ? "Address" : "Personal Details")
+                            AddressSectionView(
+                                address: $viewModel.address,
+                                isShippingEnabled: $viewModel.isShippingEnabled,
+                                isShippingEdiable: $viewModel.isShippingEditable,
+                                isFullNameEnabled: $viewModel.isFullNameEnabled,
+                                isFullNameEditable: $viewModel.isFullNameEditable,
+                                isPhoneEnabled: $viewModel.isMobileNumberEnabled,
+                                isPhoneEditable: $viewModel.isMobileNumberEditable,
+                                isEmailEnabled: $viewModel.isEmailIdEnabled,
+                                isEmailEditable: $viewModel.isEmailIdEditable,
+                                fullNameText: $viewModel.fullNameText,
+                                phoneNumberText: $viewModel.phoneNumberText,
+                                emailIdText: $viewModel.emailIdText,
+                                brandColor: viewModel.brandColor,
+                                labelName : $viewModel.addressLabelName,
+                                onClick:{
+                                    navigateToAddressScreen = true
+                                }
+                            )
+                            .id(viewModel.fullNameText + viewModel.phoneNumberText + viewModel.emailIdText + viewModel.address)
+                        }
                         if (!viewModel.recommendedIds.isEmpty) {
                             TitleHeaderView(text: "Recommended")
                                 .padding(.bottom, 8)
@@ -226,7 +245,7 @@ public struct BoxpayCheckout : View {
             NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: AddAddressScreen(isAddressUpdated: $isAddressUpdated), isActive: $navigateToAddressScreen) {
+            NavigationLink(destination: AddAddressScreen(isAddressUpdated: $isAddressUpdated,isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToAddressScreen) {
                         EmptyView()
                     }
         }
@@ -304,6 +323,13 @@ public struct BoxpayCheckout : View {
             if focused {
                 Task {
                     viewModel.address = await viewModel.formattedAddress()
+                    let firstName = await viewModel.userDataManager.getFirstName() ?? ""
+                    let lastName = await viewModel.userDataManager.getLastName() ?? ""
+                    viewModel.fullNameText = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+                    viewModel.phoneNumberText = await viewModel.userDataManager.getPhone() ?? ""
+                    viewModel.emailIdText = await viewModel.userDataManager.getEmail() ?? ""
+                    
+                    isAddressUpdated = false
                 }
             }
         }
@@ -316,6 +342,11 @@ public struct BoxpayCheckout : View {
                     fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
                 }
             )
+        }
+        .onChange(of: viewModel.isAddressScreenRequiredToCompleteDetails) {focused in
+            if(focused) {
+                navigateToAddressScreen = true
+            }
         }
     }
     
@@ -389,58 +420,164 @@ public struct BoxpayCheckout : View {
                 result: PaymentResultObject(status: status, transactionId: transactionId)
             )
 
+            await viewModel.checkoutManager.clearAllFields()
+            await viewModel.userDataManager.clearAllFields()
             presentationMode.wrappedValue.dismiss()
         }
     }
 }
 
 private struct AddressSectionView: View {
-    @Binding var address : String
-    var onClick : (() -> Void)
+    @Binding var address: String
+    @Binding var isShippingEnabled: Bool
+    @Binding var isShippingEdiable : Bool
+    @Binding var isFullNameEnabled: Bool
+    @Binding var isFullNameEditable: Bool
+    @Binding var isPhoneEnabled: Bool
+    @Binding var isPhoneEditable: Bool
+    @Binding var isEmailEnabled: Bool
+    @Binding var isEmailEditable: Bool
+    @Binding var fullNameText: String
+    @Binding var phoneNumberText: String
+    @Binding var emailIdText: String
+    var brandColor: String
+    @Binding var labelName : String
+
+    var onClick: () -> Void
+
     var body: some View {
-        if(address != ""){
-            Button(action: {
-                onClick()
-            }) {
-                VStack(alignment: .leading) {
-                    HStack {
-                        Image(frameworkAsset: "map_pin_gray")
-                            .resizable()
-                            .foregroundColor(.green)
-                            .frame(width: 20, height: 20)
-                            .scaledToFit()
-                        
-                        VStack(alignment: .leading, spacing: 1) {
-                            HStack {
-                                Text("Deliver at ")
-                                    .font(.custom("Poppins-Regular",size: 12))
-                                    .foregroundColor(Color(hex: "#4F4D55")) +
-                                Text("Others")
-                                    .font(.custom("Poppins-SemiBold", size: 12))
-                                    .foregroundColor(Color(hex: "#4F4D55"))
-                            }
-                            Text(address)
-                                .font(.custom("Poppins-SemiBold",size: 14))
-                                .foregroundColor(Color(hex: "#4F4D55"))
-                                .lineLimit(1)
-                                .frame(maxWidth: .infinity, alignment: .leading) // Ensures full width
-                        }
-                        
-                        Spacer()
-                        
-                        Image(frameworkAsset: "chevron")
-                            .frame(width: 10, height: 10)
-                            .rotationEffect(.degrees(90))
-                        
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(radius: 1)
-                    .padding(.horizontal, 16)
+        if isEditableSectionAvailable {
+            Button(action: onClick) {
+                contentView
+            }
+        } else {
+            contentView // show content without button interaction
+        }
+    }
+
+
+    @ViewBuilder
+    private var contentView: some View {
+        if isShippingEnabled && address.isEmpty {
+            addPromptView(text: "Add new address")
+        } else if needsPersonalDetails {
+            addPromptView(text: "Add personal details")
+        } else {
+            infoDisplayView
+        }
+    }
+    
+    private var isEditableSectionAvailable: Bool {
+        (isShippingEnabled && isShippingEdiable) ||
+        (isFullNameEnabled && isFullNameEditable) ||
+        (isPhoneEnabled && isPhoneEditable) ||
+        (isEmailEnabled && isEmailEditable)
+    }
+
+    private var needsPersonalDetails: Bool {
+        (isEmailEnabled && emailIdText.isEmpty) ||
+        (isPhoneEnabled && phoneNumberText.isEmpty) ||
+        (isFullNameEnabled && fullNameText.isEmpty)
+    }
+
+    private func addPromptView(text: String) -> some View {
+        HStack {
+            Image(frameworkAsset: "add_green", isTemplate: true)
+                .foregroundColor(Color(hex: brandColor))
+                .frame(width:16, height:16)
+            Text(text)
+                .font(.custom("Poppins-SemiBold", size: 14))
+                .foregroundColor(Color(hex: brandColor))
+            Spacer()
+            Image(frameworkAsset: "chevron")
+                .frame(width: 10, height: 10)
+                .rotationEffect(.degrees(90))
+        }
+        .commonCardStyle()
+    }
+
+    private var infoDisplayView: some View {
+        VStack(alignment: .leading) {
+            HStack {
+                Image(frameworkAsset: isShippingEnabled ? "map_pin_gray" : "ic_person")
+                    .resizable()
+                    .foregroundColor(.green)
+                    .frame(width: 20, height: 20)
+                    .scaledToFit()
+
+                VStack(alignment: .leading, spacing: 0) {
+                    infoHeaderView
+                    infoSubTextView
+                }
+
+                Spacer()
+
+                Image(frameworkAsset: "chevron")
+                    .frame(width: 10, height: 10)
+                    .rotationEffect(.degrees(90))
+            }
+            .commonCardStyle()
+        }
+    }
+
+    @ViewBuilder
+    private var infoHeaderView: some View {
+        HStack {
+            if isShippingEnabled {
+                Text("Deliver at")
+                    .font(.custom("Poppins-Regular", size: 12))
+                    .foregroundColor(Color(hex: "#4F4D55"))
+                Text(labelName)
+                    .font(.custom("Poppins-SemiBold", size: 12))
+                    .foregroundColor(Color(hex: "#4F4D55"))
+            } else {
+                if isFullNameEnabled {
+                    Text(fullNameText)
+                        .font(.custom("Poppins-SemiBold", size: 14))
+                        .foregroundColor(Color(hex: "#4F4D55"))
+                }
+                if isFullNameEnabled && isPhoneEnabled {
+                    Text("|")
+                        .font(.custom("Poppins-SemiBold", size: 14))
+                        .foregroundColor(Color(hex: "#4F4D55"))
+                }
+                if isPhoneEnabled {
+                    Text(phoneNumberText)
+                        .font(.custom("Poppins-SemiBold", size: 14))
+                        .foregroundColor(Color(hex: "#4F4D55"))
                 }
             }
         }
     }
+
+    @ViewBuilder
+    private var infoSubTextView: some View {
+        if isShippingEnabled {
+            Text(address)
+                .font(.custom("Poppins-SemiBold", size: 14))
+                .foregroundColor(Color(hex: "#4F4D55"))
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else if isEmailEnabled {
+            Text(emailIdText)
+                .font(.custom("Poppins-Regular", size: 12))
+                .foregroundColor(Color(hex: "#4F4D55"))
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
 }
+
+// MARK: - View Extension for Common Card Style
+private extension View {
+    func commonCardStyle() -> some View {
+        self
+            .padding(12)
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(radius: 1)
+            .padding(.horizontal, 16)
+    }
+}
+

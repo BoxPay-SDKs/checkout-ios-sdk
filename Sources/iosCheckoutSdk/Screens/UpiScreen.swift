@@ -128,7 +128,7 @@ struct UpiScreen: View {
                             Image(frameworkAsset: "chevron")
                                 .rotationEffect(.degrees(isRotated ? 0 : 180))
                         }
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 12)
                         .padding(.top, 12)
                         .padding(.bottom , isRotated ? 16 : 0)
                     }
@@ -167,7 +167,7 @@ struct UpiScreen: View {
                             }
 
                             Button(action: {
-                                if let valid = upiCollectValid {
+                                if let _ = upiCollectValid {
                                     handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect")
                                 } else {
                                     upiCollectError = true

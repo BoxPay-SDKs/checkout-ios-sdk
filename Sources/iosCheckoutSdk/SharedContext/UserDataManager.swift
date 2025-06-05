@@ -59,4 +59,23 @@ public actor UserDataManager {
     func setLabelType(_ labelType:String?) {labelTypeStored = labelType}
     func setLabelName(_ labelName:String?) {labelNameStored = labelName}
     func setUniqueId(_ uniqueId:String?) {uniqueIdStored = uniqueId}
+    
+    func clearAllFields() {
+        firstNameStored = nil
+        lastNameStored = nil
+        emailStored = nil
+        phoneStored = nil
+        dobStored = nil
+        panStored = nil
+        address1Stored = nil
+        address2Stored = nil
+        cityStored = nil
+        stateStored = nil
+        countryCodeStored = nil
+        pincodeStored = nil
+        labelTypeStored = nil
+        labelNameStored = nil
+        uniqueIdStored = nil
+
+    }
 }
