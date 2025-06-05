@@ -231,9 +231,9 @@ class CheckoutViewModel: ObservableObject {
         }
         address = await formattedAddress()
         let labelName = await userDataManager.getLabelName()
-        let addressLabelName = (labelName == nil || labelName!.isEmpty)
-            ? await userDataManager.getLabelType()
-            : labelName
+        addressLabelName = (labelName == nil || labelName?.isEmpty == true)
+            ? await userDataManager.getLabelType() ?? ""
+            : labelName ?? ""
 
         self.isShippingEnabled = await checkoutManager.getIsShippingAddressEnabled()
         self.isShippingEditable = await checkoutManager.getIsShippingAddressEditable()
