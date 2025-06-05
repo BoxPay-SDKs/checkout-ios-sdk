@@ -319,6 +319,11 @@ public struct BoxpayCheckout : View {
             if focused {
                 Task {
                     viewModel.address = await viewModel.formattedAddress()
+                    let firstName = await viewModel.userDataManager.getFirstName() ?? ""
+                    let lastName = await viewModel.userDataManager.getLastName() ?? ""
+                    viewModel.fullNameText = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+                    viewModel.phoneNumberText = await viewModel.userDataManager.getPhone() ?? ""
+                    viewModel.emailIdText = await viewModel.userDataManager.getEmail() ?? ""
                 }
             }
         }
@@ -470,7 +475,6 @@ private struct AddressSectionView: View {
                 .resizable()
                 .foregroundColor(Color(hex: brandColor))
                 .frame(width: 16, height: 16)
-                .scaledToFit()
             Text(text)
                 .font(.custom("Poppins-SemiBold", size: 14))
                 .foregroundColor(Color(hex: brandColor))
