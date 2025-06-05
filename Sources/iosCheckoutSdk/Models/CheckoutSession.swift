@@ -133,7 +133,7 @@ public struct DiscountDetails: Decodable,Sendable {
 }
 
 public struct EnabledField: Decodable,Sendable {
-    let field: String?
+    let field: String
     let editable: Bool
     let mandatory: Bool
 }

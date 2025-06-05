@@ -57,6 +57,15 @@ class AddAddressViewModel: ObservableObject {
     
     @Published var countryCodes: [String] = []
     private var allCountryCodes: [String] = []
+    
+    @Published var isShippingEnabled = false
+    @Published var isShippingEditable = false
+    @Published var isFullNameEnabled = false
+    @Published var isFullNameEditable = false
+    @Published var isMobileNumberEditable = false
+    @Published var isMobileNumberEnabled = false
+    @Published var isEmailIdEnabled = false
+    @Published var isEmailIdEditable = false
 
     
     let emailRegex = "^(?!.*\\.\\.)(?!.*\\.\\@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
@@ -69,6 +78,15 @@ class AddAddressViewModel: ObservableObject {
     init() {
         Task {
             self.brandColor = await checkoutManager.getBrandColor()
+            self.isShippingEnabled = await checkoutManager.getIsShippingAddressEnabled()
+            self.isShippingEditable = await checkoutManager.getIsShippingAddressEditable()
+            self.isFullNameEnabled = await checkoutManager.getIsFullNameEnabled()
+            self.isFullNameEditable = await checkoutManager.getIsFullNameEditable()
+            self.isMobileNumberEnabled = await checkoutManager.getIsMobileNumberEnabled()
+            self.isMobileNumberEditable = await checkoutManager.getIsMobileNumberEditable()
+            self.isEmailIdEnabled = await checkoutManager.getIsEmailIdEnabled()
+            self.isEmailIdEditable = await checkoutManager.getIsEmailIdEditable()
+            
             let firstName = await userDataManager.getFirstName() ?? ""
             let lastName = await userDataManager.getLastName() ?? ""
             self.fullNameTextField = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)

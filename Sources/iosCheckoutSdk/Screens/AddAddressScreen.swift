@@ -20,7 +20,7 @@ struct AddAddressScreen : View {
         ZStack{
             VStack(alignment: .leading){
                 HeaderView(
-                    text: "Add Address",
+                    text: viewModel.isShippingEnabled ? "Add Address" : "Add Personal Details",
                     showDesc: false,
                     showSecure: false,
                     itemCount: 0,
@@ -34,28 +34,31 @@ struct AddAddressScreen : View {
                     ZStack(alignment: .topLeading) {
                         VStack(spacing: 20) {
                                 // Full Name Field - stays in place
-                            FloatingLabelTextField(
-                                placeholder: "Country*",
-                                text: $viewModel.countryTextField,
-                                isValid: .constant(nil),
-                                onChange: { string in
-                                    viewModel.onChangeCountryTextField(updatedText: string)
-                                },
-                                isFocused: $viewModel.isCountryTextFieldFocused,
-                                trailingIcon: .constant("chevron"),
-                                leadingIcon: .constant(""),
-                                isSecureText: .constant(false)
-                            ).background(
-                                GeometryReader { geo in
-                                    Color.clear
-                                        .preference(key: CountryFieldBoundsPreferenceKey.self, value: geo.frame(in: .global))
-                                }
-                            )
-                            .onPreferenceChange(CountryFieldBoundsPreferenceKey.self) { value in
-                                DispatchQueue.main.async {
-                                    countryFieldFrame = value
+                            if(viewModel.isShippingEnabled) {
+                                FloatingLabelTextField(
+                                    placeholder: "Country*",
+                                    text: $viewModel.countryTextField,
+                                    isValid: .constant(nil),
+                                    onChange: { string in
+                                        viewModel.onChangeCountryTextField(updatedText: string)
+                                    },
+                                    isFocused: $viewModel.isCountryTextFieldFocused,
+                                    trailingIcon: .constant("chevron"),
+                                    leadingIcon: .constant(""),
+                                    isSecureText: .constant(false)
+                                ).background(
+                                    GeometryReader { geo in
+                                        Color.clear
+                                            .preference(key: CountryFieldBoundsPreferenceKey.self, value: geo.frame(in: .global))
+                                    }
+                                )
+                                .onPreferenceChange(CountryFieldBoundsPreferenceKey.self) { value in
+                                    DispatchQueue.main.async {
+                                        countryFieldFrame = value
+                                    }
                                 }
                             }
+                            if(viewModel.isFullNameEnabled) {
                                 VStack(alignment: .leading) {
                                     FloatingLabelTextField(
                                         placeholder: "Full Name*",
@@ -75,81 +78,128 @@ struct AddAddressScreen : View {
                                             .foregroundColor(Color(hex: "#E12121"))
                                     }
                                 }
-                            VStack(alignment: .leading) {
-                                FloatingLabelWithCodeTextField(
-                                    placeholder: "Mobile Number*",
-                                    countryCode: $viewModel.selectedCountryNumberCode,
-                                    text: $viewModel.mobileNumberTextField,
-                                    isValid: $viewModel.isMobileNumberValid,
-                                    isFocused: $viewModel.isMobileNumberTextFieldFocused,
-                                    isCodeFocused: $viewModel.isCountryCodeTextFieldFocused,
-                                    onChangeText: { string in
-                                        viewModel.onChangeMobileNumber(updatedText: string)
-                                    },
-                                    onChangeCode: { string in
-                                        viewModel.onChangeCountryCodeTextField(updatedText: string)
-                                    },
-                                    keyboardType: .numberPad,
-                                    trailingIcon: .constant(""),
-                                    leadingIcon: .constant(""),
-                                    isSecureText: .constant(false)
-                                )
-                                .background(
-                                    GeometryReader { geo in
-                                        Color.clear
-                                            .preference(key: CountryCodeFieldBoundsPreferenceKey.self, value: geo.frame(in: .global))
-                                    }
-                                )
-                                .onPreferenceChange(CountryCodeFieldBoundsPreferenceKey.self) { value in
-                                    DispatchQueue.main.async {
-                                        countryCodeFieldFrame = value
-                                    }
-                                }
-                                if(viewModel.isMobileNumberValid == false) {
-                                    Text("\(viewModel.mobileNumberErrorText)")
-                                        .font(.custom("Poppins-Regular", size: 12))
-                                        .foregroundColor(Color(hex: "#E12121"))
-                                }
                             }
-                            
-                            VStack(alignment: .leading) {
-                                FloatingLabelTextField(
-                                    placeholder: "Email ID*",
-                                    text: $viewModel.emailIdTextField,
-                                    isValid: $viewModel.isEmailIdValid,
-                                    onChange: { string in
-                                        viewModel.onChangeEmailId(updatedText: string)
-                                    },
-                                    isFocused: $viewModel.isEmailIdTextFieldFocused,
-                                    trailingIcon: .constant(""),
-                                    leadingIcon: .constant(""),
-                                    isSecureText: .constant(false)
-                                )
-                                if(viewModel.isEmailIdValid == false) {
-                                    Text("\(viewModel.emailIdErrorText)")
-                                        .font(.custom("Poppins-Regular", size: 12))
-                                        .foregroundColor(Color(hex: "#E12121"))
-                                }
-                            }
-                            
-                            HStack(alignment : .top , spacing: 10){
-                                VStack(alignment: .leading){
-                                    FloatingLabelTextField(
-                                        placeholder: "ZIP/Postal Code*",
-                                        text: $viewModel.postalCodeTextField,
-                                        isValid: $viewModel.isPostalCodeValid,
-                                        onChange: { string in
-                                            viewModel.onChangePostalCode(updatedText: string)
+                            if(viewModel.isMobileNumberEnabled) {
+                                VStack(alignment: .leading) {
+                                    FloatingLabelWithCodeTextField(
+                                        placeholder: "Mobile Number*",
+                                        countryCode: $viewModel.selectedCountryNumberCode,
+                                        text: $viewModel.mobileNumberTextField,
+                                        isValid: $viewModel.isMobileNumberValid,
+                                        isFocused: $viewModel.isMobileNumberTextFieldFocused,
+                                        isCodeFocused: $viewModel.isCountryCodeTextFieldFocused,
+                                        onChangeText: { string in
+                                            viewModel.onChangeMobileNumber(updatedText: string)
                                         },
-                                        isFocused: $viewModel.isPostalCodeTextFieldFocused,
+                                        onChangeCode: { string in
+                                            viewModel.onChangeCountryCodeTextField(updatedText: string)
+                                        },
                                         keyboardType: .numberPad,
                                         trailingIcon: .constant(""),
                                         leadingIcon: .constant(""),
                                         isSecureText: .constant(false)
                                     )
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    if(viewModel.isPostalCodeValid == false) {
-                                        Text("\(viewModel.postalCodeErrorText)")
+                                    .background(
+                                        GeometryReader { geo in
+                                            Color.clear
+                                                .preference(key: CountryCodeFieldBoundsPreferenceKey.self, value: geo.frame(in: .global))
+                                        }
+                                    )
+                                    .onPreferenceChange(CountryCodeFieldBoundsPreferenceKey.self) { value in
+                                        DispatchQueue.main.async {
+                                            countryCodeFieldFrame = value
+                                        }
+                                    }
+                                    if(viewModel.isMobileNumberValid == false) {
+                                        Text("\(viewModel.mobileNumberErrorText)")
+                                            .font(.custom("Poppins-Regular", size: 12))
+                                            .foregroundColor(Color(hex: "#E12121"))
+                                    }
+                                }
+                            }
+                            
+                            if(viewModel.isEmailIdEnabled) {
+                                VStack(alignment: .leading) {
+                                    FloatingLabelTextField(
+                                        placeholder: "Email ID*",
+                                        text: $viewModel.emailIdTextField,
+                                        isValid: $viewModel.isEmailIdValid,
+                                        onChange: { string in
+                                            viewModel.onChangeEmailId(updatedText: string)
+                                        },
+                                        isFocused: $viewModel.isEmailIdTextFieldFocused,
+                                        trailingIcon: .constant(""),
+                                        leadingIcon: .constant(""),
+                                        isSecureText: .constant(false)
+                                    )
+                                    if(viewModel.isEmailIdValid == false) {
+                                        Text("\(viewModel.emailIdErrorText)")
+                                            .font(.custom("Poppins-Regular", size: 12))
+                                            .foregroundColor(Color(hex: "#E12121"))
+                                    }
+                                }
+                            }
+                            
+                            if(viewModel.isShippingEnabled) {
+                                HStack(alignment : .top , spacing: 10){
+                                    VStack(alignment: .leading){
+                                        FloatingLabelTextField(
+                                            placeholder: "ZIP/Postal Code*",
+                                            text: $viewModel.postalCodeTextField,
+                                            isValid: $viewModel.isPostalCodeValid,
+                                            onChange: { string in
+                                                viewModel.onChangePostalCode(updatedText: string)
+                                            },
+                                            isFocused: $viewModel.isPostalCodeTextFieldFocused,
+                                            keyboardType: .numberPad,
+                                            trailingIcon: .constant(""),
+                                            leadingIcon: .constant(""),
+                                            isSecureText: .constant(false)
+                                        )
+                                        .fixedSize(horizontal: false, vertical: true)
+                                        if(viewModel.isPostalCodeValid == false) {
+                                            Text("\(viewModel.postalCodeErrorText)")
+                                                .font(.custom("Poppins-Regular", size: 12))
+                                                .foregroundColor(Color(hex: "#E12121"))
+                                        }
+                                    }
+                                    
+                                    VStack(alignment: .leading) {
+                                        FloatingLabelTextField(
+                                            placeholder: "City*",
+                                            text: $viewModel.cityTextField,
+                                            isValid: $viewModel.isCityValid,
+                                            onChange: { string in
+                                                viewModel.onChangeCity(updatedText: string)
+                                            },
+                                            isFocused: $viewModel.isCityTextFieldFocused,
+                                            trailingIcon: .constant(""),
+                                            leadingIcon: .constant(""),
+                                            isSecureText: .constant(false)
+                                        )
+                                        .fixedSize(horizontal: false, vertical: true)
+                                        if(viewModel.isCityValid == false) {
+                                            Text("\(viewModel.cityErrorText)")
+                                                .font(.custom("Poppins-Regular", size: 12))
+                                                .foregroundColor(Color(hex: "#E12121"))
+                                        }
+                                    }
+                                }
+                                VStack(alignment: .leading) {
+                                    FloatingLabelTextField(
+                                        placeholder: "State*",
+                                        text: $viewModel.stateTextField,
+                                        isValid: $viewModel.isStateValid,
+                                        onChange: { string in
+                                            viewModel.onChangeState(updatedText: string)
+                                        },
+                                        isFocused: $viewModel.isStateTextFieldFocused,
+                                        trailingIcon: .constant(""),
+                                        leadingIcon: .constant(""),
+                                        isSecureText: .constant(false)
+                                    )
+                                    if(viewModel.isStateValid == false) {
+                                        Text("\(viewModel.stateErrorText)")
                                             .font(.custom("Poppins-Regular", size: 12))
                                             .foregroundColor(Color(hex: "#E12121"))
                                     }
@@ -157,74 +207,34 @@ struct AddAddressScreen : View {
                                 
                                 VStack(alignment: .leading) {
                                     FloatingLabelTextField(
-                                        placeholder: "City*",
-                                        text: $viewModel.cityTextField,
-                                        isValid: $viewModel.isCityValid,
+                                        placeholder: "House number, Apartment*",
+                                        text: $viewModel.mainAddressTextField,
+                                        isValid: $viewModel.isMainAddressValid,
                                         onChange: { string in
-                                            viewModel.onChangeCity(updatedText: string)
+                                            viewModel.onChangeMainAddress(updatedText: string)
                                         },
-                                        isFocused: $viewModel.isCityTextFieldFocused,
+                                        isFocused: $viewModel.isMainAddressTextFieldFocused,
                                         trailingIcon: .constant(""),
                                         leadingIcon: .constant(""),
                                         isSecureText: .constant(false)
                                     )
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    if(viewModel.isCityValid == false) {
-                                        Text("\(viewModel.cityErrorText)")
+                                    if(viewModel.isMainAddressValid == false) {
+                                        Text("\(viewModel.mainAddressErrorText)")
                                             .font(.custom("Poppins-Regular", size: 12))
                                             .foregroundColor(Color(hex: "#E12121"))
                                     }
                                 }
-                            }
-                            VStack(alignment: .leading) {
+                                
                                 FloatingLabelTextField(
-                                    placeholder: "State*",
-                                    text: $viewModel.stateTextField,
-                                    isValid: $viewModel.isStateValid,
-                                    onChange: { string in
-                                        viewModel.onChangeState(updatedText: string)
-                                    },
-                                    isFocused: $viewModel.isStateTextFieldFocused,
+                                    placeholder: "Area,Colony,Street, Sector",
+                                    text: $viewModel.secondaryAddressTextField,
+                                    isValid: .constant(nil),
+                                    isFocused: $viewModel.isSecondaryAddressTextFieldFocused,
                                     trailingIcon: .constant(""),
                                     leadingIcon: .constant(""),
                                     isSecureText: .constant(false)
                                 )
-                                if(viewModel.isStateValid == false) {
-                                    Text("\(viewModel.stateErrorText)")
-                                        .font(.custom("Poppins-Regular", size: 12))
-                                        .foregroundColor(Color(hex: "#E12121"))
-                                }
                             }
-                            
-                            VStack(alignment: .leading) {
-                                FloatingLabelTextField(
-                                    placeholder: "House number, Apartment*",
-                                    text: $viewModel.mainAddressTextField,
-                                    isValid: $viewModel.isMainAddressValid,
-                                    onChange: { string in
-                                        viewModel.onChangeMainAddress(updatedText: string)
-                                    },
-                                    isFocused: $viewModel.isMainAddressTextFieldFocused,
-                                    trailingIcon: .constant(""),
-                                    leadingIcon: .constant(""),
-                                    isSecureText: .constant(false)
-                                )
-                                if(viewModel.isMainAddressValid == false) {
-                                    Text("\(viewModel.mainAddressErrorText)")
-                                        .font(.custom("Poppins-Regular", size: 12))
-                                        .foregroundColor(Color(hex: "#E12121"))
-                                }
-                            }
-                            
-                            FloatingLabelTextField(
-                                placeholder: "Area,Colony,Street, Sector",
-                                text: $viewModel.secondaryAddressTextField,
-                                isValid: .constant(nil),
-                                isFocused: $viewModel.isSecondaryAddressTextFieldFocused,
-                                trailingIcon: .constant(""),
-                                leadingIcon: .constant(""),
-                                isSecureText: .constant(false)
-                            )
                         }
                         .padding(.top, 20)
                         if viewModel.isCountryTextFieldFocused {

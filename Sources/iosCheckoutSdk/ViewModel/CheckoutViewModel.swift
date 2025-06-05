@@ -168,6 +168,31 @@ class CheckoutViewModel: ObservableObject {
         await checkoutManager.setBrandColor(sessionData.merchantDetails.checkoutTheme.primaryButtonColor ?? "#1CA672")
         brandColor = sessionData.merchantDetails.checkoutTheme.primaryButtonColor ?? "#1CA672"
         
+        for field in sessionData.configs.enabledFields {
+                switch field.field {
+                case "SHIPPING_ADDRESS":
+                    await checkoutManager.setIsShippingAddressEnabled(true)
+                    await checkoutManager.setIsShippingAddressEditable(field.editable)
+                case "SHOPPER_NAME":
+                    await checkoutManager.setIsFullNameEnabled(true)
+                    await checkoutManager.setIsFullNameEditable(field.editable)
+                case "SHOPPER_PHONE":
+                    await checkoutManager.setIsMobileNumberEnabled(true)
+                    await checkoutManager.setIsMobileNumberEditable(field.editable)
+                case "SHOPPER_EMAIL":
+                    await checkoutManager.setIsEmailIdEnabled(true)
+                    await checkoutManager.setIsEmailIdEditable(field.editable)
+                case "SHOPPER_PAN":
+                    await checkoutManager.setIsPANEnabled(true)
+                    await checkoutManager.setIsPANEditable(field.editable)
+                case "SHOPPER_DOB":
+                    await checkoutManager.setIsDOBEnabled(true)
+                    await checkoutManager.setIsDOBEditable(field.editable)
+                default:
+                    break
+                }
+            }
+        
 
         let userData = sessionData.paymentDetails.shopper
             await userDataManager.setFirstName(userData.firstName)
