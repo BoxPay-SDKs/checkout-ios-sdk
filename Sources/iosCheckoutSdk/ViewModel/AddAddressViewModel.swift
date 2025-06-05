@@ -98,7 +98,7 @@ class AddAddressViewModel: ObservableObject {
             self.stateTextField = await userDataManager.getState() ?? ""
             self.mainAddressTextField = await userDataManager.getAddress1() ?? ""
             self.secondaryAddressTextField = await userDataManager.getAddress2() ?? ""
-            self.selectedCountryCode = await userDataManager.getCountryCode() ?? ""
+            self.selectedCountryCode = await userDataManager.getCountryCode() ?? "IN"
             
             loadCountryData()
         }
