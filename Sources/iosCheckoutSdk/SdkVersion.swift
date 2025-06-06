@@ -6,5 +6,5 @@
 //
 
 public struct SDKVersion {
-    public static let version = " #24 - 1.0.1-beta4"
+    public static let version = "1.0.2-beta5"
 }
