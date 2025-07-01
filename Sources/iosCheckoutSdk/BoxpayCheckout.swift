@@ -52,6 +52,7 @@ public struct BoxpayCheckout : View {
     @State private var transactionId : String = ""
     
     let detector = UPIAppDetectorIOS()
+    var installedApps : [String] = []
     
     
     public init(
@@ -67,6 +68,9 @@ public struct BoxpayCheckout : View {
             self.onPaymentResult = onPaymentResult
             let SVGCoder = SDImageSVGCoder.shared
             SDImageCodersManager.shared.addCoder(SVGCoder)
+            let service = UPIService(detector: detector)
+            installedApps = service.getAvailableApps()
+            print("Installed UPI Apps: \(installedApps)")
         }
     
     public var body: some View {
@@ -354,21 +358,17 @@ public struct BoxpayCheckout : View {
     }
     
     private func isGooglePayInstalled() -> Bool {
-        let service = UPIService(detector: detector)
-        let installedApps = service.getAvailableApps()
-        print("Installed UPI Apps: \(installedApps)")
-        
-        return UIApplication.shared.canOpenURL(URL(string: "tez://")!)
+        return installedApps.contains("tez") || installedApps.contains("gpay")
     }
 
     // Check if Paytm is installed
     private func isPaytmInstalled() -> Bool {
-        return UIApplication.shared.canOpenURL(URL(string: "paytmmp://")!)
+        return installedApps.contains("paytm")
     }
 
     // Check if PhonePe is installed
     private func isPhonePeInstalled() -> Bool {
-        return UIApplication.shared.canOpenURL(URL(string: "phonepe://")!)
+        return installedApps.contains("phonepe")
     }
 
     private func handlePaymentAction(_ action: PaymentAction) {
