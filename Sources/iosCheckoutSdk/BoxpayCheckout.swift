@@ -70,7 +70,7 @@ public struct BoxpayCheckout : View {
             SDImageCodersManager.shared.addCoder(SVGCoder)
             let service = UPIService(detector: detector)
             installedApps = service.getAvailableApps()
-            print("Installed UPI Apps: \(installedApps)")
+            print("Installed Apps: \(installedApps)")
         }
     
     public var body: some View {
