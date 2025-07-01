@@ -8,6 +8,7 @@
 import SwiftUICore
 import SwiftUI
 import SDWebImageSVGCoder
+import shared
 
 public struct BoxpayCheckout : View {
     var token : String
@@ -49,6 +50,8 @@ public struct BoxpayCheckout : View {
     
     @State private var status : String = ""
     @State private var transactionId : String = ""
+    
+    let detector = UPIAppDetectorIOS()
     
     
     public init(
@@ -351,6 +354,10 @@ public struct BoxpayCheckout : View {
     }
     
     private func isGooglePayInstalled() -> Bool {
+        let service = UPIService(detector: detector)
+        let installedApps = service.getAvailableApps()
+        print("Installed UPI Apps: \(installedApps)")
+        
         return UIApplication.shared.canOpenURL(URL(string: "tez://")!)
     }
 

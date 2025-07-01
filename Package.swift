@@ -24,9 +24,14 @@ let package = Package(
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
+        .binaryTarget(
+            name: "boxpaybridge",
+            path: "Framework/boxpaybridge.xcframework"
+        ),
         .target(
             name: "iosCheckoutSdk",
             dependencies: [
+                "boxpaybridge",
                 .product(name: "Lottie", package: "lottie-ios"),
                 .product(name: "SDWebImageSwiftUI", package: "SDWebImageSwiftUI"),
                 .product(name: "SDWebImageSVGCoder", package: "SDWebImageSVGCoder")
