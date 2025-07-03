@@ -8,7 +8,7 @@
 import SwiftUICore
 import SwiftUI
 import SDWebImageSVGCoder
-import shared
+import CrossPlatformSDK
 
 public struct BoxpayCheckout : View {
     var token : String
@@ -70,7 +70,6 @@ public struct BoxpayCheckout : View {
             SDImageCodersManager.shared.addCoder(SVGCoder)
             let service = UPIService(detector: detector)
             installedApps = service.getAvailableApps()
-            print("Installed Apps: \(installedApps)")
         }
     
     public var body: some View {
