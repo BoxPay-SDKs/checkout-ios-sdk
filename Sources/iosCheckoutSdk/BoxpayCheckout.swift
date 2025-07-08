@@ -136,7 +136,7 @@ public struct BoxpayCheckout : View {
                                             selectedRecommendedDisplayValue = item.displayValue ?? ""
                                         },
                                         onProceedButton: {
-                                            upiViewModel.postRecommendedOrSavedInstrumentRef(selectedRecommendedInstrumentValue, methodType: "UpiCollect", selectedRecommendedDisplayValue)
+                                            upiViewModel.initiateUpiPostRequest(nil, selectedRecommendedDisplayValue, methodType: "UpiCollect", selectedRecommendedInstrumentValue)
                                         },
                                         fallbackImage: "upi_logo",
                                         showLastUsed : item.instrumentRef == viewModel.recommendedIds[0].instrumentRef
@@ -173,9 +173,6 @@ public struct BoxpayCheckout : View {
                                 selectedRecommendedInstrumentValue = ""
                                 selectedSavedInstrumentValue = selectedUpiId
                                 selectedRecommendedDisplayValue = selectedUpiDisplayValue
-                            },
-                            onProceedSavedUpiId: { strign in
-                                upiViewModel.postRecommendedOrSavedInstrumentRef(selectedSavedInstrumentValue, methodType: "UpiCollect", selectedRecommendedDisplayValue)
                             }
                         )
 

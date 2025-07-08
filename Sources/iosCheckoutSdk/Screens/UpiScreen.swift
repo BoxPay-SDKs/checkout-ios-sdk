@@ -18,12 +18,11 @@ struct UpiScreen: View {
     var currencySymbol : String
     @Binding var isUpiCollectVisible: Bool
     
-    let handleUpiPayment: (_ selectedIntent : String?, _ shopperVpa : String?, _ methodType:String) -> ()
+    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ methodType: String, _ selectedInstrumentRef : String?) -> ()
     
     @Binding var savedUpiIds : [RecommendedResponse]
     @Binding var selectedSavedUpiId : String
     let onClickSavedUpi : (_ selectedSavedUpiRef : String, _ selectedSavedUpiDisplayValue : String) -> ()
-    let onProceedSavedUpiId: (_ selectedSavedUpiRef : String) -> ()
 
     @State private var upiCollectVisible = false
     @State private var upiCollectError = false
@@ -50,7 +49,7 @@ struct UpiScreen: View {
                                 onClickSavedUpi(string, item.displayValue ?? "")
                             },
                             onProceedButton: {
-                                onProceedSavedUpiId(selectedSavedUpiId)
+                                handleUpiPayment(nil,item.displayValue, "UpiCollect", selectedSavedUpiId)
                             },
                             fallbackImage: "upi_logo"
                         )
@@ -86,7 +85,7 @@ struct UpiScreen: View {
 
                 if let intent = selectedIntent, !intent.isEmpty {
                     Button(action: {
-                        handleUpiPayment(selectedIntent,upiCollectTextInput, "UpiIntent")
+                        handleUpiPayment(selectedIntent,upiCollectTextInput, "UpiIntent", nil)
                     }) {
                         (
                             Text("Pay ")
@@ -168,7 +167,7 @@ struct UpiScreen: View {
 
                             Button(action: {
                                 if let _ = upiCollectValid {
-                                    handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect")
+                                    handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect", nil)
                                 } else {
                                     upiCollectError = true
                                 }
