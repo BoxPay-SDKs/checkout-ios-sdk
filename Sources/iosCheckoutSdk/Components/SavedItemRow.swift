@@ -19,7 +19,7 @@ struct SavedItemRow : View {
     var amount : String
     
     var body: some View {
-        VStack{
+        VStack(spacing: 0){
             HStack(alignment: .center) {
                 SVGImageView(url: URL(string: savedItem.logoUrl)!, fallbackImage: fallbackImage)
                 VStack(alignment: .leading) {

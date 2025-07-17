@@ -179,11 +179,31 @@ public struct BoxpayCheckout : View {
                             }
                         )
 
+                        if(viewModel.cardsMethod && !viewModel.savedCards.isEmpty) {
+                            SavedCardsComponent(
+                                selectedItemInstrumentValue : $selectedSavedCardInstrumentValue,
+                                isContainerExpanded : $isCardContainerExpanded,
+                                savedItems : viewModel.savedCards,
+                                onClickRadioButton : { clickedInstrumentValue in
+                                    selectedSavedCardInstrumentValue = clickedInstrumentValue
+                                },
+                                onProceedButton : {
+                                    // clicked saved card proceed button
+                                },
+                                brandColor : viewModel.brandColor,
+                                currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
+                                totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? ""
+                            )
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(radius: 1)
+                            .padding(.horizontal, 16)
+                        }
                         
                         if(viewModel.cardsMethod || viewModel.walletsMethod || viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                             TitleHeaderView(text: "More Payment Options")
                             VStack(spacing: 0) {
-                                if(viewModel.cardsMethod) {
+                                if(viewModel.cardsMethod && viewModel.savedCards.isEmpty) {
                                     MorePaymentContainer(
                                         handleButtonClick: {
                                             if(!viewModel.savedCards.isEmpty) {
@@ -193,19 +213,7 @@ public struct BoxpayCheckout : View {
                                             }
                                         },
                                         image: "ic_card",
-                                        title: "Cards",
-                                        selectedItemInstrumentValue : $selectedSavedCardInstrumentValue,
-                                        isContainerExpanded : $isCardContainerExpanded,
-                                        savedItems : viewModel.savedCards,
-                                        onClickRadioButton : { clickedInstrumentValue in
-                                            selectedSavedCardInstrumentValue = clickedInstrumentValue
-                                        },
-                                        onProceedButton : {
-                                            // clicked saved card proceed button
-                                        },
-                                        brandColor : viewModel.brandColor,
-                                        currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
-                                        totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? ""
+                                        title: "Cards"
                                     )
                                     if(viewModel.netBankingMethod || viewModel.walletsMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                                         Divider()
@@ -214,8 +222,7 @@ public struct BoxpayCheckout : View {
                                 if(viewModel.walletsMethod) {
                                     MorePaymentContainer(handleButtonClick: {
                                         navigateToWalletScreen = true
-                                    }, image: "ic_wallet", title: "Wallet",selectedItemInstrumentValue : .constant(""),
-                                                         isContainerExpanded : .constant(false))
+                                    }, image: "ic_wallet", title: "Wallet")
                                     if(viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                                         Divider()
                                     }
@@ -224,8 +231,7 @@ public struct BoxpayCheckout : View {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to netbanking screen
                                         navigateToNetBankingScreen = true
-                                    }, image: "ic_netBanking", title: "Netbanking",selectedItemInstrumentValue : .constant(""),
-                                                         isContainerExpanded : .constant(false))
+                                    }, image: "ic_netBanking", title: "Netbanking")
                                     if(viewModel.bnplMethod || viewModel.emiMethod) {
                                         Divider()
                                     }
@@ -234,8 +240,7 @@ public struct BoxpayCheckout : View {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to emi screen
                                         navigateToEmiScreen = true
-                                    }, image: "ic_emi", title: "EMI",selectedItemInstrumentValue : .constant(""),
-                                                         isContainerExpanded : .constant(false))
+                                    }, image: "ic_emi", title: "EMI")
                                     if(viewModel.bnplMethod) {
                                         Divider()
                                     }
@@ -244,8 +249,7 @@ public struct BoxpayCheckout : View {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to bnpl screen
                                         navigateToBnplScreen = true
-                                    }, image: "ic_bnpl", title: "Pay Later",selectedItemInstrumentValue : .constant(""),
-                                                         isContainerExpanded : .constant(false))
+                                    }, image: "ic_bnpl", title: "Pay Later")
                                 }
                             }
                             .background(Color.white)
