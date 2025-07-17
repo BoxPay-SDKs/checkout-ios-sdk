@@ -170,7 +170,7 @@ public struct BoxpayCheckout : View {
                             currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
                             isUpiCollectVisible: $viewModel.upiCollectMethod,
                             handleUpiPayment: upiViewModel.initiateUpiPostRequest,
-                            savedUpiIds: $viewModel.recommendedIds,
+                            savedUpiIds: $viewModel.savedUpiIds,
                             selectedSavedUpiId : $selectedSavedInstrumentValue,
                             onClickSavedUpi: {selectedUpiId, selectedUpiDisplayValue in
                                 selectedRecommendedInstrumentValue = ""

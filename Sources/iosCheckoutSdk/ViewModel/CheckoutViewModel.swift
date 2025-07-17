@@ -15,6 +15,7 @@ class CheckoutViewModel: ObservableObject {
     @Published var actions: PaymentAction?
     @Published var recommendedIds : [SavedItemDataClass] = []
     @Published var savedCards : [SavedItemDataClass] = []
+    @Published var savedUpiIds : [SavedItemDataClass] = []
     
     @Published var isShippingEnabled = false
     @Published var isShippingEditable = false
@@ -86,8 +87,9 @@ class CheckoutViewModel: ObservableObject {
                     body: nil,
                     responseType: [RecommendedResponse].self
                 )
-                var localRecommended: [SavedItemDataClass] = []
+                var localSavedUpis: [SavedItemDataClass] = []
                 var localSavedCards: [SavedItemDataClass] = []
+                var localRecommended : [SavedItemDataClass] = []
 
                 // Iterate over each item in the API response
                 for item in response {
@@ -108,12 +110,16 @@ class CheckoutViewModel: ObservableObject {
 
                     // Sort the item into the correct list based on its type.
                     // We'll assume 'card' type goes to savedCards, and others are recommended.
+                    
+                    localRecommended.append(savedItem)
                     if item.type == "Card" {
                         localSavedCards.append(savedItem)
+                    } else {
+                        localSavedUpis.append(savedItem)
                     }
-                    localRecommended.append(savedItem)
                 }
                 self.recommendedIds = localRecommended
+                self.savedUpiIds = localSavedUpis
                 self.savedCards = localSavedCards
             }
         }
