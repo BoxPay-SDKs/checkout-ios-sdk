@@ -180,6 +180,7 @@ public struct BoxpayCheckout : View {
                         )
 
                         if(viewModel.cardsMethod && !viewModel.savedCards.isEmpty) {
+                            TitleHeaderView(text: "Credit & Debit Cards")
                             SavedCardsComponent(
                                 selectedItemInstrumentValue : $selectedSavedCardInstrumentValue,
                                 isContainerExpanded : $isCardContainerExpanded,
