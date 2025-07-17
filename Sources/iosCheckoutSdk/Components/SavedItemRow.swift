@@ -79,5 +79,6 @@ struct SavedItemRow : View {
                 .padding(.bottom, 12)
             }
         }
+        .background(selectedItemInstrumentValue == savedItem.instrumentTypeValue ? Color(hex: "#EDF8F4") : Color.white)
     }
 }

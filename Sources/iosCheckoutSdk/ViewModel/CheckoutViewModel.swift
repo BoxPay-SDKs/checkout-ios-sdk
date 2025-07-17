@@ -110,9 +110,8 @@ class CheckoutViewModel: ObservableObject {
                     // We'll assume 'card' type goes to savedCards, and others are recommended.
                     if item.type == "Card" {
                         localSavedCards.append(savedItem)
-                    } else {
-                        localRecommended.append(savedItem)
                     }
+                    localRecommended.append(savedItem)
                 }
                 self.recommendedIds = localRecommended
                 self.savedCards = localSavedCards
