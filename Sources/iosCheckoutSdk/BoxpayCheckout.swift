@@ -34,6 +34,9 @@ public struct BoxpayCheckout : View {
     @State private var selectedRecommendedDisplayValue : String = ""
     @State private var selectedSavedInstrumentValue : String = ""
     
+    @State private var selectedSavedCardInstrumentValue : String = ""
+    @State private var isCardContainerExpanded : Bool = false
+    
     @State private var navigateToCardScreen = false
     @State private var navigateToWalletScreen = false
     @State private var navigateToNetBankingScreen = false
@@ -123,23 +126,23 @@ public struct BoxpayCheckout : View {
                             VStack(spacing:0) {
                                 ForEach(Array(viewModel.recommendedIds.prefix(2).enumerated()), id: \.offset) { index, item in
                                     PaymentOptionView(
-                                        isSelected: selectedRecommendedInstrumentValue == item.instrumentRef,
-                                        imageUrl: item.logoUrl ?? "",
-                                        title: item.displayValue ?? "",
+                                        isSelected: selectedRecommendedInstrumentValue == item.instrumentTypeValue,
+                                        imageUrl: item.logoUrl,
+                                        title: item.displayName,
                                         currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
                                         amount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
-                                        instrumentValue: item.instrumentRef ?? "",
+                                        instrumentValue: item.instrumentTypeValue,
                                         brandColor: viewModel.brandColor,
                                         onClick: { string in
                                             selectedSavedInstrumentValue = ""
                                             selectedRecommendedInstrumentValue = string
-                                            selectedRecommendedDisplayValue = item.displayValue ?? ""
+                                            selectedRecommendedDisplayValue = item.displayName
                                         },
                                         onProceedButton: {
                                             upiViewModel.initiateUpiPostRequest(nil, selectedRecommendedDisplayValue, methodType: "UpiCollect", selectedRecommendedInstrumentValue)
                                         },
                                         fallbackImage: "upi_logo",
-                                        showLastUsed : item.instrumentRef == viewModel.recommendedIds[0].instrumentRef
+                                        showLastUsed : item.instrumentTypeValue == viewModel.recommendedIds[0].instrumentTypeValue
                                     )
                                     if index < min(1, viewModel.recommendedIds.prefix(2).count - 1) {
                                         Divider() // Optional: Adjust Divider's padding if needed
@@ -181,19 +184,38 @@ public struct BoxpayCheckout : View {
                             TitleHeaderView(text: "More Payment Options")
                             VStack(spacing: 0) {
                                 if(viewModel.cardsMethod) {
-                                    MorePaymentContainer(handleButtonClick: {
-                                        // click to navigate to cards screen
-                                        navigateToCardScreen = true
-                                    }, image: "ic_card", title: "Cards")
+                                    MorePaymentContainer(
+                                        handleButtonClick: {
+                                            if(!viewModel.savedCards.isEmpty) {
+                                                isCardContainerExpanded = !isCardContainerExpanded
+                                            } else {
+                                                navigateToCardScreen = true
+                                            }
+                                        },
+                                        image: "ic_card",
+                                        title: "Cards",
+                                        selectedItemInstrumentValue : $selectedSavedCardInstrumentValue,
+                                        isContainerExpanded : $isCardContainerExpanded,
+                                        savedItems : viewModel.savedCards,
+                                        onClickRadioButton : { clickedInstrumentValue in
+                                            selectedSavedCardInstrumentValue = clickedInstrumentValue
+                                        },
+                                        onProceedButton : {
+                                            // clicked saved card proceed button
+                                        },
+                                        brandColor : viewModel.brandColor,
+                                        currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
+                                        totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? ""
+                                    )
                                     if(viewModel.netBankingMethod || viewModel.walletsMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                                         Divider()
                                     }
                                 }
                                 if(viewModel.walletsMethod) {
                                     MorePaymentContainer(handleButtonClick: {
-                                        // click to navigate to wallets screen
                                         navigateToWalletScreen = true
-                                    }, image: "ic_wallet", title: "Wallet")
+                                    }, image: "ic_wallet", title: "Wallet",selectedItemInstrumentValue : .constant(""),
+                                                         isContainerExpanded : .constant(false))
                                     if(viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                                         Divider()
                                     }
@@ -202,7 +224,8 @@ public struct BoxpayCheckout : View {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to netbanking screen
                                         navigateToNetBankingScreen = true
-                                    }, image: "ic_netBanking", title: "Netbanking")
+                                    }, image: "ic_netBanking", title: "Netbanking",selectedItemInstrumentValue : .constant(""),
+                                                         isContainerExpanded : .constant(false))
                                     if(viewModel.bnplMethod || viewModel.emiMethod) {
                                         Divider()
                                     }
@@ -211,7 +234,8 @@ public struct BoxpayCheckout : View {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to emi screen
                                         navigateToEmiScreen = true
-                                    }, image: "ic_emi", title: "EMI")
+                                    }, image: "ic_emi", title: "EMI",selectedItemInstrumentValue : .constant(""),
+                                                         isContainerExpanded : .constant(false))
                                     if(viewModel.bnplMethod) {
                                         Divider()
                                     }
@@ -220,7 +244,8 @@ public struct BoxpayCheckout : View {
                                     MorePaymentContainer(handleButtonClick: {
                                         // click to navigate to bnpl screen
                                         navigateToBnplScreen = true
-                                    }, image: "ic_bnpl", title: "Pay Later")
+                                    }, image: "ic_bnpl", title: "Pay Later",selectedItemInstrumentValue : .constant(""),
+                                                         isContainerExpanded : .constant(false))
                                 }
                             }
                             .background(Color.white)

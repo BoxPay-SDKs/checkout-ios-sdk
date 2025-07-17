@@ -20,7 +20,7 @@ struct UpiScreen: View {
     
     let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ methodType: String, _ selectedInstrumentRef : String?) -> ()
     
-    @Binding var savedUpiIds : [RecommendedResponse]
+    @Binding var savedUpiIds : [SavedItemDataClass]
     @Binding var selectedSavedUpiId : String
     let onClickSavedUpi : (_ selectedSavedUpiRef : String, _ selectedSavedUpiDisplayValue : String) -> ()
 
@@ -38,18 +38,18 @@ struct UpiScreen: View {
                 VStack(spacing : 0){
                     ForEach(Array(savedUpiIds.enumerated()), id: \.offset) { index, item in
                         PaymentOptionView(
-                            isSelected: selectedSavedUpiId == item.instrumentRef,
-                            imageUrl: item.logoUrl ?? "",
-                            title: item.displayValue ?? "",
+                            isSelected: selectedSavedUpiId == item.instrumentTypeValue,
+                            imageUrl: item.logoUrl,
+                            title: item.displayName,
                             currencySymbol: currencySymbol,
                             amount: totalAmount,
-                            instrumentValue: item.instrumentRef ?? "",
+                            instrumentValue: item.instrumentTypeValue,
                             brandColor: brandColor,
                             onClick: { string in
-                                onClickSavedUpi(string, item.displayValue ?? "")
+                                onClickSavedUpi(string, item.displayName)
                             },
                             onProceedButton: {
-                                handleUpiPayment(nil,item.displayValue, "UpiCollect", selectedSavedUpiId)
+                                handleUpiPayment(nil,item.displayName, "UpiCollect", selectedSavedUpiId)
                             },
                             fallbackImage: "upi_logo"
                         )
