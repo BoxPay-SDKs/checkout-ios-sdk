@@ -63,25 +63,27 @@ struct MorePaymentContainer : View {
                         amount: totalAmount
                     )
                     Divider()
-                    HStack(alignment: .center) {
-                        Image(frameworkAsset: "add_green", isTemplate: true)
-                            .foregroundColor(Color(hex: brandColor))
-                            .frame(width:16, height:16)
-
-                        VStack(alignment: .leading) {
-                            Text("Add new Card")
-                                .font(.custom("Poppins-Medium", size: 14))
-                                .foregroundColor(Color(hex: brandColor))
-                                .lineLimit(1)
-                        }
-
-                        Spacer()
-
-                        Image(frameworkAsset: "chevron")
-                            .frame(width: 10, height: 10)
-                            .rotationEffect(.degrees(90))
-                    }
                 }
+                HStack(alignment: .center) {
+                    Image(frameworkAsset: "add_green", isTemplate: true)
+                        .foregroundColor(Color(hex: brandColor))
+                        .frame(width:16, height:16)
+
+                    VStack(alignment: .leading) {
+                        Text("Add new Card")
+                            .font(.custom("Poppins-Medium", size: 14))
+                            .foregroundColor(Color(hex: brandColor))
+                            .lineLimit(1)
+                    }
+
+                    Spacer()
+
+                    Image(frameworkAsset: "chevron")
+                        .frame(width: 10, height: 10)
+                        .rotationEffect(.degrees(90))
+                }
+                padding(.horizontal, 12)
+                .padding(.vertical, 12)
             }
         }
     }

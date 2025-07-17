@@ -102,7 +102,7 @@ class CheckoutViewModel: ObservableObject {
 
                     let savedItem = SavedItemDataClass(
                         id: itemId,
-                        displayName: item.holderName ?? "",
+                        displayName: item.holderName ?? "Ishika Axis CC",
                         displayNumber: item.displayValue ?? "",
                         logoUrl: item.logoUrl ?? "",
                         instrumentTypeValue: item.instrumentRef ?? ""
