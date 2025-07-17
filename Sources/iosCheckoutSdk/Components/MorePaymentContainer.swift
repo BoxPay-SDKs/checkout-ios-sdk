@@ -82,7 +82,7 @@ struct MorePaymentContainer : View {
                         .frame(width: 10, height: 10)
                         .rotationEffect(.degrees(90))
                 }
-                padding(.horizontal, 12)
+                .padding(.horizontal, 12)
                 .padding(.vertical, 12)
             }
         }
