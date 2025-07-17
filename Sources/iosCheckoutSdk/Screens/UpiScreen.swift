@@ -40,16 +40,16 @@ struct UpiScreen: View {
                         PaymentOptionView(
                             isSelected: selectedSavedUpiId == item.instrumentTypeValue,
                             imageUrl: item.logoUrl,
-                            title: item.displayName,
+                            title: item.displayNumber,
                             currencySymbol: currencySymbol,
                             amount: totalAmount,
                             instrumentValue: item.instrumentTypeValue,
                             brandColor: brandColor,
                             onClick: { string in
-                                onClickSavedUpi(string, item.displayName)
+                                onClickSavedUpi(string, item.displayNumber)
                             },
                             onProceedButton: {
-                                handleUpiPayment(nil,item.displayName, "UpiCollect", selectedSavedUpiId)
+                                handleUpiPayment(nil,item.displayNumber, "UpiCollect", selectedSavedUpiId)
                             },
                             fallbackImage: "upi_logo"
                         )

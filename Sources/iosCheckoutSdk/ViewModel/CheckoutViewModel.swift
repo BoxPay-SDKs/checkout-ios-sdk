@@ -103,7 +103,7 @@ class CheckoutViewModel: ObservableObject {
                         displayName: item.holderName ?? "",
                         displayNumber: item.displayValue ?? "",
                         logoUrl: item.logoUrl ?? "",
-                        instrumentTypeValue: item.instrumentType ?? ""
+                        instrumentTypeValue: item.instrumentRef ?? ""
                     )
 
                     // Sort the item into the correct list based on its type.

@@ -128,7 +128,7 @@ public struct BoxpayCheckout : View {
                                     PaymentOptionView(
                                         isSelected: selectedRecommendedInstrumentValue == item.instrumentTypeValue,
                                         imageUrl: item.logoUrl,
-                                        title: item.displayName,
+                                        title: item.displayNumber,
                                         currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
                                         amount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
                                         instrumentValue: item.instrumentTypeValue,
@@ -136,7 +136,7 @@ public struct BoxpayCheckout : View {
                                         onClick: { string in
                                             selectedSavedInstrumentValue = ""
                                             selectedRecommendedInstrumentValue = string
-                                            selectedRecommendedDisplayValue = item.displayName
+                                            selectedRecommendedDisplayValue = item.displayNumber
                                         },
                                         onProceedButton: {
                                             upiViewModel.initiateUpiPostRequest(nil, selectedRecommendedDisplayValue, methodType: "UpiCollect", selectedRecommendedInstrumentValue)
