@@ -108,7 +108,7 @@ class CheckoutViewModel: ObservableObject {
 
                     // Sort the item into the correct list based on its type.
                     // We'll assume 'card' type goes to savedCards, and others are recommended.
-                    if item.type == "card" {
+                    if item.type == "Card" {
                         localSavedCards.append(savedItem)
                     } else {
                         localRecommended.append(savedItem)
