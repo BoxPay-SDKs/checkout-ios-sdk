@@ -255,7 +255,7 @@ struct CardScreen : View {
                         .cornerRadius(4)
 
                         if(!viewModel.shopperToken.isEmpty) {
-                            HStack(alignment: .center, spacing: 0) {
+                            HStack(spacing: 0) {
                                 Toggle(isOn: $isSavedCardCheckBoxClicked) {
                                     Text("Save this card as per RBI rules.")
                                         .font(.custom("Poppins-Regular", size: 12))

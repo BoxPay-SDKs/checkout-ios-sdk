@@ -18,28 +18,34 @@ struct SavedCardKnowMore : View {
             Text("RBI Guidelines")
                 .font(.custom("Poppins-SemiBold", size: 20))
                 .foregroundColor(Color(hex: "#2D2B32"))
+            
             Text("As per the new RBI guidelines, we can no longer store your card information with us.")
                 .font(.custom("Poppins-Regular", size: 14))
                 .foregroundColor(Color(hex: "#2D2B32"))
                 .padding(.top, 12)
+            
             HStack(alignment: .center, spacing: 0) {
                 Image(frameworkAsset: "card_lock")
-                    .frame(width: 28, height: 28)
+                    .frame(width: 16, height: 16)
+                
                 Text("Your bank/card network will securely save your card information via tokenization if you consent for the same.")
                     .font(.custom("Poppins-Regular", size: 14))
                     .foregroundColor(Color(hex: "#4F4D55"))
                     .padding(.leading, 12)
             }
             .padding(.top, 28)
+            
             HStack(alignment: .center, spacing: 0) {
                 Image(frameworkAsset: "card_add")
-                    .frame(width: 28, height: 28)
+                    .frame(width: 16, height: 16)
+                
                 Text("In case you choose to not tokenize, you’ll have to enter card details every time you pay.")
                     .font(.custom("Poppins-Regular", size: 14))
                     .foregroundColor(Color(hex: "#4F4D55"))
                     .padding(.leading, 12)
             }
             .padding(.top, 28)
+            
             Button(action: {
                 onGoBack()
             }){
