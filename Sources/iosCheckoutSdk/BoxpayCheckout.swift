@@ -134,12 +134,19 @@ public struct BoxpayCheckout : View {
                                         instrumentValue: item.instrumentTypeValue,
                                         brandColor: viewModel.brandColor,
                                         onClick: { string in
-                                            selectedSavedInstrumentValue = ""
-                                            selectedRecommendedInstrumentValue = string
-                                            selectedRecommendedDisplayValue = item.displayNumber
+                                            if(item.type == "upi") {
+                                                selectedSavedInstrumentValue = ""
+                                                selectedRecommendedInstrumentValue = string
+                                                selectedRecommendedDisplayValue = item.displayNumber
+                                                selectedSavedCardInstrumentValue = ""
+                                            } else {
+                                                selectedSavedCardInstrumentValue = string
+                                                selectedSavedInstrumentValue = ""
+                                                selectedRecommendedInstrumentValue = ""
+                                            }
                                         },
                                         onProceedButton: {
-                                            upiViewModel.initiateUpiPostRequest(nil, selectedRecommendedDisplayValue, methodType: "UpiCollect", selectedRecommendedInstrumentValue)
+                                            upiViewModel.initiateUpiPostRequest(nil, selectedRecommendedDisplayValue, methodType: item.type == "upi" ? "UpiCollect" : "", item.type == "upi" ? selectedRecommendedInstrumentValue : selectedSavedCardInstrumentValue, item.type)
                                         },
                                         fallbackImage: "upi_logo",
                                         showLastUsed : item.instrumentTypeValue == viewModel.recommendedIds[0].instrumentTypeValue
@@ -187,9 +194,11 @@ public struct BoxpayCheckout : View {
                                 savedItems : viewModel.savedCards,
                                 onClickRadioButton : { clickedInstrumentValue in
                                     selectedSavedCardInstrumentValue = clickedInstrumentValue
+                                    selectedRecommendedInstrumentValue = ""
+                                    selectedSavedInstrumentValue = ""
                                 },
                                 onProceedButton : {
-                                    // clicked saved card proceed button
+                                    upiViewModel.initiateUpiPostRequest(nil, nil, methodType: "", selectedSavedCardInstrumentValue, "card")
                                 },
                                 brandColor : viewModel.brandColor,
                                 currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",

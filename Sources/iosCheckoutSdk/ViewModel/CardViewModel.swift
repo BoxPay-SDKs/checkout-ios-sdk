@@ -35,11 +35,12 @@ class CardViewModel: ObservableObject {
         }
     }
     
-    func initiateCardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String) {
+    func initiateCardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String, isSavedCardCheckBoxClicked : Bool) {
         Task {
             self.isLoading = true
             
             let expiry = formatExpiry(cardExpiry)
+            
             var instrumentDetails: [String: Any] = [
                 "type": "card/plain",
                 "card": [
@@ -50,6 +51,12 @@ class CardViewModel: ObservableObject {
                 ]
             ]
             
+            var headers = StringUtils.getRequestHeaders()
+
+            if !shopperToken.isEmpty {
+                headers["Authorization"] = "Session \(shopperToken)"
+                instrumentDetails["saveInstrument"] = isSavedCardCheckBoxClicked
+            }
             let deliveryAddress: [String: Any?] = await[
                 "address1": userDataManager.getAddress1(),
                 "address2": userDataManager.getAddress2(),

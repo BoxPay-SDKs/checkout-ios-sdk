@@ -6,6 +6,7 @@
 //
 
 struct SavedItemDataClass : Identifiable {
+    let type : String
     let id : String
     let displayName : String
     let displayNumber : String

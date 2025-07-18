@@ -18,7 +18,7 @@ struct UpiScreen: View {
     var currencySymbol : String
     @Binding var isUpiCollectVisible: Bool
     
-    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ methodType: String, _ selectedInstrumentRef : String?) -> ()
+    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ methodType: String, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
     
     @Binding var savedUpiIds : [SavedItemDataClass]
     @Binding var selectedSavedUpiId : String
@@ -49,7 +49,7 @@ struct UpiScreen: View {
                                 onClickSavedUpi(string, item.displayNumber)
                             },
                             onProceedButton: {
-                                handleUpiPayment(nil,item.displayNumber, "UpiCollect", selectedSavedUpiId)
+                                handleUpiPayment(nil,item.displayNumber, "UpiCollect", selectedSavedUpiId, "upi")
                             },
                             fallbackImage: "upi_logo"
                         )
@@ -85,7 +85,7 @@ struct UpiScreen: View {
 
                 if let intent = selectedIntent, !intent.isEmpty {
                     Button(action: {
-                        handleUpiPayment(selectedIntent,upiCollectTextInput, "UpiIntent", nil)
+                        handleUpiPayment(selectedIntent,upiCollectTextInput, "UpiIntent", nil, "upi")
                     }) {
                         (
                             Text("Pay ")
@@ -167,7 +167,7 @@ struct UpiScreen: View {
 
                             Button(action: {
                                 if let _ = upiCollectValid {
-                                    handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect", nil)
+                                    handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect", nil, "upi")
                                 } else {
                                     upiCollectError = true
                                 }
