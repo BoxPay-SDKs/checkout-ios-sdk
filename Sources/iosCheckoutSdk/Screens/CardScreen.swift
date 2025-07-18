@@ -65,11 +65,14 @@ struct CardScreen : View {
     @State private var paymentHtmlString: String? = nil
     @State private var showWebView = false
     @State private var isCvvShowDetailsClicked = false
+    @State private var isSavedCardKnowMoreClicked = false
     
     @State var itemsCount = 0
     @State var currencySymbol = ""
     @State var totalAmount = ""
     @State var brandColor = ""
+    
+    @State private var isSavedCardCheckBoxClicked = false
     
     var body: some View {
         VStack {
@@ -251,6 +254,27 @@ struct CardScreen : View {
                         .background(Color(hex: "#E8F6F1"))
                         .cornerRadius(4)
 
+                        if(!viewModel.shopperToken.isEmpty) {
+                            HStack {
+                                Toggle(isOn: $isSavedCardCheckBoxClicked) {
+                                    Text("Hello toggle")
+                                }
+                                    .toggleStyle(CheckboxToggleStyle())
+                                Text("Save this card as per RBI rules.")
+                                    .font(.custom("Poppins-Regular", size: 12))
+                                    .foregroundColor(Color(hex: "#2D2B32"))
+                                    .padding(.leading, 4)
+                                Button(action : {
+                                    isSavedCardKnowMoreClicked = true
+                                }) {
+                                    Text("Know more")
+                                        .font(.custom("Poppins-SemiBold", size: 12))
+                                        .foregroundColor(Color(hex:brandColor))
+                                        .padding(.leading, 2)
+                                }
+                            }
+                            .padding(.top, 16)
+                        }
                     }
                     .padding(.horizontal, 16)
                     Button(action: {
@@ -325,6 +349,11 @@ struct CardScreen : View {
         .bottomSheet(isPresented: $isCvvShowDetailsClicked) {
             CVVInfoView(onGoBack: {
                 isCvvShowDetailsClicked = false
+            },brandColor: brandColor)
+        }
+        .bottomSheet(isPresented: $isSavedCardKnowMoreClicked) {
+            SavedCardKnowMore(onGoBack: {
+                isSavedCardKnowMoreClicked = false
             },brandColor: brandColor)
         }
     }

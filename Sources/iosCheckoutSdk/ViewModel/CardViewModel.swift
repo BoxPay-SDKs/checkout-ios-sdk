@@ -9,9 +9,18 @@ class CardViewModel: ObservableObject {
     private let apiService = ApiService.shared
     @Published var cardResponse : CardInfoResponse?
     let userDataManager = UserDataManager.shared
+    @Published var shopperToken = ""
     
     @Published var transactionId = ""
 
+    
+    init() {
+        Task {
+            shopperToken = await checkoutManager.getShopperToken()
+        }
+    }
+    
+    
     func fetchCardInfo(_ cardNumber: String) {
         Task {
             do {
