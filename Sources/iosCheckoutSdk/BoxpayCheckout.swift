@@ -146,7 +146,7 @@ public struct BoxpayCheckout : View {
                                             }
                                         },
                                         onProceedButton: {
-                                            upiViewModel.initiateUpiPostRequest(nil, selectedRecommendedDisplayValue, methodType: item.type == "upi" ? "UpiCollect" : "", item.type == "upi" ? selectedRecommendedInstrumentValue : selectedSavedCardInstrumentValue, item.type)
+                                            upiViewModel.initiateUpiPostRequest(nil, selectedRecommendedDisplayValue, methodType: item.type == "upi" ? "UpiCollect" : "card/token", item.type == "upi" ? selectedRecommendedInstrumentValue : selectedSavedCardInstrumentValue, item.type)
                                         },
                                         fallbackImage: "upi_logo",
                                         showLastUsed : item.instrumentTypeValue == viewModel.recommendedIds[0].instrumentTypeValue
@@ -198,7 +198,7 @@ public struct BoxpayCheckout : View {
                                     selectedSavedInstrumentValue = ""
                                 },
                                 onProceedButton : {
-                                    upiViewModel.initiateUpiPostRequest(nil, nil, methodType: "", selectedSavedCardInstrumentValue, "card")
+                                    upiViewModel.initiateUpiPostRequest(nil, nil, methodType: "card/token", selectedSavedCardInstrumentValue, "card")
                                 },
                                 brandColor : viewModel.brandColor,
                                 currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
