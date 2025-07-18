@@ -11,12 +11,10 @@ import RealityKit
 
 struct CheckboxToggleStyle: ToggleStyle {
     @Environment(\.isEnabled) var isEnabled
-    let enabledColor: Color = .blue
+    let enabledColor: Color
 
     func makeBody(configuration: Configuration) -> some View {
         HStack {
-            configuration.label
-            Spacer()
             Image(systemName: configuration.isOn ? "checkmark.square.fill" : "square")
                 .resizable()
                 .frame(width: 24, height: 24)
@@ -26,6 +24,7 @@ struct CheckboxToggleStyle: ToggleStyle {
                         configuration.isOn.toggle()
                     }
                 }
+            configuration.label
         }
         .disabled(!isEnabled)
     }

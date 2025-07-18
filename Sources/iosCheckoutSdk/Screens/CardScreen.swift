@@ -255,15 +255,14 @@ struct CardScreen : View {
                         .cornerRadius(4)
 
                         if(!viewModel.shopperToken.isEmpty) {
-                            HStack {
+                            HStack(alignment: .center, spacing: 0) {
                                 Toggle(isOn: $isSavedCardCheckBoxClicked) {
-                                    Text("Hello toggle")
+                                    Text("Save this card as per RBI rules.")
+                                        .font(.custom("Poppins-Regular", size: 12))
+                                        .foregroundColor(Color(hex: "#2D2B32"))
+                                        .padding(.leading, 4)
                                 }
-                                    .toggleStyle(CheckboxToggleStyle())
-                                Text("Save this card as per RBI rules.")
-                                    .font(.custom("Poppins-Regular", size: 12))
-                                    .foregroundColor(Color(hex: "#2D2B32"))
-                                    .padding(.leading, 4)
+                                    .toggleStyle(CheckboxToggleStyle(enabledColor : Color(hex: brandColor)))
                                 Button(action : {
                                     isSavedCardKnowMoreClicked = true
                                 }) {
@@ -271,6 +270,12 @@ struct CardScreen : View {
                                         .font(.custom("Poppins-SemiBold", size: 12))
                                         .foregroundColor(Color(hex:brandColor))
                                         .padding(.leading, 2)
+                                        .background(
+                                            Rectangle()
+                                            .frame(height: 1) // Adjust the thickness of the line
+                                            .offset(y: 8)      // Adjust the position of the line
+                                            .foregroundColor(Color(hex: brandColor))
+                                        )
                                 }
                             }
                             .padding(.top, 16)
