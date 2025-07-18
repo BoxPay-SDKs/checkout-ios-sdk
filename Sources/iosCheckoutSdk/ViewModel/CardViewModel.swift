@@ -9,9 +9,18 @@ class CardViewModel: ObservableObject {
     private let apiService = ApiService.shared
     @Published var cardResponse : CardInfoResponse?
     let userDataManager = UserDataManager.shared
+    @Published var shopperToken = ""
     
     @Published var transactionId = ""
 
+    
+    init() {
+        Task {
+            shopperToken = await checkoutManager.getShopperToken()
+        }
+    }
+    
+    
     func fetchCardInfo(_ cardNumber: String) {
         Task {
             do {
@@ -26,11 +35,12 @@ class CardViewModel: ObservableObject {
         }
     }
     
-    func initiateCardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String) {
+    func initiateCardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String, isSavedCardCheckBoxClicked : Bool) {
         Task {
             self.isLoading = true
             
             let expiry = formatExpiry(cardExpiry)
+            
             var instrumentDetails: [String: Any] = [
                 "type": "card/plain",
                 "card": [
@@ -41,6 +51,12 @@ class CardViewModel: ObservableObject {
                 ]
             ]
             
+            var headers = StringUtils.getRequestHeaders()
+
+            if !shopperToken.isEmpty {
+                headers["Authorization"] = "Session \(shopperToken)"
+                instrumentDetails["saveInstrument"] = isSavedCardCheckBoxClicked
+            }
             let deliveryAddress: [String: Any?] = await[
                 "address1": userDataManager.getAddress1(),
                 "address2": userDataManager.getAddress2(),

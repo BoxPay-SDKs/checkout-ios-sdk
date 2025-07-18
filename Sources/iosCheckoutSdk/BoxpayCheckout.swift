@@ -34,6 +34,9 @@ public struct BoxpayCheckout : View {
     @State private var selectedRecommendedDisplayValue : String = ""
     @State private var selectedSavedInstrumentValue : String = ""
     
+    @State private var selectedSavedCardInstrumentValue : String = ""
+    @State private var isCardContainerExpanded : Bool = false
+    
     @State private var navigateToCardScreen = false
     @State private var navigateToWalletScreen = false
     @State private var navigateToNetBankingScreen = false
@@ -123,23 +126,30 @@ public struct BoxpayCheckout : View {
                             VStack(spacing:0) {
                                 ForEach(Array(viewModel.recommendedIds.prefix(2).enumerated()), id: \.offset) { index, item in
                                     PaymentOptionView(
-                                        isSelected: selectedRecommendedInstrumentValue == item.instrumentRef,
-                                        imageUrl: item.logoUrl ?? "",
-                                        title: item.displayValue ?? "",
+                                        isSelected: selectedRecommendedInstrumentValue == item.instrumentTypeValue,
+                                        imageUrl: item.logoUrl,
+                                        title: item.displayNumber,
                                         currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
                                         amount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
-                                        instrumentValue: item.instrumentRef ?? "",
+                                        instrumentValue: item.instrumentTypeValue,
                                         brandColor: viewModel.brandColor,
                                         onClick: { string in
-                                            selectedSavedInstrumentValue = ""
-                                            selectedRecommendedInstrumentValue = string
-                                            selectedRecommendedDisplayValue = item.displayValue ?? ""
+                                            if(item.type == "upi") {
+                                                selectedSavedInstrumentValue = ""
+                                                selectedRecommendedInstrumentValue = string
+                                                selectedRecommendedDisplayValue = item.displayNumber
+                                                selectedSavedCardInstrumentValue = ""
+                                            } else {
+                                                selectedSavedCardInstrumentValue = string
+                                                selectedSavedInstrumentValue = ""
+                                                selectedRecommendedInstrumentValue = ""
+                                            }
                                         },
                                         onProceedButton: {
-                                            upiViewModel.initiateUpiPostRequest(nil, selectedRecommendedDisplayValue, methodType: "UpiCollect", selectedRecommendedInstrumentValue)
+                                            upiViewModel.initiateUpiPostRequest(nil, selectedRecommendedDisplayValue, methodType: item.type == "upi" ? "UpiCollect" : "card/token", item.type == "upi" ? selectedRecommendedInstrumentValue : selectedSavedCardInstrumentValue, item.type)
                                         },
                                         fallbackImage: "upi_logo",
-                                        showLastUsed : item.instrumentRef == viewModel.recommendedIds[0].instrumentRef
+                                        showLastUsed : item.instrumentTypeValue == viewModel.recommendedIds[0].instrumentTypeValue
                                     )
                                     if index < min(1, viewModel.recommendedIds.prefix(2).count - 1) {
                                         Divider() // Optional: Adjust Divider's padding if needed
@@ -167,7 +177,7 @@ public struct BoxpayCheckout : View {
                             currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
                             isUpiCollectVisible: $viewModel.upiCollectMethod,
                             handleUpiPayment: upiViewModel.initiateUpiPostRequest,
-                            savedUpiIds: $viewModel.recommendedIds,
+                            savedUpiIds: $viewModel.savedUpiIds,
                             selectedSavedUpiId : $selectedSavedInstrumentValue,
                             onClickSavedUpi: {selectedUpiId, selectedUpiDisplayValue in
                                 selectedRecommendedInstrumentValue = ""
@@ -176,22 +186,50 @@ public struct BoxpayCheckout : View {
                             }
                         )
 
+                        if(viewModel.cardsMethod && !viewModel.savedCards.isEmpty) {
+                            TitleHeaderView(text: "Credit & Debit Cards")
+                            SavedCardsComponent(
+                                selectedItemInstrumentValue : $selectedSavedCardInstrumentValue,
+                                isContainerExpanded : $isCardContainerExpanded,
+                                savedItems : viewModel.savedCards,
+                                onClickRadioButton : { clickedInstrumentValue in
+                                    selectedSavedCardInstrumentValue = clickedInstrumentValue
+                                    selectedRecommendedInstrumentValue = ""
+                                    selectedSavedInstrumentValue = ""
+                                },
+                                onProceedButton : {
+                                    upiViewModel.initiateUpiPostRequest(nil, nil, methodType: "card/token", selectedSavedCardInstrumentValue, "card")
+                                },
+                                brandColor : viewModel.brandColor,
+                                currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
+                                totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
+                                onClickAddNewCard : {
+                                    navigateToCardScreen = true
+                                }
+                            )
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(radius: 1)
+                            .padding(.horizontal, 16)
+                        }
                         
                         if(viewModel.cardsMethod || viewModel.walletsMethod || viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                             TitleHeaderView(text: "More Payment Options")
                             VStack(spacing: 0) {
-                                if(viewModel.cardsMethod) {
-                                    MorePaymentContainer(handleButtonClick: {
-                                        // click to navigate to cards screen
-                                        navigateToCardScreen = true
-                                    }, image: "ic_card", title: "Cards")
+                                if(viewModel.cardsMethod && viewModel.savedCards.isEmpty) {
+                                    MorePaymentContainer(
+                                        handleButtonClick: {
+                                            navigateToCardScreen = true
+                                        },
+                                        image: "ic_card",
+                                        title: "Cards"
+                                    )
                                     if(viewModel.netBankingMethod || viewModel.walletsMethod || viewModel.bnplMethod || viewModel.emiMethod) {
                                         Divider()
                                     }
                                 }
                                 if(viewModel.walletsMethod) {
                                     MorePaymentContainer(handleButtonClick: {
-                                        // click to navigate to wallets screen
                                         navigateToWalletScreen = true
                                     }, image: "ic_wallet", title: "Wallet")
                                     if(viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {

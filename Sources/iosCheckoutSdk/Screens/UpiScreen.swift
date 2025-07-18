@@ -18,9 +18,9 @@ struct UpiScreen: View {
     var currencySymbol : String
     @Binding var isUpiCollectVisible: Bool
     
-    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ methodType: String, _ selectedInstrumentRef : String?) -> ()
+    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ methodType: String, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
     
-    @Binding var savedUpiIds : [RecommendedResponse]
+    @Binding var savedUpiIds : [SavedItemDataClass]
     @Binding var selectedSavedUpiId : String
     let onClickSavedUpi : (_ selectedSavedUpiRef : String, _ selectedSavedUpiDisplayValue : String) -> ()
 
@@ -38,18 +38,18 @@ struct UpiScreen: View {
                 VStack(spacing : 0){
                     ForEach(Array(savedUpiIds.enumerated()), id: \.offset) { index, item in
                         PaymentOptionView(
-                            isSelected: selectedSavedUpiId == item.instrumentRef,
-                            imageUrl: item.logoUrl ?? "",
-                            title: item.displayValue ?? "",
+                            isSelected: selectedSavedUpiId == item.instrumentTypeValue,
+                            imageUrl: item.logoUrl,
+                            title: item.displayNumber,
                             currencySymbol: currencySymbol,
                             amount: totalAmount,
-                            instrumentValue: item.instrumentRef ?? "",
+                            instrumentValue: item.instrumentTypeValue,
                             brandColor: brandColor,
                             onClick: { string in
-                                onClickSavedUpi(string, item.displayValue ?? "")
+                                onClickSavedUpi(string, item.displayNumber)
                             },
                             onProceedButton: {
-                                handleUpiPayment(nil,item.displayValue, "UpiCollect", selectedSavedUpiId)
+                                handleUpiPayment(nil,item.displayNumber, "UpiCollect", selectedSavedUpiId, "upi")
                             },
                             fallbackImage: "upi_logo"
                         )
@@ -85,7 +85,7 @@ struct UpiScreen: View {
 
                 if let intent = selectedIntent, !intent.isEmpty {
                     Button(action: {
-                        handleUpiPayment(selectedIntent,upiCollectTextInput, "UpiIntent", nil)
+                        handleUpiPayment(selectedIntent,upiCollectTextInput, "UpiIntent", nil, "upi")
                     }) {
                         (
                             Text("Pay ")
@@ -167,7 +167,7 @@ struct UpiScreen: View {
 
                             Button(action: {
                                 if let _ = upiCollectValid {
-                                    handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect", nil)
+                                    handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect", nil, "upi")
                                 } else {
                                     upiCollectError = true
                                 }

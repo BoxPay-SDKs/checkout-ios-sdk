@@ -65,11 +65,14 @@ struct CardScreen : View {
     @State private var paymentHtmlString: String? = nil
     @State private var showWebView = false
     @State private var isCvvShowDetailsClicked = false
+    @State private var isSavedCardKnowMoreClicked = false
     
     @State var itemsCount = 0
     @State var currencySymbol = ""
     @State var totalAmount = ""
     @State var brandColor = ""
+    
+    @State private var isSavedCardCheckBoxClicked = false
     
     var body: some View {
         VStack {
@@ -251,11 +254,38 @@ struct CardScreen : View {
                         .background(Color(hex: "#E8F6F1"))
                         .cornerRadius(4)
 
+                        if(!viewModel.shopperToken.isEmpty) {
+                            HStack {
+                                Toggle(isOn: $isSavedCardCheckBoxClicked) {
+                                    Text("Save this card as per RBI rules.")
+                                        .font(.custom("Poppins-Regular", size: 12))
+                                        .foregroundColor(Color(hex: "#2D2B32"))
+                                        .padding(.leading, 4)
+                                }
+                                    .toggleStyle(CheckboxToggleStyle(enabledColor : Color(hex: brandColor)))
+                                Button(action : {
+                                    isSavedCardKnowMoreClicked = true
+                                }) {
+                                    Text("Know more")
+                                        .font(.custom("Poppins-SemiBold", size: 12))
+                                        .foregroundColor(Color(hex:brandColor))
+                                        .padding(.leading, 2)
+                                        .background(
+                                            Rectangle()
+                                            .frame(height: 1) // Adjust the thickness of the line
+                                            .offset(y: 8)      // Adjust the position of the line
+                                            .foregroundColor(Color(hex: brandColor))
+                                        )
+                                }
+                            }
+                            .padding(.top, 12)
+                            .frame(maxWidth: .infinity, alignment : .leading)
+                        }
                     }
                     .padding(.horizontal, 16)
                     Button(action: {
                         if checkCardValid() && durationNumber == nil {
-                            viewModel.initiateCardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput)
+                            viewModel.initiateCardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, isSavedCardCheckBoxClicked: isSavedCardCheckBoxClicked)
                         } else if (checkCardValid() && durationNumber != nil) {
                             viewModel.initiateEMICardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, cardType: cardType ?? "", offerCode: offerCode, duration: "\(durationNumber ?? 0)")
                         }
@@ -325,6 +355,11 @@ struct CardScreen : View {
         .bottomSheet(isPresented: $isCvvShowDetailsClicked) {
             CVVInfoView(onGoBack: {
                 isCvvShowDetailsClicked = false
+            },brandColor: brandColor)
+        }
+        .bottomSheet(isPresented: $isSavedCardKnowMoreClicked) {
+            SavedCardKnowMore(onGoBack: {
+                isSavedCardKnowMoreClicked = false
             },brandColor: brandColor)
         }
     }

@@ -13,7 +13,9 @@ class CheckoutViewModel: ObservableObject {
     @Published var emiMethod: Bool = false
     @Published var bnplMethod: Bool = false
     @Published var actions: PaymentAction?
-    @Published var recommendedIds : [RecommendedResponse] = []
+    @Published var recommendedIds : [SavedItemDataClass] = []
+    @Published var savedCards : [SavedItemDataClass] = []
+    @Published var savedUpiIds : [SavedItemDataClass] = []
     
     @Published var isShippingEnabled = false
     @Published var isShippingEditable = false
@@ -85,7 +87,41 @@ class CheckoutViewModel: ObservableObject {
                     body: nil,
                     responseType: [RecommendedResponse].self
                 )
-                self.recommendedIds = response
+                var localSavedUpis: [SavedItemDataClass] = []
+                var localSavedCards: [SavedItemDataClass] = []
+                var localRecommended : [SavedItemDataClass] = []
+
+                // Iterate over each item in the API response
+                for item in response {
+                    // Create the SavedItemDataClass instance by mapping fields.
+                    // It's safer to only create an item if it has a unique identifier.
+                    guard let itemId = item.instrumentRef else {
+                        // Skip this item if it doesn't have an instrumentRef to use as an ID
+                        continue
+                    }
+
+                    let savedItem = SavedItemDataClass(
+                        type: item.type?.lowercased() ?? "",
+                        id: itemId,
+                        displayName: item.holderName ?? "Ishika Axis CC",
+                        displayNumber: item.displayValue ?? "",
+                        logoUrl: item.logoUrl ?? "",
+                        instrumentTypeValue: item.instrumentRef ?? ""
+                    )
+
+                    // Sort the item into the correct list based on its type.
+                    // We'll assume 'card' type goes to savedCards, and others are recommended.
+                    
+                    localRecommended.append(savedItem)
+                    if item.type == "Card" {
+                        localSavedCards.append(savedItem)
+                    } else {
+                        localSavedUpis.append(savedItem)
+                    }
+                }
+                self.recommendedIds = localRecommended
+                self.savedUpiIds = localSavedUpis
+                self.savedCards = localSavedCards
             }
         }
     }
