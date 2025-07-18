@@ -24,7 +24,7 @@ struct SavedCardKnowMore : View {
                 .foregroundColor(Color(hex: "#2D2B32"))
                 .padding(.top, 12)
             
-            HStack(alignment: .center, spacing: 0) {
+            HStack {
                 Image(frameworkAsset: "card_lock")
                     .frame(width: 16, height: 16)
                 
@@ -35,7 +35,7 @@ struct SavedCardKnowMore : View {
             }
             .padding(.top, 28)
             
-            HStack(alignment: .center, spacing: 0) {
+            HStack {
                 Image(frameworkAsset: "card_add")
                     .frame(width: 16, height: 16)
                 

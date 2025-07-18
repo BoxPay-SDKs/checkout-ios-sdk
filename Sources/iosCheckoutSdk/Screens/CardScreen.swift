@@ -255,30 +255,31 @@ struct CardScreen : View {
                         .cornerRadius(4)
 
                         if(!viewModel.shopperToken.isEmpty) {
-                            HStack(spacing: 0) {
-                                Toggle(isOn: $isSavedCardCheckBoxClicked) {
-                                    Text("Save this card as per RBI rules.")
-                                        .font(.custom("Poppins-Regular", size: 12))
-                                        .foregroundColor(Color(hex: "#2D2B32"))
-                                        .padding(.leading, 4)
-                                }
-                                    .toggleStyle(CheckboxToggleStyle(enabledColor : Color(hex: brandColor)))
-                                Button(action : {
-                                    isSavedCardKnowMoreClicked = true
-                                }) {
-                                    Text("Know more")
-                                        .font(.custom("Poppins-SemiBold", size: 12))
-                                        .foregroundColor(Color(hex:brandColor))
-                                        .padding(.leading, 2)
-                                        .background(
-                                            Rectangle()
-                                            .frame(height: 1) // Adjust the thickness of the line
-                                            .offset(y: 8)      // Adjust the position of the line
-                                            .foregroundColor(Color(hex: brandColor))
-                                        )
+                            VStack(alignment: .leading, spacing:0){
+                                HStack {
+                                    Toggle(isOn: $isSavedCardCheckBoxClicked) {
+                                        Text("Save this card as per RBI rules.")
+                                            .font(.custom("Poppins-Regular", size: 12))
+                                            .foregroundColor(Color(hex: "#2D2B32"))
+                                            .padding(.leading, 4)
+                                    }
+                                        .toggleStyle(CheckboxToggleStyle(enabledColor : Color(hex: brandColor)))
+                                    Button(action : {
+                                        isSavedCardKnowMoreClicked = true
+                                    }) {
+                                        Text("Know more")
+                                            .font(.custom("Poppins-SemiBold", size: 12))
+                                            .foregroundColor(Color(hex:brandColor))
+                                            .padding(.leading, 2)
+                                            .background(
+                                                Rectangle()
+                                                .frame(height: 1) // Adjust the thickness of the line
+                                                .offset(y: 8)      // Adjust the position of the line
+                                                .foregroundColor(Color(hex: brandColor))
+                                            )
+                                    }
                                 }
                             }
-                            .padding(.top, 16)
                         }
                     }
                     .padding(.horizontal, 16)
