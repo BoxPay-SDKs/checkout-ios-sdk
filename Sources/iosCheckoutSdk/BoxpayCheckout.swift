@@ -193,7 +193,10 @@ public struct BoxpayCheckout : View {
                                 },
                                 brandColor : viewModel.brandColor,
                                 currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
-                                totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? ""
+                                totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
+                                onClickAddNewCard : {
+                                    navigateToCardScreen = true
+                                }
                             )
                             .background(Color.white)
                             .cornerRadius(12)
@@ -207,11 +210,7 @@ public struct BoxpayCheckout : View {
                                 if(viewModel.cardsMethod && viewModel.savedCards.isEmpty) {
                                     MorePaymentContainer(
                                         handleButtonClick: {
-                                            if(!viewModel.savedCards.isEmpty) {
-                                                isCardContainerExpanded = !isCardContainerExpanded
-                                            } else {
-                                                navigateToCardScreen = true
-                                            }
+                                            navigateToCardScreen = true
                                         },
                                         image: "ic_card",
                                         title: "Cards"

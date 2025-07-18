@@ -17,6 +17,7 @@ struct SavedCardsComponent : View {
     var brandColor : String = ""
     var currencySymbol : String = ""
     var totalAmount : String = ""
+    var onClickAddNewCard : () -> Void
     
     
     var body: some View {
@@ -36,22 +37,26 @@ struct SavedCardsComponent : View {
                 )
                 Divider()
             }
-            HStack(alignment: .center) {
-                Image(frameworkAsset: "add_green", isTemplate: true)
-                    .foregroundColor(Color(hex: brandColor))
-                    .frame(width:16, height:16)
-
-                VStack(alignment: .leading) {
-                    Text("Add new Card")
+            Button(action: {
+                onClickAddNewCard()
+            }) {
+                HStack(alignment: .center) {
+                    Image(frameworkAsset: "add_green", isTemplate: true)
                         .foregroundColor(Color(hex: brandColor))
-                        .font(.custom("Poppins-SemiBold", size: 14))
+                        .frame(width:16, height:16)
+
+                    VStack(alignment: .leading) {
+                        Text("Add new Card")
+                            .foregroundColor(Color(hex: brandColor))
+                            .font(.custom("Poppins-SemiBold", size: 14))
+                    }
+
+                    Spacer()
+
+                    Image(frameworkAsset: "chevron")
+                        .frame(width: 10, height: 10)
+                        .rotationEffect(.degrees(90))
                 }
-
-                Spacer()
-
-                Image(frameworkAsset: "chevron")
-                    .frame(width: 10, height: 10)
-                    .rotationEffect(.degrees(90))
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
