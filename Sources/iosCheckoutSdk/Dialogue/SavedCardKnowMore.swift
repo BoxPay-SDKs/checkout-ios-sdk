@@ -25,8 +25,8 @@ struct SavedCardKnowMore : View {
                 .padding(.top, 12)
             
             HStack {
-                Image(frameworkAsset: "card_lock")
-                    .frame(width: 16, height: 16)
+                Image(frameworkAsset: "ic_card_lock")
+                    .frame(width: 28, height: 28)
                 
                 Text("Your bank/card network will securely save your card information via tokenization if you consent for the same.")
                     .font(.custom("Poppins-Regular", size: 14))
@@ -36,8 +36,8 @@ struct SavedCardKnowMore : View {
             .padding(.top, 28)
             
             HStack {
-                Image(frameworkAsset: "card_add")
-                    .frame(width: 16, height: 16)
+                Image(frameworkAsset: "ic_card_add")
+                    .frame(width: 28, height: 28)
                 
                 Text("In case you choose to not tokenize, you’ll have to enter card details every time you pay.")
                     .font(.custom("Poppins-Regular", size: 14))
