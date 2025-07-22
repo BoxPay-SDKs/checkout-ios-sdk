@@ -255,7 +255,7 @@ struct CardScreen : View {
                                 trailingIcon: .constant(""),
                                 leadingIcon: .constant(""),
                                 isSecureText: .constant(false)
-                            ).padding(.top, 20)
+                            ).padding(.top, 10)
                         }
                         HStack {
                             Image(frameworkAsset: "ic_info")

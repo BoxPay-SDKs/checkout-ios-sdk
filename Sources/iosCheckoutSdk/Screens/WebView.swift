@@ -78,7 +78,10 @@ struct WebView: UIViewRepresentable {
         }
 
         // Log start of navigation
-        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!,withError error: Error) {
+            print("--- WEBVIEW FAILED TO LOAD ---")
+                        print("Error: \(error.localizedDescription)")
+                        print("Error Details: \(error)")
             if ((webView.url?.absoluteString.contains("boxpay")) == true) {
                 DispatchQueue.main.async {
                     self.parent.onDismiss?()
