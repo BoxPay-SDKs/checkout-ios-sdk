@@ -196,7 +196,7 @@ struct NetBankingScreen: View {
                 onDismiss: {
                     showWebView = false
                     viewModel.isLoading = true
-                    fetchStatusViewModel.startFetchingStatus(methodType: "Card")
+                    fetchStatusViewModel.startFetchingStatus(methodType: "NetBanking")
                 }
             )
         }

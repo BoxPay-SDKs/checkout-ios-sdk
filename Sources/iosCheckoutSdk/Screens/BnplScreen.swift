@@ -139,7 +139,7 @@ struct BnplScreen: View {
                 onDismiss: {
                     showWebView = false
                     viewModel.isLoading = true
-                    fetchStatusViewModel.startFetchingStatus(methodType: "Card")
+                    fetchStatusViewModel.startFetchingStatus(methodType: "BNPL")
                 }
             )
         }
