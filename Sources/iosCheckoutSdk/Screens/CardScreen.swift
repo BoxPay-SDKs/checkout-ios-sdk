@@ -244,7 +244,7 @@ struct CardScreen : View {
                         }
                         if(!viewModel.shopperToken.isEmpty) {
                             FloatingLabelTextField(
-                                placeholder: "Nickname for the card (optional)",
+                                placeholder: "Card Nickname (for easy identification)",
                                 text: $cardNickNameTextInput,
                                 isValid: .constant(true),
                                 onChange: { newNickName in
