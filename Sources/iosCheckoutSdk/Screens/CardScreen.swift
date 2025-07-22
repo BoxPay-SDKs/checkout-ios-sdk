@@ -644,24 +644,24 @@ struct CardScreen : View {
                 viewModel.isLoading = false
                 await viewModel.checkoutManager.setStatus("FAILED")
                 fetchStatusViewModel.stopFetchingStatus()
-                errorReason = message
-                sessionFailedScreen = true
+                self.errorReason = message
+                self.sessionFailedScreen = true
             case .showSuccess(let time):
                 await viewModel.checkoutManager.setStatus("SUCCESS")
                 viewModel.isLoading = false
                 fetchStatusViewModel.stopFetchingStatus()
-                timeStamp = time
-                sessionCompleteScreen = true
+                self.timeStamp = time
+                self.sessionCompleteScreen = true
             case .showExpired:
                 await viewModel.checkoutManager.setStatus("EXPIRED")
                 fetchStatusViewModel.stopFetchingStatus()
                 sessionExpireScreen = true
             case .openWebViewUrl(let url):
-                paymentUrl = url
-                showWebView = true
+                self.paymentUrl = url
+                self.showWebView = true
             case .openWebViewHTML(let htmlContent):
-                paymentHtmlString = htmlContent
-                showWebView = true
+                self.paymentHtmlString = htmlContent
+                self.showWebView = true
             case .openIntentUrl(_):
                 // no operation
                 break
