@@ -16,6 +16,7 @@ struct WebView: UIViewRepresentable {
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
+        config.preferences.javaScriptEnabled = true
         config.websiteDataStore = .default()
 
         let webView = WKWebView(frame: .zero, configuration: config)
@@ -28,7 +29,7 @@ struct WebView: UIViewRepresentable {
             let request = URLRequest(url: url)
             webView.load(request)
         } else if let html = htmlString {
-            webView.loadHTMLString(html, baseURL: Bundle.module.resourceURL)
+            webView.loadHTMLString(html, baseURL: nil)
         }
 
         return webView
@@ -78,7 +79,7 @@ struct WebView: UIViewRepresentable {
         }
 
         // Log start of navigation
-        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!,withError error: Error) {
+        func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!,withError error: Error) {
             print("--- WEBVIEW FAILED TO LOAD ---")
                         print("Error: \(error.localizedDescription)")
                         print("Error Details: \(error)")
