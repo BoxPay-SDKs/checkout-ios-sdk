@@ -28,7 +28,7 @@ struct WebView: UIViewRepresentable {
             let request = URLRequest(url: url)
             webView.load(request)
         } else if let html = htmlString {
-            webView.loadHTMLString(html, baseURL: nil)
+            webView.loadHTMLString(html, baseURL: Bundle.module.resourceURL)
         }
 
         return webView
