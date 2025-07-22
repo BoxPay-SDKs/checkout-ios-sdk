@@ -361,7 +361,8 @@ struct CardScreen : View {
         }
         .sheet(isPresented: $showWebView) {
             WebView(
-                url: URL(string: paymentUrl ?? ""), htmlString: paymentHtmlString,
+                url: paymentUrl,
+                htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     viewModel.isLoading = true
@@ -644,24 +645,24 @@ struct CardScreen : View {
                 viewModel.isLoading = false
                 await viewModel.checkoutManager.setStatus("FAILED")
                 fetchStatusViewModel.stopFetchingStatus()
-                self.errorReason = message
-                self.sessionFailedScreen = true
+                errorReason = message
+                sessionFailedScreen = true
             case .showSuccess(let time):
                 await viewModel.checkoutManager.setStatus("SUCCESS")
                 viewModel.isLoading = false
                 fetchStatusViewModel.stopFetchingStatus()
-                self.timeStamp = time
-                self.sessionCompleteScreen = true
+                timeStamp = time
+                sessionCompleteScreen = true
             case .showExpired:
                 await viewModel.checkoutManager.setStatus("EXPIRED")
                 fetchStatusViewModel.stopFetchingStatus()
                 sessionExpireScreen = true
             case .openWebViewUrl(let url):
-                self.paymentUrl = url
-                self.showWebView = true
+                paymentUrl = url
+                showWebView = true
             case .openWebViewHTML(let htmlContent):
-                self.paymentHtmlString = htmlContent
-                self.showWebView = true
+                paymentHtmlString = htmlContent
+                showWebView = true
             case .openIntentUrl(_):
                 // no operation
                 break

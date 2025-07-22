@@ -149,11 +149,12 @@ struct WalletScreen: View {
         }
         .sheet(isPresented: $showWebView) {
             WebView(
-                url: URL(string: paymentUrl ?? ""), htmlString: paymentHtmlString,
+                url: paymentUrl,
+                htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     viewModel.isLoading = true
-                    fetchStatusViewModel.startFetchingStatus(methodType: "Wallet")
+                    fetchStatusViewModel.startFetchingStatus(methodType: "Card")
                 }
             )
         }
