@@ -7,12 +7,10 @@
 
 
 import SwiftUI
+import CrossPlatformSDK
 
 struct UpiScreen: View {
     @Binding var isUpiIntentVisible: Bool
-    var isGpayVisible: Bool
-    var isPaytmVisible: Bool
-    var isPhonePeVisible: Bool
     var brandColor : String
     var totalAmount : String
     var currencySymbol : String
@@ -23,6 +21,8 @@ struct UpiScreen: View {
     @Binding var savedUpiIds : [SavedItemDataClass]
     @Binding var selectedSavedUpiId : String
     let onClickSavedUpi : (_ selectedSavedUpiRef : String, _ selectedSavedUpiDisplayValue : String) -> ()
+    let detector = UPIAppDetectorIOS()
+    @State private var installedApps : [String] = []
 
     @State private var upiCollectVisible = false
     @State private var upiCollectError = false
@@ -59,21 +59,21 @@ struct UpiScreen: View {
             }
             if isUpiIntentVisible {
                 HStack {
-                    if isGpayVisible {
+                    if isGooglePayInstalled() {
                         intentButton(title: "GPay", imageName: "gpay_upi_logo", isSelected: selectedIntent == "GPay") {
                             selectedIntent = "GPay"
                             resetCollect()
                         }
                     }
 
-                    if isPhonePeVisible {
+                    if isPhonePeInstalled() {
                         intentButton(title: "PhonePe", imageName: "phonepe", isSelected: selectedIntent == "PhonePe") {
                             selectedIntent = "PhonePe"
                             resetCollect()
                         }
                     }
 
-                    if isPaytmVisible {
+                    if isPaytmInstalled() {
                         intentButton(title: "PayTm", imageName: "paytm_upi_logo", isSelected: selectedIntent == "PayTm") {
                             selectedIntent = "PayTm"
                             resetCollect()
@@ -81,7 +81,7 @@ struct UpiScreen: View {
                     }
 
                 }
-                .padding(.top, isGpayVisible || isPaytmVisible || isPhonePeVisible ? 16 : 0)
+                .padding(.top, isGooglePayInstalled() || isPaytmInstalled() || isPhonePeInstalled() ? 16 : 0)
 
                 if let intent = selectedIntent, !intent.isEmpty {
                     Button(action: {
@@ -107,7 +107,7 @@ struct UpiScreen: View {
             }
 
             // 👇 Insert the divider here
-            if (isGpayVisible || isPhonePeVisible || isPaytmVisible) && !upiCollectVisible {
+            if (isGooglePayInstalled() || isPhonePeInstalled() || isPaytmInstalled()) && !upiCollectVisible {
                 Divider()
                     .padding(.top, 12)
             }
@@ -198,6 +198,10 @@ struct UpiScreen: View {
             }
 
         }
+        .onAppear() {
+            let upiService = UPIService(detector: detector)
+            installedApps = upiService.getAvailableApps()
+        }
         .frame(maxWidth: .infinity)
         .background(Color.white)
         .cornerRadius(12)
@@ -264,4 +268,17 @@ struct UpiScreen: View {
         }
     }
 
+    private func isGooglePayInstalled() -> Bool {
+        return installedApps.contains("tez") || installedApps.contains("gpay")
+    }
+
+    // Check if Paytm is installed
+    private func isPaytmInstalled() -> Bool {
+        return installedApps.contains("paytm")
+    }
+
+    // Check if PhonePe is installed
+    private func isPhonePeInstalled() -> Bool {
+        return installedApps.contains("phonepe")
+    }
 }

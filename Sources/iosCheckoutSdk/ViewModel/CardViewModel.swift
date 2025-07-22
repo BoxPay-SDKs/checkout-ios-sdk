@@ -35,7 +35,7 @@ class CardViewModel: ObservableObject {
         }
     }
     
-    func initiateCardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String, isSavedCardCheckBoxClicked : Bool) {
+    func initiateCardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String, isSavedCardCheckBoxClicked : Bool, cardNickName : String) {
         Task {
             self.isLoading = true
             
@@ -47,7 +47,8 @@ class CardViewModel: ObservableObject {
                     "number": cardNumber,
                     "expiry": expiry,
                     "cvc": cardCvv,
-                    "holderName": cardHolderName
+                    "holderName": cardHolderName,
+                    "nickName" : !shopperToken.isEmpty && !cardNickName.isEmpty ? cardNickName : nil
                 ]
             ]
             
@@ -57,6 +58,7 @@ class CardViewModel: ObservableObject {
                 headers["Authorization"] = "Session \(shopperToken)"
                 instrumentDetails["saveInstrument"] = isSavedCardCheckBoxClicked
             }
+            
             let deliveryAddress: [String: Any?] = await[
                 "address1": userDataManager.getAddress1(),
                 "address2": userDataManager.getAddress2(),
@@ -120,7 +122,7 @@ class CardViewModel: ObservableObject {
                 let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
                 let data = try await apiService.request(
                     method: .POST,
-                    headers: StringUtils.getRequestHeaders(),
+                    headers: headers,
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
                 )
@@ -158,7 +160,7 @@ class CardViewModel: ObservableObject {
         }
     }
     
-    func initiateEMICardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String, cardType: String, offerCode: String?, duration: String) {
+    func initiateEMICardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String, cardType: String, offerCode: String?, duration: String, isSavedCardCheckBoxClicked : Bool, cardNickName : String) {
         Task {
             self.isLoading = true
             
@@ -170,12 +172,20 @@ class CardViewModel: ObservableObject {
                     "number": cardNumber,
                     "expiry": expiry,
                     "cvc": cardCvv,
-                    "holderName": cardHolderName
+                    "holderName": cardHolderName,
+                    "nickName" : !shopperToken.isEmpty && !cardNickName.isEmpty ? cardNickName : nil
                 ],
                 "emi": [
                     "duration": duration
                 ]
             ]
+            
+            var headers = StringUtils.getRequestHeaders()
+
+            if !shopperToken.isEmpty {
+                headers["Authorization"] = "Session \(shopperToken)"
+                instrumentDetails["saveInstrument"] = isSavedCardCheckBoxClicked
+            }
             
             let deliveryAddress: [String: Any?] = await[
                 "address1": userDataManager.getAddress1(),
@@ -244,7 +254,7 @@ class CardViewModel: ObservableObject {
                 let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
                 let data = try await apiService.request(
                     method: .POST,
-                    headers: StringUtils.getRequestHeaders(),
+                    headers: headers,
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
                 )

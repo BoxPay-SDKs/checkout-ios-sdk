@@ -30,11 +30,13 @@ struct CardScreen : View {
     @State private var isCardExpiryFocused = false
     @State private var isCardCvvFocused = false
     @State private var isCardNameFocused = false
+    @State private var isCardNickNameFocused = false
     
     @State private var cardNumberTextInput = ""
     @State private var cardExpiryTextInput = ""
     @State private var cardCvvTextInput = ""
     @State private var cardNameTextInput = ""
+    @State private var cardNickNameTextInput = ""
     
     @State private var cardNumberErrorText = ""
     @State private var cardExpiryErrorText = ""
@@ -240,6 +242,21 @@ struct CardScreen : View {
                                     .foregroundColor(Color(hex: "#E12121"))
                             }
                         }
+                        if(!viewModel.shopperToken.isEmpty) {
+                            FloatingLabelTextField(
+                                placeholder: "Nickname for the card (optional)",
+                                text: $cardNickNameTextInput,
+                                isValid: .constant(true),
+                                onChange: { newNickName in
+                                    cardNickNameTextInput = newNickName
+                                },
+                                isFocused: $isCardNickNameFocused,
+                                onFocusEnd: nil,
+                                trailingIcon: .constant(""),
+                                leadingIcon: .constant(""),
+                                isSecureText: .constant(false)
+                            )
+                        }
                         HStack {
                             Image(frameworkAsset: "ic_info")
                                 .frame(width: 12, height: 12)
@@ -285,9 +302,9 @@ struct CardScreen : View {
                     .padding(.horizontal, 16)
                     Button(action: {
                         if checkCardValid() && durationNumber == nil {
-                            viewModel.initiateCardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, isSavedCardCheckBoxClicked: isSavedCardCheckBoxClicked)
+                            viewModel.initiateCardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, isSavedCardCheckBoxClicked: isSavedCardCheckBoxClicked, cardNickName: cardNickNameTextInput)
                         } else if (checkCardValid() && durationNumber != nil) {
-                            viewModel.initiateEMICardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, cardType: cardType ?? "", offerCode: offerCode, duration: "\(durationNumber ?? 0)")
+                            viewModel.initiateEMICardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, cardType: cardType ?? "", offerCode: offerCode, duration: "\(durationNumber ?? 0)",isSavedCardCheckBoxClicked: isSavedCardCheckBoxClicked, cardNickName: cardNickNameTextInput)
                         }
                     }){
                         Text("Make Payment")
