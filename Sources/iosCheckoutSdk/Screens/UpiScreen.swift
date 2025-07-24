@@ -181,16 +181,16 @@ struct UpiScreen: View {
                 }
 
             }
-            .frame(maxWidth: .infinity)
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(radius: 1)
             .padding(.horizontal, 16)
         }
         .onAppear() {
             let upiService = UPIService(detector: detector)
             installedApps = upiService.getAvailableApps()
         }
+        .frame(maxWidth: .infinity)
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(radius: 1)
     }
 
     func intentButton(title: String, imageName: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
