@@ -40,10 +40,6 @@ struct PaymentOptionView: View {
                 }
             }
         }
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 1)
-        .padding(.horizontal, 16)
     }
 }
 

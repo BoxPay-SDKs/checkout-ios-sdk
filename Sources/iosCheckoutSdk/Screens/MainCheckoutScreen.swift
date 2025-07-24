@@ -78,6 +78,7 @@ struct MainCheckoutScreen : View {
                                 },
                                 showLastUsed: true
                             )
+                            .commonCardStyle()
                         }
                         
                         if(viewModel.upiIntentMethod || viewModel.upiCollectMethod) {

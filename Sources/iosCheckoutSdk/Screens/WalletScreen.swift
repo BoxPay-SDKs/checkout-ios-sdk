@@ -94,6 +94,7 @@ struct WalletScreen: View {
                                 },
                                 showLastUsed: false
                             )
+                            .commonCardStyle()
                         }
                     }
                 }

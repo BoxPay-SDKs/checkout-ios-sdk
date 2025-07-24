@@ -78,6 +78,7 @@ struct BnplScreen: View {
                                 },
                                 showLastUsed: false
                             )
+                            .commonCardStyle()
                         }
                     }
                 }

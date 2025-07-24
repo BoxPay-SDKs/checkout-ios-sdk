@@ -77,6 +77,7 @@ struct NetBankingScreen: View {
                                 },
                                 showLastUsed: false
                             )
+                            .commonCardStyle()
                         }
                         HStack {
                             Text("All Banks")

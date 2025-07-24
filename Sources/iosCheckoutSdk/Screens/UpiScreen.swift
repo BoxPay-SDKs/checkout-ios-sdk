@@ -181,7 +181,6 @@ struct UpiScreen: View {
                 }
 
             }
-            .padding(.horizontal, 16)
         }
         .onAppear() {
             let upiService = UPIService(detector: detector)
@@ -191,6 +190,7 @@ struct UpiScreen: View {
         .background(Color.white)
         .cornerRadius(12)
         .shadow(radius: 1)
+        .padding(.horizontal, 16)
     }
 
     func intentButton(title: String, imageName: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
