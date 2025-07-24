@@ -101,8 +101,8 @@ class CheckoutViewModel: ObservableObject {
                     let savedItem = CommonDataClass(
                         type: item.type?.lowercased() ?? "",
                         id: itemId,
-                        displayName: item.cardNickName ?? "",
-                        displayNumber: item.displayValue ?? "",
+                        displayName: item.displayValue ?? "",
+                        displayNumber: item.cardNickName ?? "",
                         logoUrl: item.logoUrl ?? "",
                         instrumentTypeValue: item.instrumentRef ?? ""
                     )

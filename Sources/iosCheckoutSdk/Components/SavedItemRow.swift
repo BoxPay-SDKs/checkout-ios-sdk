@@ -23,11 +23,11 @@ struct SavedItemRow : View {
             HStack(alignment: .center) {
                 SVGImageView(url: URL(string: savedItem.logoUrl)!, fallbackImage: fallbackImage)
                 VStack(alignment: .leading) {
-                    Text(savedItem.displayName)
+                    Text(savedItem.displayNumber)
                         .font(.custom("Poppins-SemiBold", size: 12))
                         .foregroundColor(Color(hex: "#4F4D55"))
                     
-                    Text(savedItem.displayNumber)
+                    Text(savedItem.displayName)
                         .font(.custom("Poppins-Regular", size: 12))
                         .foregroundColor(Color(hex: "#4F4D55"))
                 }
