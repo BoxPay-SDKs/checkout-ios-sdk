@@ -32,7 +32,7 @@ struct UpiScreen: View {
         VStack{
             if (!savedUpiIds.isEmpty) {
                 PaymentOptionView(
-                    items: $savedUpiIds,
+                    items: .constant(Array(savedUpiIds.prefix(2))),
                     onProceed: { instrumentValue, displayName, paymentType in
                         handleUpiPayment(nil, displayName, instrumentValue, paymentType)
                     },
@@ -181,16 +181,16 @@ struct UpiScreen: View {
                 }
 
             }
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .cornerRadius(12)
+            .shadow(radius: 1)
+            .padding(.horizontal, 16)
         }
         .onAppear() {
             let upiService = UPIService(detector: detector)
             installedApps = upiService.getAvailableApps()
         }
-        .frame(maxWidth: .infinity)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(radius: 1)
-        .padding(.horizontal, 16)
     }
 
     func intentButton(title: String, imageName: String, isSelected: Bool, action: @escaping () -> Void) -> some View {

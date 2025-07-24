@@ -33,9 +33,8 @@ struct PaymentOptionView: View {
                         onProceed(viewModel.selectedInstrumentValue , viewModel.selectedDisplayName, viewModel.selectedPaymentType)
                     },
                     fallbackImage: "ic_bnpl_semi_bold",
-                    showLastUsed: showLastUsed ? item.instrumentTypeValue == viewModel.selectedInstrumentValue : false
+                    showLastUsed: showLastUsed ? items[0].instrumentTypeValue == item.instrumentTypeValue : false
                 )
-                
                 if index < items.count - 1 {
                     Divider()
                 }
