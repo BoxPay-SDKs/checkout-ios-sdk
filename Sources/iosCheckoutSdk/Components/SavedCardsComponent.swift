@@ -9,31 +9,26 @@ import SwiftUICore
 import SwiftUI
 
 struct SavedCardsComponent : View {
-    @Binding var selectedItemInstrumentValue : String
-    @Binding var isContainerExpanded : Bool
-    var savedItems : [CommonDataClass] = []
-    var onClickRadioButton : ((String) -> Void)? = nil
-    var onProceedButton : () -> Void = {}
-    var brandColor : String = ""
-    var currencySymbol : String = ""
-    var totalAmount : String = ""
+    @Binding var savedItems : [CommonDataClass]
+    var onProceedButton : (_ selectedInstrumentValue : String) -> Void
     var onClickAddNewCard : () -> Void
     
-    
+    @ObservedObject private var viewModel = ItemsViewModel()
+        
     var body: some View {
         VStack(spacing: 0) {
             ForEach(Array(savedItems.enumerated()), id: \.offset) { index, item in
                 SavedItemRow(
                     savedItem : item,
                     fallbackImage:"ic_default_card",
-                    onClick : { string in
-                        onClickRadioButton!(string)
+                    onClick : { instrumentValue in
+                        viewModel.onChangeInstrumentValue(newInstrumentValue: instrumentValue, newDisplayValue: "", paymentType: item.type)
                     },
-                    selectedItemInstrumentValue: selectedItemInstrumentValue,
+                    selectedItemInstrumentValue: viewModel.selectedInstrumentValue,
                     onProceedButton: onProceedButton,
-                    brandColor: brandColor,
-                    currencySymbol: currencySymbol,
-                    amount: totalAmount
+                    brandColor: viewModel.brandColor,
+                    currencySymbol: viewModel.currencySymbol,
+                    amount: viewModel.amount
                 )
                 Divider()
             }
@@ -42,12 +37,12 @@ struct SavedCardsComponent : View {
             }) {
                 HStack(alignment: .center) {
                     Image(frameworkAsset: "add_green", isTemplate: true)
-                        .foregroundColor(Color(hex: brandColor))
+                        .foregroundColor(Color(hex: viewModel.brandColor))
                         .frame(width:16, height:16)
 
                     VStack(alignment: .leading) {
                         Text("Add new Card")
-                            .foregroundColor(Color(hex: brandColor))
+                            .foregroundColor(Color(hex: viewModel.brandColor))
                             .font(.custom("Poppins-SemiBold", size: 14))
                     }
 
@@ -61,5 +56,9 @@ struct SavedCardsComponent : View {
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
         }
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(radius: 1)
+        .padding(.horizontal, 16)
     }
 }

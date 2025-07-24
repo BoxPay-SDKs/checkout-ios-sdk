@@ -10,18 +10,13 @@ import SwiftUI
 import CrossPlatformSDK
 
 struct UpiScreen: View {
+    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
+    @Binding var savedUpiIds : [CommonDataClass]
+    @ObservedObject var viewModel : UpiViewModel
     @Binding var isUpiIntentVisible: Bool
-    var brandColor : String
-    var totalAmount : String
-    var currencySymbol : String
     @Binding var isUpiCollectVisible: Bool
     
-    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
-    
-    @Binding var savedUpiIds : [CommonDataClass]
-    @Binding var selectedSavedUpiId : String
-    let onClickSavedUpi : (_ selectedSavedUpiRef : String, _ selectedSavedUpiDisplayValue : String) -> ()
-    let detector = UPIAppDetectorIOS()
+    private let detector = UPIAppDetectorIOS()
     @State private var installedApps : [String] = []
 
     @State private var upiCollectVisible = false
@@ -31,14 +26,15 @@ struct UpiScreen: View {
     @State private var isRotated = false
     @State private var isFocused = false
     @State private var selectedIntent: String? = nil
+    
 
     var body: some View {
         VStack(alignment: .leading) {
             if (!savedUpiIds.isEmpty) {
                 PaymentOptionView(
                     items: $savedUpiIds,
-                    onProceed: { instrumentValue in
-                        handleUpiPayment(nil,"", instrumentValue, "upi")
+                    onProceed: { instrumentValue, displayName, paymentType in
+                        handleUpiPayment(nil, displayName, instrumentValue, paymentType)
                     },
                     showLastUsed: false
                 )
@@ -71,20 +67,20 @@ struct UpiScreen: View {
 
                 if let intent = selectedIntent, !intent.isEmpty {
                     Button(action: {
-                        handleUpiPayment(selectedIntent,upiCollectTextInput, nil, "upi")
+                        handleUpiPayment(selectedIntent,nil, nil, "upi")
                     }) {
                         (
                             Text("Pay ")
                                 .font(.custom("Poppins-SemiBold", size: 16)) +
-                            Text(currencySymbol)
+                            Text(viewModel.currencySymbol)
                                 .font(.custom("Inter-SemiBold", size: 16)) +
-                            Text("\(totalAmount) via \(intent)")
+                            Text("\(viewModel.amount) via \(intent)")
                                 .font(.custom("Poppins-SemiBold", size: 16))
                         )
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(Color(hex: brandColor))
+                        .background(Color(hex: viewModel.brandColor))
                         .cornerRadius(8)
                     }
                     .padding(.top, 8)
@@ -104,10 +100,10 @@ struct UpiScreen: View {
                     Button(action: toggleCollectSection) {
                         HStack {
                             Image(frameworkAsset: "add_green", isTemplate: true)
-                                .foregroundColor(Color(hex: brandColor))
+                                .foregroundColor(Color(hex: viewModel.brandColor))
                                 .frame(width:16, height:16)
                             Text("Add new UPI Id")
-                                .foregroundColor(Color(hex: brandColor))
+                                .foregroundColor(Color(hex: viewModel.brandColor))
                                 .font(.custom("Poppins-SemiBold", size: 14))
                             Spacer()
                             Image(frameworkAsset: "chevron")
@@ -153,7 +149,7 @@ struct UpiScreen: View {
 
                             Button(action: {
                                 if let _ = upiCollectValid {
-                                    handleUpiPayment(selectedIntent, upiCollectTextInput, nil, "upi")
+                                    handleUpiPayment(nil, upiCollectTextInput, nil, "upi")
                                 } else {
                                     upiCollectError = true
                                 }
@@ -161,15 +157,15 @@ struct UpiScreen: View {
                                 (
                                     Text("Verify & Pay ")
                                         .font(.custom("Poppins-Regular", size: 16)) +
-                                    Text(currencySymbol)
+                                    Text(viewModel.currencySymbol)
                                         .font(.custom("Inter-Regular", size: 16)) +
-                                    Text(totalAmount)
+                                    Text(viewModel.amount)
                                         .font(.custom("Poppins-Regular", size: 16))
                                 )
                                     .foregroundColor(.white)
                                     .padding()
                                     .frame(maxWidth: .infinity)
-                                    .background(upiCollectValid == true ? Color(hex: brandColor) : Color.gray.opacity(0.5))
+                                    .background(upiCollectValid == true ? Color(hex: viewModel.brandColor) : Color.gray.opacity(0.5))
                                     .cornerRadius(8)
                                     
                             }
@@ -211,12 +207,12 @@ struct UpiScreen: View {
                 }
                 .overlay(
                     Circle()
-                        .stroke(isSelected ? Color(hex: brandColor) : Color.clear, lineWidth: 2)
+                        .stroke(isSelected ? Color(hex: viewModel.brandColor) : Color.clear, lineWidth: 2)
                 )
             }
 
             Text(title)
-                .foregroundColor(isSelected ? Color(hex: brandColor) : .primary)
+                .foregroundColor(isSelected ? Color(hex: viewModel.brandColor) : .primary)
                 .font(.custom(isSelected ? "Poppins-SemiBold" : "Poppins-Regular", size: 14))
         }
         .padding(.leading, 16)

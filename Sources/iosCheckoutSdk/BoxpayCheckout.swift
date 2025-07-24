@@ -16,8 +16,6 @@ public struct BoxpayCheckout : View {
     var onPaymentResult : (PaymentResultObject) -> Void
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel = CheckoutViewModel()
-    @StateObject var upiViewModel = UpiViewModel()
-    @StateObject var fetchStatusViewModel = FetchStatusViewModel()
     @State private var isCheckoutMainScreenFocused = false
     
     
@@ -40,8 +38,6 @@ public struct BoxpayCheckout : View {
         // Replace this with your actual SDK UI
         MainCheckoutScreen(
             viewModel : viewModel,
-            upiViewModel : upiViewModel,
-            fetchStatusViewModel : fetchStatusViewModel,
             isCheckoutMainScreenFocused : $isCheckoutMainScreenFocused,
             triggerPaymentStatusCallBack : triggerPaymentStatusCallBack
         )

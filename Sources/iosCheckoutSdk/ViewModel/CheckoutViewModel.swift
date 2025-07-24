@@ -30,7 +30,6 @@ class CheckoutViewModel: ObservableObject {
     @Published var phoneNumberText = ""
     @Published var emailIdText = ""
     @Published var isAddressScreenRequiredToCompleteDetails = false
-    @Published var addressLabelName = ""
 
     @Published var checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
@@ -51,7 +50,6 @@ class CheckoutViewModel: ObservableObject {
     }
     
     @Published var brandColor = ""
-    @Published var address = ""
     
     @Published var isInitialized = false
         func initialize(token: String, shopperToken: String?, config: ConfigOptions?, callback: @escaping (PaymentResultObject) -> Void) {
@@ -265,11 +263,6 @@ class CheckoutViewModel: ObservableObject {
         if (!shopperToken.isEmpty) {
             getRecommendedFields(shopperToken: shopperToken)
         }
-        address = await formattedAddress()
-        let labelName = await userDataManager.getLabelName()
-        addressLabelName = (labelName == nil || labelName?.isEmpty == true)
-            ? await userDataManager.getLabelType() ?? ""
-            : labelName ?? ""
 
         self.isShippingEnabled = await checkoutManager.getIsShippingAddressEnabled()
         self.isShippingEditable = await checkoutManager.getIsShippingAddressEditable()
@@ -286,7 +279,7 @@ class CheckoutViewModel: ObservableObject {
         self.phoneNumberText = await userDataManager.getPhone() ?? ""
         self.emailIdText = await userDataManager.getEmail() ?? ""
         
-        let isAddressMissing = address.isEmpty && isShippingEnabled
+        let isAddressMissing = firstName.isEmpty && isShippingEnabled
         let isPersonalInfoMissing = (fullNameText.isEmpty || emailIdText.isEmpty || phoneNumberText.isEmpty) &&
                                     (isFullNameEnabled || isMobileNumberEnabled || isEmailIdEnabled)
 
@@ -307,21 +300,4 @@ class CheckoutViewModel: ObservableObject {
         // This will return the symbol for the currency, e.g., "$", "€", "₹", etc.
         return formatter.currencySymbol ?? "₹"
     }
-    
-    func formattedAddress() async -> String {
-        let address1 = await userDataManager.getAddress1()
-        let address2 = await userDataManager.getAddress2()
-        let city = await userDataManager.getCity()
-        let state = await userDataManager.getState()
-        let postalCode = await userDataManager.getPinCode()
-
-        let components = [address1, address2, city, state, postalCode]
-
-        let filteredComponents = components
-            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-
-        return filteredComponents.joined(separator: ", ")
-    }
-
 }

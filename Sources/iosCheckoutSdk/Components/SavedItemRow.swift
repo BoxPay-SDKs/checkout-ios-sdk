@@ -11,9 +11,9 @@ import SwiftUI
 struct SavedItemRow : View {
     var savedItem : CommonDataClass
     var fallbackImage : String
-    var onClick : (String) -> Void
+    var onClick : (_ selectedInstrumentValue : String) -> Void
     var selectedItemInstrumentValue : String
-    var onProceedButton : () -> Void
+    var onProceedButton : (_ selectedInstrumentValue : String) -> Void
     var brandColor : String
     var currencySymbol : String
     var amount : String
@@ -57,7 +57,7 @@ struct SavedItemRow : View {
             
             if selectedItemInstrumentValue == savedItem.instrumentTypeValue {
                 Button(action: {
-                    onProceedButton()
+                    onProceedButton(selectedItemInstrumentValue)
                 }) {
                     (
                         Text("Proceed to Pay ")

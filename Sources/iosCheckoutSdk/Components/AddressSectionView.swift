@@ -9,22 +9,9 @@ import SwiftUI
 
 
 struct AddressSectionView: View {
-    @Binding var address: String
-    @Binding var isShippingEnabled: Bool
-    @Binding var isShippingEdiable : Bool
-    @Binding var isFullNameEnabled: Bool
-    @Binding var isFullNameEditable: Bool
-    @Binding var isPhoneEnabled: Bool
-    @Binding var isPhoneEditable: Bool
-    @Binding var isEmailEnabled: Bool
-    @Binding var isEmailEditable: Bool
-    @Binding var fullNameText: String
-    @Binding var phoneNumberText: String
-    @Binding var emailIdText: String
-    var brandColor: String
-    @Binding var labelName : String
-
     var onClick: () -> Void
+    
+    @ObservedObject private var viewModel = AddAddressViewModel()
 
     var body: some View {
         if isEditableSectionAvailable {
@@ -39,7 +26,7 @@ struct AddressSectionView: View {
 
     @ViewBuilder
     private var contentView: some View {
-        if isShippingEnabled && address.isEmpty {
+        if viewModel.isShippingEnabled && viewModel.address.isEmpty {
             addPromptView(text: "Add new address")
         } else if needsPersonalDetails {
             addPromptView(text: "Add personal details")
@@ -49,26 +36,26 @@ struct AddressSectionView: View {
     }
     
     private var isEditableSectionAvailable: Bool {
-        (isShippingEnabled && isShippingEdiable) ||
-        (isFullNameEnabled && isFullNameEditable) ||
-        (isPhoneEnabled && isPhoneEditable) ||
-        (isEmailEnabled && isEmailEditable)
+        (viewModel.isShippingEnabled && viewModel.isShippingEditable) ||
+        (viewModel.isFullNameEnabled && viewModel.isFullNameEditable) ||
+        (viewModel.isMobileNumberEnabled && viewModel.isMobileNumberEditable) ||
+        (viewModel.isEmailIdEnabled && viewModel.isEmailIdEditable)
     }
 
     private var needsPersonalDetails: Bool {
-        (isEmailEnabled && emailIdText.isEmpty) ||
-        (isPhoneEnabled && phoneNumberText.isEmpty) ||
-        (isFullNameEnabled && fullNameText.isEmpty)
+        (viewModel.isEmailIdEnabled && viewModel.emailIdTextField.isEmpty) ||
+        (viewModel.isMobileNumberEnabled && viewModel.mobileNumberTextField.isEmpty) ||
+        (viewModel.isFullNameEnabled && viewModel.fullNameTextField.isEmpty)
     }
 
     private func addPromptView(text: String) -> some View {
         HStack {
             Image(frameworkAsset: "add_green", isTemplate: true)
-                .foregroundColor(Color(hex: brandColor))
+                .foregroundColor(Color(hex: viewModel.brandColor))
                 .frame(width:16, height:16)
             Text(text)
                 .font(.custom("Poppins-SemiBold", size: 14))
-                .foregroundColor(Color(hex: brandColor))
+                .foregroundColor(Color(hex: viewModel.brandColor))
             Spacer()
             Image(frameworkAsset: "chevron")
                 .frame(width: 10, height: 10)
@@ -80,7 +67,7 @@ struct AddressSectionView: View {
     private var infoDisplayView: some View {
         VStack(alignment: .leading) {
             HStack {
-                Image(frameworkAsset: isShippingEnabled ? "map_pin_gray" : "ic_person")
+                Image(frameworkAsset: viewModel.isShippingEnabled ? "map_pin_gray" : "ic_person")
                     .resizable()
                     .foregroundColor(.green)
                     .frame(width: 20, height: 20)
@@ -104,26 +91,26 @@ struct AddressSectionView: View {
     @ViewBuilder
     private var infoHeaderView: some View {
         HStack {
-            if isShippingEnabled {
+            if viewModel.isShippingEnabled {
                 Text("Deliver at")
                     .font(.custom("Poppins-Regular", size: 12))
                     .foregroundColor(Color(hex: "#4F4D55"))
-                Text(labelName)
+                Text(viewModel.addressLabelName)
                     .font(.custom("Poppins-SemiBold", size: 12))
                     .foregroundColor(Color(hex: "#4F4D55"))
             } else {
-                if isFullNameEnabled {
-                    Text(fullNameText)
+                if viewModel.isFullNameEnabled {
+                    Text(viewModel.fullNameTextField)
                         .font(.custom("Poppins-SemiBold", size: 14))
                         .foregroundColor(Color(hex: "#4F4D55"))
                 }
-                if isFullNameEnabled && isPhoneEnabled {
+                if viewModel.isFullNameEnabled && viewModel.isMobileNumberEnabled {
                     Text("|")
                         .font(.custom("Poppins-SemiBold", size: 14))
                         .foregroundColor(Color(hex: "#4F4D55"))
                 }
-                if isPhoneEnabled {
-                    Text(phoneNumberText)
+                if viewModel.isMobileNumberEnabled {
+                    Text(viewModel.mobileNumberTextField)
                         .font(.custom("Poppins-SemiBold", size: 14))
                         .foregroundColor(Color(hex: "#4F4D55"))
                 }
@@ -133,14 +120,14 @@ struct AddressSectionView: View {
 
     @ViewBuilder
     private var infoSubTextView: some View {
-        if isShippingEnabled {
-            Text(address)
+        if viewModel.isShippingEnabled {
+            Text(viewModel.address)
                 .font(.custom("Poppins-SemiBold", size: 14))
                 .foregroundColor(Color(hex: "#4F4D55"))
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
-        } else if isEmailEnabled {
-            Text(emailIdText)
+        } else if viewModel.isEmailIdEnabled {
+            Text(viewModel.emailIdTextField)
                 .font(.custom("Poppins-Regular", size: 12))
                 .foregroundColor(Color(hex: "#4F4D55"))
                 .lineLimit(1)

@@ -16,7 +16,10 @@ class ItemsViewModel : ObservableObject {
     @Published var amount = ""
     @Published var currencySymbol = ""
     
-    @Published var selectedBNPLInstrumentValue = ""
+    @Published var selectedInstrumentValue = ""
+    @Published var selectedDisplayName = ""
+    @Published var selectedPaymentType = ""
+    
     init() {
         Task {
             brandColor = await checkoutManager.getBrandColor()
@@ -26,7 +29,9 @@ class ItemsViewModel : ObservableObject {
     }
     
     
-    func onChangeBNPLInstrumentValue(newValue : String) {
-        selectedBNPLInstrumentValue = newValue
+    func onChangeInstrumentValue(newInstrumentValue : String, newDisplayValue : String, paymentType : String) {
+        selectedInstrumentValue = newInstrumentValue
+        selectedDisplayName = newDisplayValue
+        selectedPaymentType = paymentType
     }
 }

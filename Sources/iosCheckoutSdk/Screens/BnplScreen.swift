@@ -73,7 +73,7 @@ struct BnplScreen: View {
                         } else {
                             PaymentOptionView(
                                 items: $viewModel.bnplDataClass,
-                                onProceed: { instrumentValue in
+                                onProceed: { instrumentValue, _ , _ in
                                     viewModel.initiateBnplPostRequest(instrumentValue: instrumentValue)
                                 },
                                 showLastUsed: false

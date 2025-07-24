@@ -14,6 +14,18 @@ class UpiViewModel: ObservableObject {
     let checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
     let apiManager = ApiService.shared
+    
+    @Published var brandColor = ""
+    @Published var currencySymbol = ""
+    @Published var amount = ""
+    
+    init() {
+        Task {
+            brandColor = await checkoutManager.getBrandColor()
+            amount = await checkoutManager.getTotalAmount()
+            currencySymbol = await checkoutManager.getCurrencySymbol()
+        }
+    }
 
     func initiateUpiPostRequest(_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?, _ selectedIntrumentRefType : String?) {
         self.isLoading = true

@@ -72,7 +72,7 @@ struct NetBankingScreen: View {
                             .padding(.horizontal, 16)
                             PaymentOptionView(
                                 items: $viewModel.popularBankDataClass,
-                                onProceed: { instrumentValue in
+                                onProceed: { instrumentValue, _ , _  in
                                     viewModel.initiateNetBankingPostRequest(instrumentValue: instrumentValue)
                                 },
                                 showLastUsed: false
@@ -109,7 +109,7 @@ struct NetBankingScreen: View {
                         } else {
                             PaymentOptionView(
                                 items: $viewModel.netBankingDataClass,
-                                onProceed: { instrumentValue in
+                                onProceed: { instrumentValue , _ , _ in
                                     viewModel.initiateNetBankingPostRequest(instrumentValue: instrumentValue)
                                 },
                                 showLastUsed: false

@@ -89,7 +89,7 @@ struct WalletScreen: View {
                         } else {
                             PaymentOptionView(
                                 items: $viewModel.walletDataClass,
-                                onProceed: { instrumentValue in
+                                onProceed: { instrumentValue , _ , _ in
                                     viewModel.initiateWalletPostRequest(instrumentValue: instrumentValue)
                                 },
                                 showLastUsed: false

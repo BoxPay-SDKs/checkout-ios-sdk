@@ -10,12 +10,11 @@ import SwiftUI
 
 struct MainCheckoutScreen : View {
     @ObservedObject var viewModel: CheckoutViewModel
-    @ObservedObject var upiViewModel: UpiViewModel
-    @ObservedObject var fetchStatusViewModel: FetchStatusViewModel
-    
     @Binding var isCheckoutMainScreenFocused : Bool
-    
     var triggerPaymentStatusCallBack : () -> Void
+    
+    @ObservedObject private var upiViewModel: UpiViewModel = UpiViewModel()
+    @ObservedObject private var fetchStatusViewModel: FetchStatusViewModel = FetchStatusViewModel()
     
     @State private var sessionExpireScreen = false
     @State private var sessionCompleteScreen = false
@@ -26,23 +25,14 @@ struct MainCheckoutScreen : View {
     @State private var shopperVpa = ""
     @State private var showCancelPopup = false
     @State private var isUserIntentProcessing = false
-    
-    @State private var selectedRecommendedInstrumentValue : String = ""
-    @State private var selectedRecommendedDisplayValue : String = ""
-    @State private var selectedSavedInstrumentValue : String = ""
-    
-    @State private var selectedSavedCardInstrumentValue : String = ""
-    @State private var isCardContainerExpanded : Bool = false
-    
+        
     @State private var navigateToCardScreen = false
     @State private var navigateToWalletScreen = false
     @State private var navigateToNetBankingScreen = false
     @State private var navigateToBnplScreen = false
     @State private var navigateToEmiScreen = false
     @State private var navigateToAddressScreen = false
-    
-    @State private var isAddressUpdated = false
-    
+        
     @State private var paymentUrl : String? = nil
     @State private var paymentHtmlString: String? = nil
     @State private var showWebView = false
@@ -73,83 +63,46 @@ struct MainCheckoutScreen : View {
                         if viewModel.isShippingEnabled || viewModel.isFullNameEnabled || viewModel.isMobileNumberEnabled || viewModel.isEmailIdEnabled {
                             TitleHeaderView(text: viewModel.isShippingEnabled ? "Address" : "Personal Details")
                             AddressSectionView(
-                                address: $viewModel.address,
-                                isShippingEnabled: $viewModel.isShippingEnabled,
-                                isShippingEdiable: $viewModel.isShippingEditable,
-                                isFullNameEnabled: $viewModel.isFullNameEnabled,
-                                isFullNameEditable: $viewModel.isFullNameEditable,
-                                isPhoneEnabled: $viewModel.isMobileNumberEnabled,
-                                isPhoneEditable: $viewModel.isMobileNumberEditable,
-                                isEmailEnabled: $viewModel.isEmailIdEnabled,
-                                isEmailEditable: $viewModel.isEmailIdEditable,
-                                fullNameText: $viewModel.fullNameText,
-                                phoneNumberText: $viewModel.phoneNumberText,
-                                emailIdText: $viewModel.emailIdText,
-                                brandColor: viewModel.brandColor,
-                                labelName : $viewModel.addressLabelName,
                                 onClick:{
                                     navigateToAddressScreen = true
                                 }
                             )
-                            .id(viewModel.fullNameText + viewModel.phoneNumberText + viewModel.emailIdText + viewModel.address)
                         }
                         if (!viewModel.recommendedIds.isEmpty) {
                             TitleHeaderView(text: "Recommended")
                                 .padding(.bottom, 8)
                             PaymentOptionView(
-                                items: viewModel.recommendedIds,
-                                onProceed: { instrumentValue in
-                                    upiViewModel.initiateUpiPostRequest(nil, instrumentValue, "" , "")
+                                items: $viewModel.recommendedIds,
+                                onProceed: { instrumentValue, displayName, paymentType in
+                                    upiViewModel.initiateUpiPostRequest(nil , displayName , instrumentValue , paymentType)
                                 },
                                 showLastUsed: true
                             )
                         }
+                        
                         if(viewModel.upiIntentMethod || viewModel.upiCollectMethod) {
                             TitleHeaderView(text: "Pay by any UPI")
                                 .padding(.bottom, 8)
+                            UpiScreen(
+                                handleUpiPayment: upiViewModel.initiateUpiPostRequest,
+                                savedUpiIds: $viewModel.savedUpiIds,
+                                viewModel : upiViewModel,
+                                isUpiIntentVisible: $viewModel.upiIntentMethod,
+                                isUpiCollectVisible: $viewModel.upiCollectMethod
+                            )
                         }
-                        
-                        UpiScreen(
-                            isUpiIntentVisible: $viewModel.upiIntentMethod,
-                            brandColor: viewModel.brandColor,
-                            totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
-                            currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
-                            isUpiCollectVisible: $viewModel.upiCollectMethod,
-                            handleUpiPayment: upiViewModel.initiateUpiPostRequest,
-                            savedUpiIds: $viewModel.savedUpiIds,
-                            selectedSavedUpiId : $selectedSavedInstrumentValue,
-                            onClickSavedUpi: {selectedUpiId, selectedUpiDisplayValue in
-                                selectedRecommendedInstrumentValue = ""
-                                selectedSavedInstrumentValue = selectedUpiId
-                                selectedRecommendedDisplayValue = selectedUpiDisplayValue
-                            }
-                        )
 
                         if(viewModel.cardsMethod && !viewModel.savedCards.isEmpty) {
                             TitleHeaderView(text: "Credit & Debit Cards")
                             SavedCardsComponent(
-                                selectedItemInstrumentValue : $selectedSavedCardInstrumentValue,
-                                isContainerExpanded : $isCardContainerExpanded,
-                                savedItems : viewModel.savedCards,
-                                onClickRadioButton : { clickedInstrumentValue in
-                                    selectedSavedCardInstrumentValue = clickedInstrumentValue
-                                    selectedRecommendedInstrumentValue = ""
-                                    selectedSavedInstrumentValue = ""
+                                savedItems : $viewModel.savedCards,
+                                onProceedButton : { instrumentValue in
+                                    upiViewModel.initiateUpiPostRequest(nil, nil, instrumentValue, "card")
                                 },
-                                onProceedButton : {
-                                    upiViewModel.initiateUpiPostRequest(nil, nil, methodType: "card/token", selectedSavedCardInstrumentValue, "card")
-                                },
-                                brandColor : viewModel.brandColor,
-                                currencySymbol : viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
-                                totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
                                 onClickAddNewCard : {
                                     navigateToCardScreen = true
                                 }
                             )
-                            .background(Color.white)
-                            .cornerRadius(12)
-                            .shadow(radius: 1)
-                            .padding(.horizontal, 16)
                         }
                         
                         if(viewModel.cardsMethod || viewModel.walletsMethod || viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
@@ -225,7 +178,7 @@ struct MainCheckoutScreen : View {
             NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: AddAddressScreen(isAddressUpdated: $isAddressUpdated,isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToAddressScreen) {
+            NavigationLink(destination: AddAddressScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToAddressScreen) {
                         EmptyView()
                     }
         }
@@ -283,20 +236,6 @@ struct MainCheckoutScreen : View {
         )
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             fetchStatusViewModel.startFetchingStatus(methodType: "UpiIntent")
-        }
-        .onChange(of: isAddressUpdated) { focused in
-            if focused {
-                Task {
-                    viewModel.address = await viewModel.formattedAddress()
-                    let firstName = await viewModel.userDataManager.getFirstName() ?? ""
-                    let lastName = await viewModel.userDataManager.getLastName() ?? ""
-                    viewModel.fullNameText = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
-                    viewModel.phoneNumberText = await viewModel.userDataManager.getPhone() ?? ""
-                    viewModel.emailIdText = await viewModel.userDataManager.getEmail() ?? ""
-                    
-                    isAddressUpdated = false
-                }
-            }
         }
         .sheet(isPresented: $showWebView) {
             WebView(
