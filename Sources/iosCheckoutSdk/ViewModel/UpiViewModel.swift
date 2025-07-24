@@ -15,7 +15,7 @@ class UpiViewModel: ObservableObject {
     let userDataManager = UserDataManager.shared
     let apiManager = ApiService.shared
 
-    func initiateUpiPostRequest(_ selectedIntent: String?, _ shopperVpa: String?, methodType: String, _ selectedInstrumentRef : String?, _ selectedIntrumentRefType : String?) {
+    func initiateUpiPostRequest(_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?, _ selectedIntrumentRefType : String?) {
         self.isLoading = true
         Task {
             let type = if selectedIntent != nil {
@@ -124,7 +124,7 @@ class UpiViewModel: ObservableObject {
                     timeStamp: response.transactionTimestampLocale,
                     reasonCode: response.status.reasonCode,
                     reason: response.status.reason,
-                    methodType: methodType,
+                    methodType: selectedIntrumentRefType != nil && selectedIntrumentRefType == "upi" ? "UPICollect" : selectedIntent != nil ? "UpiIntent" : "",
                     response: PaymentActionResponse(action: response.actions),
                     shopperVpa: shopperVpa ?? ""
                 )

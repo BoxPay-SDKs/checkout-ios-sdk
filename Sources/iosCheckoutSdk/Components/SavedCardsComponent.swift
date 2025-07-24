@@ -11,7 +11,7 @@ import SwiftUI
 struct SavedCardsComponent : View {
     @Binding var selectedItemInstrumentValue : String
     @Binding var isContainerExpanded : Bool
-    var savedItems : [SavedItemDataClass] = []
+    var savedItems : [CommonDataClass] = []
     var onClickRadioButton : ((String) -> Void)? = nil
     var onProceedButton : () -> Void = {}
     var brandColor : String = ""

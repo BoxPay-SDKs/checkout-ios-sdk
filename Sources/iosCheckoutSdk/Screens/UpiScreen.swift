@@ -16,9 +16,9 @@ struct UpiScreen: View {
     var currencySymbol : String
     @Binding var isUpiCollectVisible: Bool
     
-    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ methodType: String, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
+    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
     
-    @Binding var savedUpiIds : [SavedItemDataClass]
+    @Binding var savedUpiIds : [CommonDataClass]
     @Binding var selectedSavedUpiId : String
     let onClickSavedUpi : (_ selectedSavedUpiRef : String, _ selectedSavedUpiDisplayValue : String) -> ()
     let detector = UPIAppDetectorIOS()
@@ -35,27 +35,13 @@ struct UpiScreen: View {
     var body: some View {
         VStack(alignment: .leading) {
             if (!savedUpiIds.isEmpty) {
-                VStack(spacing : 0){
-                    ForEach(Array(savedUpiIds.enumerated()), id: \.offset) { index, item in
-                        PaymentOptionView(
-                            isSelected: selectedSavedUpiId == item.instrumentTypeValue,
-                            imageUrl: item.logoUrl,
-                            title: item.displayNumber,
-                            currencySymbol: currencySymbol,
-                            amount: totalAmount,
-                            instrumentValue: item.instrumentTypeValue,
-                            brandColor: brandColor,
-                            onClick: { string in
-                                onClickSavedUpi(string, item.displayNumber)
-                            },
-                            onProceedButton: {
-                                handleUpiPayment(nil,item.displayNumber, "UpiCollect", selectedSavedUpiId, "upi")
-                            },
-                            fallbackImage: "upi_logo"
-                        )
-                        Divider()
-                    }
-                }
+                PaymentOptionView(
+                    items: $savedUpiIds,
+                    onProceed: { instrumentValue in
+                        handleUpiPayment(nil,"", instrumentValue, "upi")
+                    },
+                    showLastUsed: false
+                )
             }
             if isUpiIntentVisible {
                 HStack {
@@ -85,7 +71,7 @@ struct UpiScreen: View {
 
                 if let intent = selectedIntent, !intent.isEmpty {
                     Button(action: {
-                        handleUpiPayment(selectedIntent,upiCollectTextInput, "UpiIntent", nil, "upi")
+                        handleUpiPayment(selectedIntent,upiCollectTextInput, nil, "upi")
                     }) {
                         (
                             Text("Pay ")
@@ -167,7 +153,7 @@ struct UpiScreen: View {
 
                             Button(action: {
                                 if let _ = upiCollectValid {
-                                    handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect", nil, "upi")
+                                    handleUpiPayment(selectedIntent, upiCollectTextInput, nil, "upi")
                                 } else {
                                     upiCollectError = true
                                 }

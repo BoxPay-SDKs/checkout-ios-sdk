@@ -1,0 +1,32 @@
+//
+//  ItemsViewModel.swift
+//  checkout_ios_sdk
+//
+//  Created by Ishika Bansal on 23/07/25.
+//
+
+import SwiftUI
+
+@MainActor
+class ItemsViewModel : ObservableObject {
+    private let checkoutManager = CheckoutManager.shared
+    private let userDataManager = UserDataManager.shared
+    
+    @Published var brandColor = ""
+    @Published var amount = ""
+    @Published var currencySymbol = ""
+    
+    @Published var selectedBNPLInstrumentValue = ""
+    init() {
+        Task {
+            brandColor = await checkoutManager.getBrandColor()
+            amount = await checkoutManager.getTotalAmount()
+            currencySymbol = await checkoutManager.getCurrencySymbol()
+        }
+    }
+    
+    
+    func onChangeBNPLInstrumentValue(newValue : String) {
+        selectedBNPLInstrumentValue = newValue
+    }
+}

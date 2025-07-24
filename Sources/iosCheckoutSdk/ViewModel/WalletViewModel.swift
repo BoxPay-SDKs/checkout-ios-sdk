@@ -37,11 +37,12 @@ class WalletViewModel : ObservableObject {
 
                 let filteredData = data.filter { $0.type == "Wallet" }.map { item in
                     CommonDataClass(
+                        type: "Wallet",
                         id: item.id ?? "",
-                        title: item.title ?? "",
-                        image: item.logoUrl ?? "",
-                        instrumentTypeValue: item.instrumentTypeValue ?? "",
-                        isLastUsed: nil
+                        displayName: item.title ?? "",
+                        displayNumber: "",
+                        logoUrl: item.logoUrl ?? "",
+                        instrumentTypeValue: item.instrumentTypeValue ?? ""
                     )
                 }
 

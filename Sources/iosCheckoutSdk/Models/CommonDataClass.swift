@@ -5,7 +5,7 @@
 //  Created by Ishika Bansal on 17/07/25.
 //
 
-struct SavedItemDataClass : Identifiable {
+struct CommonDataClass : Identifiable {
     let type : String
     let id : String
     let displayName : String

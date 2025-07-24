@@ -96,44 +96,13 @@ struct MainCheckoutScreen : View {
                         if (!viewModel.recommendedIds.isEmpty) {
                             TitleHeaderView(text: "Recommended")
                                 .padding(.bottom, 8)
-                            VStack(spacing:0) {
-                                ForEach(Array(viewModel.recommendedIds.prefix(2).enumerated()), id: \.offset) { index, item in
-                                    PaymentOptionView(
-                                        isSelected: selectedRecommendedInstrumentValue == item.instrumentTypeValue,
-                                        imageUrl: item.logoUrl,
-                                        title: item.displayNumber,
-                                        currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
-                                        amount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
-                                        instrumentValue: item.instrumentTypeValue,
-                                        brandColor: viewModel.brandColor,
-                                        onClick: { string in
-                                            if(item.type == "upi") {
-                                                selectedSavedInstrumentValue = ""
-                                                selectedRecommendedInstrumentValue = string
-                                                selectedRecommendedDisplayValue = item.displayNumber
-                                                selectedSavedCardInstrumentValue = ""
-                                            } else {
-                                                selectedSavedCardInstrumentValue = ""
-                                                selectedSavedInstrumentValue = ""
-                                                selectedRecommendedInstrumentValue = string
-                                            }
-                                        },
-                                        onProceedButton: {
-                                            upiViewModel.initiateUpiPostRequest(nil, selectedRecommendedDisplayValue, methodType: item.type == "upi" ? "UpiCollect" : "card/token", item.type == "upi" ? selectedRecommendedInstrumentValue : selectedSavedCardInstrumentValue, item.type)
-                                        },
-                                        fallbackImage: "upi_logo",
-                                        showLastUsed : item.instrumentTypeValue == viewModel.recommendedIds[0].instrumentTypeValue
-                                    )
-                                    if index < min(1, viewModel.recommendedIds.prefix(2).count - 1) {
-                                        Divider() // Optional: Adjust Divider's padding if needed
-                                    }
-                                }
-                            }
-                            .background(Color.white)
-                            .cornerRadius(12)
-                            .shadow(radius: 1)
-                            .padding(.horizontal, 16)
-                            .padding(.top, 8)
+                            PaymentOptionView(
+                                items: viewModel.recommendedIds,
+                                onProceed: { instrumentValue in
+                                    upiViewModel.initiateUpiPostRequest(nil, instrumentValue, "" , "")
+                                },
+                                showLastUsed: true
+                            )
                         }
                         if(viewModel.upiIntentMethod || viewModel.upiCollectMethod) {
                             TitleHeaderView(text: "Pay by any UPI")

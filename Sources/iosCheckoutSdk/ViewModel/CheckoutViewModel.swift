@@ -13,9 +13,9 @@ class CheckoutViewModel: ObservableObject {
     @Published var emiMethod: Bool = false
     @Published var bnplMethod: Bool = false
     @Published var actions: PaymentAction?
-    @Published var recommendedIds : [SavedItemDataClass] = []
-    @Published var savedCards : [SavedItemDataClass] = []
-    @Published var savedUpiIds : [SavedItemDataClass] = []
+    @Published var recommendedIds : [CommonDataClass] = []
+    @Published var savedCards : [CommonDataClass] = []
+    @Published var savedUpiIds : [CommonDataClass] = []
     
     @Published var isShippingEnabled = false
     @Published var isShippingEditable = false
@@ -87,20 +87,20 @@ class CheckoutViewModel: ObservableObject {
                     body: nil,
                     responseType: [RecommendedResponse].self
                 )
-                var localSavedUpis: [SavedItemDataClass] = []
-                var localSavedCards: [SavedItemDataClass] = []
-                var localRecommended : [SavedItemDataClass] = []
+                var localSavedUpis: [CommonDataClass] = []
+                var localSavedCards: [CommonDataClass] = []
+                var localRecommended : [CommonDataClass] = []
 
                 // Iterate over each item in the API response
                 for item in response {
-                    // Create the SavedItemDataClass instance by mapping fields.
+                    // Create the CommonDataClass instance by mapping fields.
                     // It's safer to only create an item if it has a unique identifier.
                     guard let itemId = item.instrumentRef else {
                         // Skip this item if it doesn't have an instrumentRef to use as an ID
                         continue
                     }
 
-                    let savedItem = SavedItemDataClass(
+                    let savedItem = CommonDataClass(
                         type: item.type?.lowercased() ?? "",
                         id: itemId,
                         displayName: item.cardNickName ?? "",

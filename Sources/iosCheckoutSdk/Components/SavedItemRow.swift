@@ -9,7 +9,7 @@ import SwiftUICore
 import SwiftUI
 
 struct SavedItemRow : View {
-    var savedItem : SavedItemDataClass
+    var savedItem : CommonDataClass
     var fallbackImage : String
     var onClick : (String) -> Void
     var selectedItemInstrumentValue : String
