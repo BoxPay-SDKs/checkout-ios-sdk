@@ -1,15 +1,15 @@
 //
-//  CommonDataClass.swift
-//  checkout-ios-sdk
+//  SavedCardDataClass.swift
+//  checkout_ios_sdk
 //
-//  Created by Ishika Bansal on 13/05/25.
+//  Created by Ishika Bansal on 17/07/25.
 //
 
-
-struct CommonDataClass {
+struct SavedItemDataClass : Identifiable {
+    let type : String
     let id : String
-    let title : String
-    let image :String
+    let displayName : String
+    let displayNumber : String
+    let logoUrl : String
     let instrumentTypeValue : String
-    let isLastUsed : Bool?
 }
