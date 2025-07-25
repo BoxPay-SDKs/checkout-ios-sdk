@@ -14,18 +14,44 @@ class UpiViewModel: ObservableObject {
     let checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
     let apiManager = ApiService.shared
+    
+    @Published var brandColor = ""
+    @Published var currencySymbol = ""
+    @Published var amount = ""
+    
+    init() {
+        Task {
+            brandColor = await checkoutManager.getBrandColor()
+            amount = await checkoutManager.getTotalAmount()
+            currencySymbol = await checkoutManager.getCurrencySymbol()
+        }
+    }
 
-    func initiateUpiPostRequest(_ selectedIntent: String?, _ shopperVpa: String?, methodType: String, _ selectedInstrumentRef : String?) {
+    func initiateUpiPostRequest(_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?, _ selectedIntrumentRefType : String?) {
         self.isLoading = true
         Task {
+            let type = if selectedIntent != nil {
+                "upi/intent"
+            } else if let instrumentRefType = selectedIntrumentRefType, instrumentRefType == "card" {
+                "card/token"
+            } else {
+                "upi/collect"
+            }
+            
             var instrumentDetails: [String: Any] = [
-                "type": selectedIntent != nil ? "upi/intent" : "upi/collect"
+                "type": type
             ]
 
             if let intent = selectedIntent {
                 instrumentDetails["upiAppDetails"] = ["upiApp": intent]
             } else if let instrumentRef = selectedInstrumentRef {
-                instrumentDetails["upi"] = ["instrumentRef": instrumentRef]
+                if let type = selectedIntrumentRefType {
+                    if(type == "upi") {
+                        instrumentDetails["upi"] = ["instrumentRef": instrumentRef]
+                    } else {
+                        instrumentDetails["savedCard"] = ["instrumentRef": instrumentRef]
+                    }
+                }
             } else if let vpa = shopperVpa {
                 instrumentDetails["upi"] = ["shopperVpa": vpa]
             }
@@ -110,7 +136,7 @@ class UpiViewModel: ObservableObject {
                     timeStamp: response.transactionTimestampLocale,
                     reasonCode: response.status.reasonCode,
                     reason: response.status.reason,
-                    methodType: methodType,
+                    methodType: selectedIntrumentRefType != nil && selectedIntrumentRefType == "upi" ? "UPICollect" : selectedIntent != nil ? "UpiIntent" : "",
                     response: PaymentActionResponse(action: response.actions),
                     shopperVpa: shopperVpa ?? ""
                 )

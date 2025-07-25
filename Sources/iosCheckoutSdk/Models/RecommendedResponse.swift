@@ -15,4 +15,5 @@ struct RecommendedResponse : Codable, Sendable {
     let displayValue : String?
     let lastUsed : String?
     let logoUrl : String?
+    let cardNickName : String?
 }

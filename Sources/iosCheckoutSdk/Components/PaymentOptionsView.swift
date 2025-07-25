@@ -9,6 +9,41 @@ import SwiftUI
 import SwiftUICore
 
 struct PaymentOptionView: View {
+    @Binding var items : [CommonDataClass]
+    var onProceed : (_ selectedInstrumentValue : String, _ selectedDisplayName : String, _ paymentType : String) -> Void
+    var showLastUsed : Bool = false
+    
+    @ObservedObject private var viewModel : ItemsViewModel = ItemsViewModel()
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                PaymentOptionRow(
+                    isSelected: viewModel.selectedInstrumentValue == item.instrumentTypeValue,
+                    imageUrl: item.logoUrl,
+                    title: item.displayName,
+                    currencySymbol: viewModel.currencySymbol,
+                    amount: viewModel.amount,
+                    instrumentValue: item.instrumentTypeValue,
+                    brandColor: viewModel.brandColor,
+                    onClick: { newInstrumentValue, newDisplayName in
+                        viewModel.onChangeInstrumentValue(newInstrumentValue: newInstrumentValue, newDisplayValue: newDisplayName, paymentType: item.type)
+                    },
+                    onProceedButton: {
+                        onProceed(viewModel.selectedInstrumentValue , viewModel.selectedDisplayName, viewModel.selectedPaymentType)
+                    },
+                    fallbackImage: "ic_bnpl_semi_bold",
+                    showLastUsed: showLastUsed ? items[0].instrumentTypeValue == item.instrumentTypeValue : false
+                )
+                if index < items.count - 1 {
+                    Divider()
+                }
+            }
+        }
+    }
+}
+
+struct PaymentOptionRow : View {
     var isSelected : Bool
     var imageUrl : String
     var title : String
@@ -16,7 +51,7 @@ struct PaymentOptionView: View {
     var amount : String
     var instrumentValue : String
     var brandColor : String
-    var onClick : (String) -> Void
+    var onClick : (_ selectedInstrumentValue : String, _ selectedDisplayName : String) -> Void
     var onProceedButton : () -> Void
     var fallbackImage : String
     var showLastUsed : Bool = false
@@ -56,11 +91,11 @@ struct PaymentOptionView: View {
                     }
                 }
                 .onTapGesture {
-                    onClick(instrumentValue)
+                    onClick(instrumentValue , title)
                 }
             }
             .onTapGesture {
-                onClick(instrumentValue)
+                    onClick(instrumentValue , title)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)

@@ -14,7 +14,6 @@ struct BnplScreen: View {
     @Binding var isCheckoutFocused : Bool
 
     @StateObject private var viewModel = BnplViewModel()
-    @State private var selectedInstrumentValue: String = ""
     
     @StateObject var fetchStatusViewModel = FetchStatusViewModel()
     
@@ -52,50 +51,35 @@ struct BnplScreen: View {
                     .background(Color.white)
                     
                     ScrollView {
-                        VStack(spacing: 0) {
-                            if(viewModel.bnplDataClass.isEmpty) {
-                                VStack(alignment: .center, spacing: 16){
-                                    Image(frameworkAsset: "ic_search_not_found", isTemplate: false)
-                                        .frame(width: 60, height: 60)
-                                    Text("Oops!! No results found")
-                                        .font(.custom("Poppins-SemiBold", size: 16))
-                                        .foregroundColor(Color(hex: "#212426"))
-                                    Text("Please try another search")
-                                        .font(.custom("Poppins-Regular", size: 14))
-                                        .foregroundColor(Color(hex: "#4F4D55"))
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 300) // Set your desired limited height here
-                                .frame(maxHeight: .infinity, alignment: .center)
-                            } else {
-                                ForEach(Array(viewModel.bnplDataClass.enumerated()), id: \.element.id) { index, item in
-                                    PaymentOptionView(
-                                        isSelected: selectedInstrumentValue == item.instrumentTypeValue,
-                                        imageUrl: item.image,
-                                        title: item.title,
-                                        currencySymbol: viewModel.currencySymbol,
-                                        amount: viewModel.totalAmount,
-                                        instrumentValue: item.instrumentTypeValue,
-                                        brandColor: viewModel.brandColor,
-                                        onClick: { string in
-                                            selectedInstrumentValue = string
-                                        },
-                                        onProceedButton: {
-                                            viewModel.initiateBnplPostRequest(instrumentValue: selectedInstrumentValue)
-                                        },
-                                        fallbackImage: "ic_bnpl_semi_bold"
-                                    )
-                                    if index < viewModel.bnplDataClass.count - 1 {
-                                            Divider()// Remove extra padding around Divider
-                                        }
-                                }
+                        if(viewModel.bnplDataClass.isEmpty) {
+                            VStack(alignment: .center, spacing: 16){
+                                Image(frameworkAsset: "ic_search_not_found", isTemplate: false)
+                                    .frame(width: 60, height: 60)
+                                Text("Oops!! No results found")
+                                    .font(.custom("Poppins-SemiBold", size: 16))
+                                    .foregroundColor(Color(hex: "#212426"))
+                                Text("Please try another search")
+                                    .font(.custom("Poppins-Regular", size: 14))
+                                    .foregroundColor(Color(hex: "#4F4D55"))
                             }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 300) // Set your desired limited height here
+                            .frame(maxHeight: .infinity, alignment: .center)
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(radius: 1)
+                            .padding(.horizontal, 16)
+                            .padding(.top, 8)
+                        } else {
+                            PaymentOptionView(
+                                items: $viewModel.bnplDataClass,
+                                onProceed: { instrumentValue, _ , _ in
+                                    viewModel.initiateBnplPostRequest(instrumentValue: instrumentValue)
+                                },
+                                showLastUsed: false
+                            )
+                            .commonCardStyle()
                         }
-                        .background(Color.white)
-                        .cornerRadius(12)
-                        .shadow(radius: 1)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
                     }
                 }
                 .background(Color(hex: "#F5F6FB"))
@@ -134,11 +118,12 @@ struct BnplScreen: View {
         }
         .sheet(isPresented: $showWebView) {
             WebView(
-                url: URL(string: paymentUrl ?? ""), htmlString: paymentHtmlString,
+                url: paymentUrl,
+                htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     viewModel.isLoading = true
-                    fetchStatusViewModel.startFetchingStatus(methodType: "Wallet")
+                    fetchStatusViewModel.startFetchingStatus(methodType: "BNPL")
                 }
             )
         }

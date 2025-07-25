@@ -76,6 +76,9 @@ class AddAddressViewModel: ObservableObject {
     
     @Published var brandColor : String = ""
     
+    @Published var address = ""
+    @Published var addressLabelName = ""
+    
     init() {
         Task {
             self.brandColor = await checkoutManager.getBrandColor()
@@ -101,6 +104,12 @@ class AddAddressViewModel: ObservableObject {
             self.selectedCountryCode = await userDataManager.getCountryCode() ?? "IN"
             
             loadCountryData()
+            
+            address = await formattedAddress()
+            let labelName = await userDataManager.getLabelName()
+            addressLabelName = (labelName == nil || labelName?.isEmpty == true)
+                ? await userDataManager.getLabelType() ?? ""
+                : labelName ?? ""
         }
     }
     
@@ -388,4 +397,19 @@ class AddAddressViewModel: ObservableObject {
         return (String(first), last)
     }
 
+    func formattedAddress() async -> String {
+        let address1 = await userDataManager.getAddress1()
+        let address2 = await userDataManager.getAddress2()
+        let city = await userDataManager.getCity()
+        let state = await userDataManager.getState()
+        let postalCode = await userDataManager.getPinCode()
+
+        let components = [address1, address2, city, state, postalCode]
+
+        let filteredComponents = components
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+
+        return filteredComponents.joined(separator: ", ")
+    }
 }

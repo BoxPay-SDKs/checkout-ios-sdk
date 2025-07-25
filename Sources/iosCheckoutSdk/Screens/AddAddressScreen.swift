@@ -9,7 +9,6 @@ import SwiftUICore
 import SwiftUI
 
 struct AddAddressScreen : View {
-    @Binding var isAddressUpdated: Bool
     @Binding var isCheckoutFocused : Bool
     @StateObject private var viewModel = AddAddressViewModel()
     @State private var countryFieldFrame: CGRect = .zero
@@ -351,7 +350,6 @@ struct AddAddressScreen : View {
         .navigationBarHidden(true)
         .onChange(of: viewModel.dataUpdationCompleted) { focused in
             if(focused) {
-                isAddressUpdated = true
                 presentationMode.wrappedValue.dismiss()
             }
         }

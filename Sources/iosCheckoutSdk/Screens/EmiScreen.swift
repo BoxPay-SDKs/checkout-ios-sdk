@@ -150,8 +150,8 @@ struct EmiScreen : View {
                                         ForEach(Array(banks.enumerated()), id: \.1.name) { index, bank in
                                             VStack(spacing: 0) {
                                                 if(viewModel.selectedCardType == "Others") {
-                                                    PaymentOptionView(isSelected: selectedOtherInstrumentValue == bank.cardLessEmiValue, imageUrl: bank.iconUrl, title: bank.name, currencySymbol: viewModel.currencySymbol, amount: viewModel.totalAmount, instrumentValue: bank.cardLessEmiValue, brandColor: viewModel.brandColor, onClick: { string in
-                                                        selectedOtherInstrumentValue = string
+                                                    PaymentOptionRow(isSelected: selectedOtherInstrumentValue == bank.cardLessEmiValue, imageUrl: bank.iconUrl, title: bank.name, currencySymbol: viewModel.currencySymbol, amount: viewModel.totalAmount, instrumentValue: bank.cardLessEmiValue, brandColor: viewModel.brandColor, onClick: { instrumentValue , _  in
+                                                        selectedOtherInstrumentValue = instrumentValue
                                                     }, onProceedButton: {
                                                         viewModel.initiatedOtherEmiPostRequest(instrumentValue: selectedOtherInstrumentValue)
                                                     }, fallbackImage: "ic_bnpl_semi_bold")
@@ -231,11 +231,12 @@ struct EmiScreen : View {
         }
         .sheet(isPresented: $showWebView) {
             WebView(
-                url: URL(string: paymentUrl ?? ""), htmlString: paymentHtmlString,
+                url: paymentUrl,
+                htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     viewModel.isLoading = true
-                    fetchStatusViewModel.startFetchingStatus(methodType: "NetBanking")
+                    fetchStatusViewModel.startFetchingStatus(methodType: "EMI")
                 }
             )
         }

@@ -30,11 +30,13 @@ struct CardScreen : View {
     @State private var isCardExpiryFocused = false
     @State private var isCardCvvFocused = false
     @State private var isCardNameFocused = false
+    @State private var isCardNickNameFocused = false
     
     @State private var cardNumberTextInput = ""
     @State private var cardExpiryTextInput = ""
     @State private var cardCvvTextInput = ""
     @State private var cardNameTextInput = ""
+    @State private var cardNickNameTextInput = ""
     
     @State private var cardNumberErrorText = ""
     @State private var cardExpiryErrorText = ""
@@ -65,11 +67,14 @@ struct CardScreen : View {
     @State private var paymentHtmlString: String? = nil
     @State private var showWebView = false
     @State private var isCvvShowDetailsClicked = false
+    @State private var isSavedCardKnowMoreClicked = false
     
     @State var itemsCount = 0
     @State var currencySymbol = ""
     @State var totalAmount = ""
     @State var brandColor = ""
+    
+    @State private var isSavedCardCheckBoxClicked = false
     
     var body: some View {
         VStack {
@@ -237,6 +242,21 @@ struct CardScreen : View {
                                     .foregroundColor(Color(hex: "#E12121"))
                             }
                         }
+                        if(!viewModel.shopperToken.isEmpty) {
+                            FloatingLabelTextField(
+                                placeholder: "Card Nickname (for easy identification)",
+                                text: $cardNickNameTextInput,
+                                isValid: .constant(true),
+                                onChange: { newNickName in
+                                    cardNickNameTextInput = newNickName
+                                },
+                                isFocused: $isCardNickNameFocused,
+                                onFocusEnd: nil,
+                                trailingIcon: .constant(""),
+                                leadingIcon: .constant(""),
+                                isSecureText: .constant(false)
+                            ).padding(.top, 10)
+                        }
                         HStack {
                             Image(frameworkAsset: "ic_info")
                                 .frame(width: 12, height: 12)
@@ -251,13 +271,40 @@ struct CardScreen : View {
                         .background(Color(hex: "#E8F6F1"))
                         .cornerRadius(4)
 
+                        if(!viewModel.shopperToken.isEmpty) {
+                            HStack {
+                                Toggle(isOn: $isSavedCardCheckBoxClicked) {
+                                    Text("Save this card as per RBI rules.")
+                                        .font(.custom("Poppins-Regular", size: 12))
+                                        .foregroundColor(Color(hex: "#2D2B32"))
+                                        .padding(.leading, 4)
+                                }
+                                    .toggleStyle(CheckboxToggleStyle(enabledColor : Color(hex: brandColor)))
+                                Button(action : {
+                                    isSavedCardKnowMoreClicked = true
+                                }) {
+                                    Text("Know more")
+                                        .font(.custom("Poppins-SemiBold", size: 12))
+                                        .foregroundColor(Color(hex:brandColor))
+                                        .padding(.leading, 2)
+                                        .background(
+                                            Rectangle()
+                                            .frame(height: 1) // Adjust the thickness of the line
+                                            .offset(y: 8)      // Adjust the position of the line
+                                            .foregroundColor(Color(hex: brandColor))
+                                        )
+                                }
+                            }
+                            .padding(.top, 12)
+                            .frame(maxWidth: .infinity, alignment : .leading)
+                        }
                     }
                     .padding(.horizontal, 16)
                     Button(action: {
                         if checkCardValid() && durationNumber == nil {
-                            viewModel.initiateCardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput)
+                            viewModel.initiateCardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, isSavedCardCheckBoxClicked: isSavedCardCheckBoxClicked, cardNickName: cardNickNameTextInput)
                         } else if (checkCardValid() && durationNumber != nil) {
-                            viewModel.initiateEMICardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, cardType: cardType ?? "", offerCode: offerCode, duration: "\(durationNumber ?? 0)")
+                            viewModel.initiateEMICardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, cardType: cardType ?? "", offerCode: offerCode, duration: "\(durationNumber ?? 0)",isSavedCardCheckBoxClicked: isSavedCardCheckBoxClicked, cardNickName: cardNickNameTextInput)
                         }
                     }){
                         Text("Make Payment")
@@ -307,14 +354,15 @@ struct CardScreen : View {
         }
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: totalAmount,currencySymbol: currencySymbol, onDone: {
-                sessionCompleteScreen = false
                 isCheckoutFocused = true
+                sessionCompleteScreen = false
                 presentationMode.wrappedValue.dismiss()
             },brandColor: brandColor)
         }
         .sheet(isPresented: $showWebView) {
             WebView(
-                url: URL(string: paymentUrl ?? ""), htmlString: paymentHtmlString,
+                url: paymentUrl,
+                htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     viewModel.isLoading = true
@@ -325,6 +373,11 @@ struct CardScreen : View {
         .bottomSheet(isPresented: $isCvvShowDetailsClicked) {
             CVVInfoView(onGoBack: {
                 isCvvShowDetailsClicked = false
+            },brandColor: brandColor)
+        }
+        .bottomSheet(isPresented: $isSavedCardKnowMoreClicked) {
+            SavedCardKnowMore(onGoBack: {
+                isSavedCardKnowMoreClicked = false
             },brandColor: brandColor)
         }
     }

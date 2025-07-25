@@ -41,11 +41,12 @@ class NetBankingViewModel : ObservableObject {
 
                 let filteredData = data.filter { $0.type == "NetBanking" }.map { item in
                     CommonDataClass(
+                        type : "NetBanking",
                         id: item.id ?? "",
-                        title: item.title ?? "",
-                        image: item.logoUrl ?? "",
-                        instrumentTypeValue: item.instrumentTypeValue ?? "",
-                        isLastUsed: nil
+                        displayName: item.title ?? "",
+                        displayNumber: "",
+                        logoUrl: item.logoUrl ?? "",
+                        instrumentTypeValue: item.instrumentTypeValue ?? ""
                     )
                 }
 
@@ -54,7 +55,7 @@ class NetBankingViewModel : ObservableObject {
                 
                 self.popularBankDataClass = self.netBankingDataClass.filter { bank in
                                             self.popularBanksList.contains { popularName in
-                                                bank.title.caseInsensitiveCompare(popularName) == .orderedSame
+                                                bank.displayName.caseInsensitiveCompare(popularName) == .orderedSame
                                             }
                                         }
                 self.itemsCount = await checkoutManager.getItemsCount()

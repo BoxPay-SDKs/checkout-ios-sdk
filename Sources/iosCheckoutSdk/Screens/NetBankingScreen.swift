@@ -70,34 +70,14 @@ struct NetBankingScreen: View {
                             .padding(.top, 12)
                             .padding(.bottom, 8)
                             .padding(.horizontal, 16)
-                            VStack(spacing : 0) {
-                                ForEach(Array(viewModel.popularBankDataClass.enumerated()), id: \.element.id) { index, item in
-                                    PaymentOptionView(
-                                        isSelected: selectedPopularInstrumentVakue == item.instrumentTypeValue,
-                                        imageUrl: item.image,
-                                        title: item.title,
-                                        currencySymbol: viewModel.currencySymbol,
-                                        amount: viewModel.totalAmount,
-                                        instrumentValue: item.instrumentTypeValue,
-                                        brandColor: viewModel.brandColor,
-                                        onClick: { string in
-                                            selectedPopularInstrumentVakue = string
-                                            selectedInstrumentValue = ""
-                                        },
-                                        onProceedButton: {
-                                            viewModel.initiateNetBankingPostRequest(instrumentValue: selectedPopularInstrumentVakue.isEmpty ? selectedInstrumentValue : selectedPopularInstrumentVakue)
-                                        },
-                                        fallbackImage: "ic_netbanking_semi_bold"
-                                    )
-                                    if index < viewModel.popularBankDataClass.count - 1 {
-                                            Divider()// Remove extra padding around Divider
-                                        }
-                                }
-                            }
-                            .background(Color.white)
-                            .cornerRadius(12)
-                            .shadow(radius: 1)
-                            .padding(.horizontal, 16)
+                            PaymentOptionView(
+                                items: $viewModel.popularBankDataClass,
+                                onProceed: { instrumentValue, _ , _  in
+                                    viewModel.initiateNetBankingPostRequest(instrumentValue: instrumentValue)
+                                },
+                                showLastUsed: false
+                            )
+                            .commonCardStyle()
                         }
                         HStack {
                             Text("All Banks")
@@ -109,50 +89,33 @@ struct NetBankingScreen: View {
                         .padding(.bottom, 8)
                         .padding(.horizontal, 16)
 
-                        VStack(spacing: 0) {
-                            if(viewModel.netBankingDataClass.isEmpty) {
-                                VStack(alignment: .center, spacing: 16){
-                                    Image(frameworkAsset: "ic_search_not_found", isTemplate: false)
-                                        .frame(width: 60, height: 60)
-                                    Text("Oops!! No results found")
-                                        .font(.custom("Poppins-SemiBold", size: 16))
-                                        .foregroundColor(Color(hex: "#212426"))
-                                    Text("Please try another search")
-                                        .font(.custom("Poppins-Regular", size: 14))
-                                        .foregroundColor(Color(hex: "#4F4D55"))
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 300) // Set your desired limited height here
-                                .frame(maxHeight: .infinity, alignment: .center)
-                            } else {
-                                ForEach(Array(viewModel.netBankingDataClass.enumerated()), id: \.element.id) { index, item in
-                                    PaymentOptionView(
-                                        isSelected: selectedInstrumentValue == item.instrumentTypeValue,
-                                        imageUrl: item.image,
-                                        title: item.title,
-                                        currencySymbol: viewModel.currencySymbol,
-                                        amount: viewModel.totalAmount,
-                                        instrumentValue: item.instrumentTypeValue,
-                                        brandColor: viewModel.brandColor,
-                                        onClick: { string in
-                                            selectedInstrumentValue = string
-                                            selectedPopularInstrumentVakue = ""
-                                        },
-                                        onProceedButton: {
-                                            viewModel.initiateNetBankingPostRequest(instrumentValue: selectedPopularInstrumentVakue.isEmpty ? selectedInstrumentValue : selectedPopularInstrumentVakue)
-                                        },
-                                        fallbackImage: "ic_netbanking_semi_bold"
-                                    )
-                                    if index < viewModel.netBankingDataClass.count - 1 {
-                                            Divider()// Remove extra padding around Divider
-                                        }
-                                }
+                        if(viewModel.netBankingDataClass.isEmpty) {
+                            VStack(alignment: .center, spacing: 16){
+                                Image(frameworkAsset: "ic_search_not_found", isTemplate: false)
+                                    .frame(width: 60, height: 60)
+                                Text("Oops!! No results found")
+                                    .font(.custom("Poppins-SemiBold", size: 16))
+                                    .foregroundColor(Color(hex: "#212426"))
+                                Text("Please try another search")
+                                    .font(.custom("Poppins-Regular", size: 14))
+                                    .foregroundColor(Color(hex: "#4F4D55"))
                             }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 300) // Set your desired limited height here
+                            .frame(maxHeight: .infinity, alignment: .center)
+                            .background(Color.white)
+                            .cornerRadius(12)
+                            .shadow(radius: 1)
+                            .padding(.horizontal, 16)
+                        } else {
+                            PaymentOptionView(
+                                items: $viewModel.netBankingDataClass,
+                                onProceed: { instrumentValue , _ , _ in
+                                    viewModel.initiateNetBankingPostRequest(instrumentValue: instrumentValue)
+                                },
+                                showLastUsed: false
+                            )
                         }
-                        .background(Color.white)
-                        .cornerRadius(12)
-                        .shadow(radius: 1)
-                        .padding(.horizontal, 16)
                     }
                 }
                 .background(Color(hex: "#F5F6FB"))
@@ -191,7 +154,8 @@ struct NetBankingScreen: View {
         }
         .sheet(isPresented: $showWebView) {
             WebView(
-                url: URL(string: paymentUrl ?? ""), htmlString: paymentHtmlString,
+                url: paymentUrl,
+                htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     viewModel.isLoading = true
@@ -246,7 +210,7 @@ struct NetBankingScreen: View {
         let lowercasedText = text.lowercased()
 
         viewModel.netBankingDataClass = list.filter { item in
-            let words = item.title.lowercased().split(separator: " ") // Split into words
+            let words = item.displayName.lowercased().split(separator: " ") // Split into words
                 return words.contains { word in
                     word.hasPrefix(lowercasedText)
                 }

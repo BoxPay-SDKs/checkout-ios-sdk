@@ -9,7 +9,7 @@ import SwiftUI
 @preconcurrency import WebKit
 
 struct WebView: UIViewRepresentable {
-    let url: URL?
+    let url: String?
     let htmlString: String?
     var onNavigationChange: ((String) -> Void)?
     var onDismiss: (() -> Void)?
@@ -25,7 +25,7 @@ struct WebView: UIViewRepresentable {
 
         // Load either a URL or raw HTML
         if let url = url {
-            let request = URLRequest(url: url)
+            let request = URLRequest(url: URL(string : url)!)
             webView.load(request)
         } else if let html = htmlString {
             webView.loadHTMLString(html, baseURL: nil)
@@ -77,7 +77,7 @@ struct WebView: UIViewRepresentable {
             decisionHandler(.allow)
         }
 
-        // Log start of navigation
+        
         func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
             if ((webView.url?.absoluteString.contains("boxpay")) == true) {
                 DispatchQueue.main.async {

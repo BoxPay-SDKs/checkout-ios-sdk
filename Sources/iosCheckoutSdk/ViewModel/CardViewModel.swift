@@ -9,9 +9,18 @@ class CardViewModel: ObservableObject {
     private let apiService = ApiService.shared
     @Published var cardResponse : CardInfoResponse?
     let userDataManager = UserDataManager.shared
+    @Published var shopperToken = ""
     
     @Published var transactionId = ""
 
+    
+    init() {
+        Task {
+            shopperToken = await checkoutManager.getShopperToken()
+        }
+    }
+    
+    
     func fetchCardInfo(_ cardNumber: String) {
         Task {
             do {
@@ -26,20 +35,29 @@ class CardViewModel: ObservableObject {
         }
     }
     
-    func initiateCardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String) {
+    func initiateCardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String, isSavedCardCheckBoxClicked : Bool, cardNickName : String) {
         Task {
             self.isLoading = true
             
             let expiry = formatExpiry(cardExpiry)
+            
             var instrumentDetails: [String: Any] = [
                 "type": "card/plain",
                 "card": [
                     "number": cardNumber,
                     "expiry": expiry,
                     "cvc": cardCvv,
-                    "holderName": cardHolderName
+                    "holderName": cardHolderName,
+                    "nickName" : !shopperToken.isEmpty && !cardNickName.isEmpty ? cardNickName : nil
                 ]
             ]
+            
+            var headers = StringUtils.getRequestHeaders()
+
+            if !shopperToken.isEmpty {
+                headers["Authorization"] = "Session \(shopperToken)"
+                instrumentDetails["saveInstrument"] = isSavedCardCheckBoxClicked
+            }
             
             let deliveryAddress: [String: Any?] = await[
                 "address1": userDataManager.getAddress1(),
@@ -104,7 +122,7 @@ class CardViewModel: ObservableObject {
                 let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
                 let data = try await apiService.request(
                     method: .POST,
-                    headers: StringUtils.getRequestHeaders(),
+                    headers: headers,
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
                 )
@@ -142,7 +160,7 @@ class CardViewModel: ObservableObject {
         }
     }
     
-    func initiateEMICardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String, cardType: String, offerCode: String?, duration: String) {
+    func initiateEMICardPostRequest(cardNumber: String, cardExpiry: String, cardCvv: String, cardHolderName: String, cardType: String, offerCode: String?, duration: String, isSavedCardCheckBoxClicked : Bool, cardNickName : String) {
         Task {
             self.isLoading = true
             
@@ -154,12 +172,20 @@ class CardViewModel: ObservableObject {
                     "number": cardNumber,
                     "expiry": expiry,
                     "cvc": cardCvv,
-                    "holderName": cardHolderName
+                    "holderName": cardHolderName,
+                    "nickName" : !shopperToken.isEmpty && !cardNickName.isEmpty ? cardNickName : nil
                 ],
                 "emi": [
                     "duration": duration
                 ]
             ]
+            
+            var headers = StringUtils.getRequestHeaders()
+
+            if !shopperToken.isEmpty {
+                headers["Authorization"] = "Session \(shopperToken)"
+                instrumentDetails["saveInstrument"] = isSavedCardCheckBoxClicked
+            }
             
             let deliveryAddress: [String: Any?] = await[
                 "address1": userDataManager.getAddress1(),
@@ -228,7 +254,7 @@ class CardViewModel: ObservableObject {
                 let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [])
                 let data = try await apiService.request(
                     method: .POST,
-                    headers: StringUtils.getRequestHeaders(),
+                    headers: headers,
                     body: jsonData,
                     responseType: GeneralPaymentInitilizationResponse.self
                 )

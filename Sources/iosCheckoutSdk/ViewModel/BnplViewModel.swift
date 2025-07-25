@@ -30,11 +30,12 @@ class BnplViewModel: ObservableObject {
 
                 let filteredData = data.filter { $0.type == "BuyNowPayLater" }.map { item in
                     CommonDataClass(
+                        type : "BuyNowPayLater",
                         id: item.id ?? "",
-                        title: item.title ?? "",
-                        image: item.logoUrl ?? "",
-                        instrumentTypeValue: item.instrumentTypeValue ?? "",
-                        isLastUsed: nil
+                        displayName: item.title ?? "",
+                        displayNumber: "",
+                        logoUrl: item.logoUrl ?? "",
+                        instrumentTypeValue: item.instrumentTypeValue ?? ""
                     )
                 }
 

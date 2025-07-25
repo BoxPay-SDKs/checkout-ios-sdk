@@ -7,22 +7,17 @@
 
 
 import SwiftUI
+import CrossPlatformSDK
 
 struct UpiScreen: View {
+    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
+    @Binding var savedUpiIds : [CommonDataClass]
+    @ObservedObject var viewModel : UpiViewModel
     @Binding var isUpiIntentVisible: Bool
-    var isGpayVisible: Bool
-    var isPaytmVisible: Bool
-    var isPhonePeVisible: Bool
-    var brandColor : String
-    var totalAmount : String
-    var currencySymbol : String
     @Binding var isUpiCollectVisible: Bool
     
-    let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ methodType: String, _ selectedInstrumentRef : String?) -> ()
-    
-    @Binding var savedUpiIds : [RecommendedResponse]
-    @Binding var selectedSavedUpiId : String
-    let onClickSavedUpi : (_ selectedSavedUpiRef : String, _ selectedSavedUpiDisplayValue : String) -> ()
+    private let detector = UPIAppDetectorIOS()
+    @State private var installedApps : [String] = []
 
     @State private var upiCollectVisible = false
     @State private var upiCollectError = false
@@ -31,172 +26,165 @@ struct UpiScreen: View {
     @State private var isRotated = false
     @State private var isFocused = false
     @State private var selectedIntent: String? = nil
+    
 
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack{
             if (!savedUpiIds.isEmpty) {
-                VStack(spacing : 0){
-                    ForEach(Array(savedUpiIds.enumerated()), id: \.offset) { index, item in
-                        PaymentOptionView(
-                            isSelected: selectedSavedUpiId == item.instrumentRef,
-                            imageUrl: item.logoUrl ?? "",
-                            title: item.displayValue ?? "",
-                            currencySymbol: currencySymbol,
-                            amount: totalAmount,
-                            instrumentValue: item.instrumentRef ?? "",
-                            brandColor: brandColor,
-                            onClick: { string in
-                                onClickSavedUpi(string, item.displayValue ?? "")
-                            },
-                            onProceedButton: {
-                                handleUpiPayment(nil,item.displayValue, "UpiCollect", selectedSavedUpiId)
-                            },
-                            fallbackImage: "upi_logo"
-                        )
-                        Divider()
-                    }
-                }
+                PaymentOptionView(
+                    items: .constant(Array(savedUpiIds.prefix(2))),
+                    onProceed: { instrumentValue, displayName, paymentType in
+                        handleUpiPayment(nil, displayName, instrumentValue, paymentType)
+                    },
+                    showLastUsed: false
+                )
             }
-            if isUpiIntentVisible {
-                HStack {
-                    if isGpayVisible {
-                        intentButton(title: "GPay", imageName: "gpay_upi_logo", isSelected: selectedIntent == "GPay") {
-                            selectedIntent = "GPay"
-                            resetCollect()
-                        }
-                    }
-
-                    if isPhonePeVisible {
-                        intentButton(title: "PhonePe", imageName: "phonepe", isSelected: selectedIntent == "PhonePe") {
-                            selectedIntent = "PhonePe"
-                            resetCollect()
-                        }
-                    }
-
-                    if isPaytmVisible {
-                        intentButton(title: "PayTm", imageName: "paytm_upi_logo", isSelected: selectedIntent == "PayTm") {
-                            selectedIntent = "PayTm"
-                            resetCollect()
-                        }
-                    }
-
-                }
-                .padding(.top, isGpayVisible || isPaytmVisible || isPhonePeVisible ? 16 : 0)
-
-                if let intent = selectedIntent, !intent.isEmpty {
-                    Button(action: {
-                        handleUpiPayment(selectedIntent,upiCollectTextInput, "UpiIntent", nil)
-                    }) {
-                        (
-                            Text("Pay ")
-                                .font(.custom("Poppins-SemiBold", size: 16)) +
-                            Text(currencySymbol)
-                                .font(.custom("Inter-SemiBold", size: 16)) +
-                            Text("\(totalAmount) via \(intent)")
-                                .font(.custom("Poppins-SemiBold", size: 16))
-                        )
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color(hex: brandColor))
-                        .cornerRadius(8)
-                    }
-                    .padding(.top, 8)
-                    .padding(.horizontal, 16)
-                }
-            }
-
-            // 👇 Insert the divider here
-            if (isGpayVisible || isPhonePeVisible || isPaytmVisible) && !upiCollectVisible {
-                Divider()
-                    .padding(.top, 12)
-            }
-
-
-            if isUpiCollectVisible {
-                VStack {
-                    Button(action: toggleCollectSection) {
-                        HStack {
-                            Image(frameworkAsset: "add_green", isTemplate: true)
-                                .foregroundColor(Color(hex: brandColor))
-                                .frame(width:16, height:16)
-                            Text("Add new UPI Id")
-                                .foregroundColor(Color(hex: brandColor))
-                                .font(.custom("Poppins-SemiBold", size: 14))
-                            Spacer()
-                            Image(frameworkAsset: "chevron")
-                                .rotationEffect(.degrees(isRotated ? 0 : 180))
-                        }
-                        .padding(.horizontal, 12)
-                        .padding(.top, 12)
-                        .padding(.bottom , isRotated ? 16 : 0)
-                    }
-                    .background(
-                        Group {
-                            if upiCollectVisible {
-                                Image(frameworkAsset: "add_upi_id_background")
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(maxWidth: .infinity)
-                            } else {
-                                Color.white
+            VStack(alignment: .leading) {
+                if isUpiIntentVisible {
+                    HStack {
+                        if isGooglePayInstalled() {
+                            intentButton(title: "GPay", imageName: "gpay_upi_logo", isSelected: selectedIntent == "GPay") {
+                                selectedIntent = "GPay"
+                                resetCollect()
                             }
                         }
-                    )
 
-                    if upiCollectVisible {
-                        VStack(alignment: .leading, spacing: 4) {
-                            FloatingLabelTextField(
-                                placeholder: "Enter UPI ID",
-                                text: $upiCollectTextInput,
-                                isValid: $upiCollectValid,
-                                onChange: { newText in
-                                    handleTextChange(newText)
-                                },
-                                isFocused: $isFocused,
-                                trailingIcon: .constant(""),
-                                leadingIcon: .constant(""),
-                                isSecureText: .constant(false)
+                        if isPhonePeInstalled() {
+                            intentButton(title: "PhonePe", imageName: "phonepe", isSelected: selectedIntent == "PhonePe") {
+                                selectedIntent = "PhonePe"
+                                resetCollect()
+                            }
+                        }
+
+                        if isPaytmInstalled() {
+                            intentButton(title: "PayTm", imageName: "paytm_upi_logo", isSelected: selectedIntent == "PayTm") {
+                                selectedIntent = "PayTm"
+                                resetCollect()
+                            }
+                        }
+
+                    }
+                    .padding(.top, isGooglePayInstalled() || isPaytmInstalled() || isPhonePeInstalled() ? 16 : 0)
+
+                    if let intent = selectedIntent, !intent.isEmpty {
+                        Button(action: {
+                            handleUpiPayment(selectedIntent,nil, nil, "upi")
+                        }) {
+                            (
+                                Text("Pay ")
+                                    .font(.custom("Poppins-SemiBold", size: 16)) +
+                                Text(viewModel.currencySymbol)
+                                    .font(.custom("Inter-SemiBold", size: 16)) +
+                                Text("\(viewModel.amount) via \(intent)")
+                                    .font(.custom("Poppins-SemiBold", size: 16))
                             )
-
-                            if upiCollectError {
-                                Text("Please enter a valid UPI Id")
-                                    .foregroundColor(Color(hex: "#E12121"))
-                                    .font(.custom("Poppins-Regular", size: 12))
-                            }
-
-                            Button(action: {
-                                if let _ = upiCollectValid {
-                                    handleUpiPayment(selectedIntent, upiCollectTextInput, "UpiCollect", nil)
-                                } else {
-                                    upiCollectError = true
-                                }
-                            }){
-                                (
-                                    Text("Verify & Pay ")
-                                        .font(.custom("Poppins-Regular", size: 16)) +
-                                    Text(currencySymbol)
-                                        .font(.custom("Inter-Regular", size: 16)) +
-                                    Text(totalAmount)
-                                        .font(.custom("Poppins-Regular", size: 16))
-                                )
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(upiCollectValid == true ? Color(hex: brandColor) : Color.gray.opacity(0.5))
-                                    .cornerRadius(8)
-                                    
-                            }
-                            .padding(.top, 12)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color(hex: viewModel.brandColor))
+                            .cornerRadius(8)
                         }
+                        .padding(.top, 8)
                         .padding(.horizontal, 16)
                     }
                 }
-                .background(Color.white)
-                .cornerRadius(12)
-                .padding(.bottom, 16)
-            }
 
+                // 👇 Insert the divider here
+                if (isGooglePayInstalled() || isPhonePeInstalled() || isPaytmInstalled()) && !upiCollectVisible {
+                    Divider()
+                        .padding(.top, 12)
+                }
+
+
+                if isUpiCollectVisible {
+                    VStack {
+                        Button(action: toggleCollectSection) {
+                            HStack {
+                                Image(frameworkAsset: "add_green", isTemplate: true)
+                                    .foregroundColor(Color(hex: viewModel.brandColor))
+                                    .frame(width:16, height:16)
+                                Text("Add new UPI Id")
+                                    .foregroundColor(Color(hex: viewModel.brandColor))
+                                    .font(.custom("Poppins-SemiBold", size: 14))
+                                Spacer()
+                                Image(frameworkAsset: "chevron")
+                                    .rotationEffect(.degrees(isRotated ? 0 : 180))
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.top, 12)
+                            .padding(.bottom , isRotated ? 16 : 0)
+                        }
+                        .background(
+                            Group {
+                                if upiCollectVisible {
+                                    Image(frameworkAsset: "add_upi_id_background")
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(maxWidth: .infinity)
+                                } else {
+                                    Color.white
+                                }
+                            }
+                        )
+
+                        if upiCollectVisible {
+                            VStack(alignment: .leading, spacing: 4) {
+                                FloatingLabelTextField(
+                                    placeholder: "Enter UPI ID",
+                                    text: $upiCollectTextInput,
+                                    isValid: $upiCollectValid,
+                                    onChange: { newText in
+                                        handleTextChange(newText)
+                                    },
+                                    isFocused: $isFocused,
+                                    trailingIcon: .constant(""),
+                                    leadingIcon: .constant(""),
+                                    isSecureText: .constant(false)
+                                )
+
+                                if upiCollectError {
+                                    Text("Please enter a valid UPI Id")
+                                        .foregroundColor(Color(hex: "#E12121"))
+                                        .font(.custom("Poppins-Regular", size: 12))
+                                }
+
+                                Button(action: {
+                                    if let _ = upiCollectValid {
+                                        handleUpiPayment(nil, upiCollectTextInput, nil, "upi")
+                                    } else {
+                                        upiCollectError = true
+                                    }
+                                }){
+                                    (
+                                        Text("Verify & Pay ")
+                                            .font(.custom("Poppins-Regular", size: 16)) +
+                                        Text(viewModel.currencySymbol)
+                                            .font(.custom("Inter-Regular", size: 16)) +
+                                        Text(viewModel.amount)
+                                            .font(.custom("Poppins-Regular", size: 16))
+                                    )
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .frame(maxWidth: .infinity)
+                                        .background(upiCollectValid == true ? Color(hex: viewModel.brandColor) : Color.gray.opacity(0.5))
+                                        .cornerRadius(8)
+                                        
+                                }
+                                .padding(.top, 12)
+                            }
+                            .padding(.horizontal, 16)
+                        }
+                    }
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .padding(.bottom, 16)
+                }
+
+            }
+        }
+        .onAppear() {
+            let upiService = UPIService(detector: detector)
+            installedApps = upiService.getAvailableApps()
         }
         .frame(maxWidth: .infinity)
         .background(Color.white)
@@ -221,12 +209,12 @@ struct UpiScreen: View {
                 }
                 .overlay(
                     Circle()
-                        .stroke(isSelected ? Color(hex: brandColor) : Color.clear, lineWidth: 2)
+                        .stroke(isSelected ? Color(hex: viewModel.brandColor) : Color.clear, lineWidth: 2)
                 )
             }
 
             Text(title)
-                .foregroundColor(isSelected ? Color(hex: brandColor) : .primary)
+                .foregroundColor(isSelected ? Color(hex: viewModel.brandColor) : .primary)
                 .font(.custom(isSelected ? "Poppins-SemiBold" : "Poppins-Regular", size: 14))
         }
         .padding(.leading, 16)
@@ -264,4 +252,17 @@ struct UpiScreen: View {
         }
     }
 
+    private func isGooglePayInstalled() -> Bool {
+        return installedApps.contains("tez") || installedApps.contains("gpay")
+    }
+
+    // Check if Paytm is installed
+    private func isPaytmInstalled() -> Bool {
+        return installedApps.contains("paytm")
+    }
+
+    // Check if PhonePe is installed
+    private func isPhonePeInstalled() -> Bool {
+        return installedApps.contains("phonepe")
+    }
 }
