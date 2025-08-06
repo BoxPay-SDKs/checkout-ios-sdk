@@ -1,6 +1,6 @@
 import SwiftUI
 import UIKit
-import FlagPhoneNumber
+import CountryPickerView
 
 struct FloatingLabelWithCodeTextField: View {
     let placeholder: String
@@ -11,7 +11,6 @@ struct FloatingLabelWithCodeTextField: View {
     @Binding var isCodeFocused: Bool     // Focus state for code field (not really used anymore)
     var onChangeText: ((String) -> Void)? = nil
     var onChangeCode: ((String) -> Void)  // called when the country code changes
-    @Binding var showCountryCodePicker : Bool
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -36,77 +35,117 @@ struct FloatingLabelWithCodeTextField: View {
                 .animation(.easeOut(duration: 0.2), value: isFocused || !text.isEmpty || !countryCode.isEmpty)
                 .font(.custom("Poppins-Regular", size: (isFocused) ? 14 : 16))
 
-            FPNTextFieldWrapper(text: $text, isValid: $isValid, countryCode: $countryCode, showCountryCodePicker: $showCountryCodePicker, isFocused: $isFocused)
-                .padding(.horizontal, 12) // Add padding
-                .padding(.top, 4)
-                .frame(height: 50)
-                .onChange(of: countryCode) { newValue in
-                    onChangeCode(newValue)  //Notify the parent view of country code changes
+            CountryCodePhoneTextField(
+                text: $text,
+                isValid: $isValid,
+                countryCode: $countryCode,
+                isFocused: $isFocused,
+                onChangeCode: { newCode in
+                    onChangeCode(newCode)
                 }
+            )
+            .padding(.horizontal, 12)
+            .padding(.top, 4)
+            .frame(height: 50)
         }
     }
 }
 
-struct FPNTextFieldWrapper: UIViewRepresentable {
+struct CountryCodePhoneTextField: UIViewRepresentable {
     @Binding var text: String
     @Binding var isValid: Bool?
-    @Binding var countryCode: String // ISO Country Code
-    @Binding var showCountryCodePicker: Bool
+    @Binding var countryCode: String
     @Binding var isFocused: Bool
 
-    func makeUIView(context: Context) -> FPNTextField {
-        let textField = FPNTextField()
-        textField.delegate = context.coordinator
-        textField.displayMode = .list // Or .picker
-        textField.addTarget(context.coordinator, action: #selector(Coordinator.textFieldDidChange(_:)), for: .editingChanged)
+    var onChangeCode: ((String) -> Void)? = nil
 
-        return textField
+    func makeUIView(context: Context) -> UIView {
+        let container = UIView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        let countryPickerView = CountryPickerView()
+        countryPickerView.showPhoneCodeInView = true
+        countryPickerView.delegate = context.coordinator
+        countryPickerView.translatesAutoresizingMaskIntoConstraints = false
+
+        let textField = UITextField()
+        textField.placeholder = "Phone Number"
+        textField.keyboardType = .phonePad
+        textField.delegate = context.coordinator
+        textField.translatesAutoresizingMaskIntoConstraints = false
+
+        // Enable tapping on country picker to open the modal
+        countryPickerView.setCountryByCode(countryCode) // Initial setup
+        countryPickerView.showCountryCodeInView = true
+
+        context.coordinator.textField = textField
+        context.coordinator.countryPickerView = countryPickerView
+
+        container.addSubview(countryPickerView)
+        container.addSubview(textField)
+
+        NSLayoutConstraint.activate([
+            countryPickerView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
+            countryPickerView.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            countryPickerView.widthAnchor.constraint(equalToConstant: 100),
+
+            textField.leadingAnchor.constraint(equalTo: countryPickerView.trailingAnchor, constant: 8),
+            textField.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
+            textField.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            textField.heightAnchor.constraint(equalToConstant: 44)
+        ])
+
+        return container
     }
 
-    func updateUIView(_ uiView: FPNTextField, context: Context) {
-        uiView.text = text
+    func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.updateBindings(text: text, code: countryCode)
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+        return Coordinator(text: $text, isValid: $isValid, countryCode: $countryCode, onChangeCode: onChangeCode, isFocused: $isFocused)
     }
 
-    @MainActor class Coordinator: NSObject, FPNTextFieldDelegate {
-          var parent: FPNTextFieldWrapper
+    class Coordinator: NSObject, UITextFieldDelegate, CountryPickerViewDelegate {
+        
+        @Binding var text: String
+        @Binding var isValid: Bool?
+        @Binding var countryCode: String
+        @Binding var isFocused: Bool
+        var onChangeCode: ((String) -> Void)?
+        weak var textField: UITextField?
+        weak var countryPickerView: CountryPickerView?
 
-          init(_ parent: FPNTextFieldWrapper) {
-              self.parent = parent
-          }
-        nonisolated func fpnDisplayCountryList() {
-              // Handle the display of the country list (e.g., present a modal)
-              DispatchQueue.main.async {
-                  self.parent.showCountryCodePicker = true
-              }
-          }
-
-        nonisolated func fpnDidSelectCountry(name: String, dialCode: String, code: String) {
-              // Called when a country is selected
-              DispatchQueue.main.async {
-                  self.parent.countryCode = code // Update the country code
-              }
-          }
-
-        nonisolated func fpnDidValidatePhoneNumber(textField: FPNTextField, isValid: Bool) {
-            // Called when the phone number is validated
-            DispatchQueue.main.async {
-                self.parent.text = textField.text ?? ""
-                self.parent.isValid = isValid // `isValid` is already Bool, so assign as is
-            }
+        init(text: Binding<String>, isValid: Binding<Bool?>, countryCode: Binding<String>, onChangeCode: ((String) -> Void)?, isFocused: Binding<Bool>) {
+            _text = text
+            _isValid = isValid
+            _countryCode = countryCode
+            self.onChangeCode = onChangeCode
+            _isFocused = isFocused
         }
 
-          @objc func textFieldDidChange(_ textField: UITextField) {
-              guard let fpnTextField = textField as? FPNTextField else {
-                  return
-              }
-              DispatchQueue.main.async {
-                   self.parent.text = fpnTextField.text ?? ""
-              }
+        func updateBindings(text: String, code: String) {
+            if text != self.text {
+                self.text = text
+            }
+            countryPickerView?.setCountryByCode(code)
+        }
 
-          }
-      }
+        func textFieldDidChangeSelection(_ textField: UITextField) {
+            self.text = textField.text ?? ""
+            self.isValid = !text.isEmpty // Simplified
+        }
+
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            isFocused = true
+        }
+
+        func textFieldDidEndEditing(_ textField: UITextField) {
+            isFocused = false
+        }
+        
+        nonisolated func countryPickerView(_ countryPickerView: CountryPickerView, didSelectCountry country: Country) {
+            print("\(country)")
+        }
+    }
 }

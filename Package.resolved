@@ -1,13 +1,13 @@
 {
-  "originHash" : "ed070190cf80dec931871ac0f72bc35d55bd29b61629256a3fa04ed25e9ae9c3",
+  "originHash" : "ee425b26732738014ba63a5bf4da746c31bfd0e8e3e169e13b614b7f270bcbb1",
   "pins" : [
     {
-      "identity" : "flagphonenumber",
+      "identity" : "countrypickerview",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/chronotruck/FlagPhoneNumber",
+      "location" : "https://github.com/kizitonwose/CountryPickerView",
       "state" : {
-        "revision" : "578ea3c5046f9423e6ce6b54c3f408cbe0f496d3",
-        "version" : "0.9.0"
+        "revision" : "6ecf22145d577411fb97c8c964df0fb5886f035f",
+        "version" : "3.3.0"
       }
     },
     {

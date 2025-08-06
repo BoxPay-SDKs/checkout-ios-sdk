@@ -85,8 +85,7 @@ struct AddAddressScreen : View {
                                         },
                                         onChangeCode: { string in
                                             viewModel.onChangeCountryCodeTextField(updatedText: string)
-                                        },
-                                        showCountryCodePicker: .constant(true)
+                                        }
                                     )
                                     if(viewModel.isMobileNumberValid == false) {
                                         Text("\(viewModel.mobileNumberErrorText)")
