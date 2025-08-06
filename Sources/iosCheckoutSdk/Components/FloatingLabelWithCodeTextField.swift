@@ -1,6 +1,6 @@
 import SwiftUI
-import PhoneNumberKit
 import UIKit
+import FlagPhoneNumber
 
 struct FloatingLabelWithCodeTextField: View {
     let placeholder: String
@@ -11,6 +11,7 @@ struct FloatingLabelWithCodeTextField: View {
     @Binding var isCodeFocused: Bool     // Focus state for code field (not really used anymore)
     var onChangeText: ((String) -> Void)? = nil
     var onChangeCode: ((String) -> Void)  // called when the country code changes
+    @Binding var showCountryCodePicker : Bool
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -35,7 +36,7 @@ struct FloatingLabelWithCodeTextField: View {
                 .animation(.easeOut(duration: 0.2), value: isFocused || !text.isEmpty || !countryCode.isEmpty)
                 .font(.custom("Poppins-Regular", size: (isFocused) ? 14 : 16))
 
-            PhoneNumberTextFieldView(text: $text, isValid: $isValid, countryCode: $countryCode, isFocused: $isFocused)
+            FPNTextFieldWrapper(text: $text, isValid: $isValid, countryCode: $countryCode, showCountryCodePicker: $showCountryCodePicker, isFocused: $isFocused)
                 .padding(.horizontal, 12) // Add padding
                 .padding(.top, 4)
                 .frame(height: 50)
@@ -46,62 +47,66 @@ struct FloatingLabelWithCodeTextField: View {
     }
 }
 
-
-struct PhoneNumberTextFieldView: UIViewRepresentable {
+struct FPNTextFieldWrapper: UIViewRepresentable {
     @Binding var text: String
     @Binding var isValid: Bool?
-    @Binding var countryCode: String
+    @Binding var countryCode: String // ISO Country Code
+    @Binding var showCountryCodePicker: Bool
     @Binding var isFocused: Bool
-    let phoneNumberKit = PhoneNumberKit()
-    var keyboardType: UIKeyboardType = .phonePad
 
-    func makeUIView(context: Context) -> PhoneNumberTextField {
-        let textField = PhoneNumberTextField(frame: .zero, phoneNumberKit: phoneNumberKit) // Initialize with phoneNumberKit
-        textField.withFlag = true
-        textField.withExamplePlaceholder = true
-        textField.borderStyle = .roundedRect
-        textField.addTarget(context.coordinator, action: #selector(Coordinator.textFieldDidChange(_:)), for: .editingChanged)
+    func makeUIView(context: Context) -> FPNTextField {
+        let textField = FPNTextField()
         textField.delegate = context.coordinator
-        textField.keyboardType = keyboardType
+        textField.displayMode = .list // Or .picker
+        textField.addTarget(context.coordinator, action: #selector(Coordinator.textFieldDidChange(_:)), for: .editingChanged)
+
         return textField
     }
 
-    func updateUIView(_ uiView: PhoneNumberTextField, context: Context) {
+    func updateUIView(_ uiView: FPNTextField, context: Context) {
         uiView.text = text
-        uiView.keyboardType = keyboardType
-        uiView.withFlag = true
-        uiView.withExamplePlaceholder = true
     }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
 
-    class Coordinator: NSObject, UITextFieldDelegate {
-        var parent: PhoneNumberTextFieldView
+    @MainActor class Coordinator: NSObject, FPNTextFieldDelegate {
+          var parent: FPNTextFieldWrapper
 
-        init(_ parent: PhoneNumberTextFieldView) {
-            self.parent = parent
+          init(_ parent: FPNTextFieldWrapper) {
+              self.parent = parent
+          }
+        nonisolated func fpnDisplayCountryList() {
+              // Handle the display of the country list (e.g., present a modal)
+              DispatchQueue.main.async {
+                  self.parent.showCountryCodePicker = true
+              }
+          }
+
+        nonisolated func fpnDidSelectCountry(name: String, dialCode: String, code: String) {
+              // Called when a country is selected
+              DispatchQueue.main.async {
+                  self.parent.countryCode = code // Update the country code
+              }
+          }
+
+        nonisolated func fpnDidValidatePhoneNumber(textField: FPNTextField, isValid: Bool) {
+            // Called when the phone number is validated
+            DispatchQueue.main.async {
+                self.parent.text = textField.text ?? ""
+                self.parent.isValid = isValid // `isValid` is already Bool, so assign as is
+            }
         }
 
-        @objc func textFieldDidChange(_ textField: UITextField) {
-            guard let phoneNumberTextField = textField as? PhoneNumberTextField else {
-                return // Exit if the textField is not a PhoneNumberTextField
-            }
+          @objc func textFieldDidChange(_ textField: UITextField) {
+              guard let fpnTextField = textField as? FPNTextField else {
+                  return
+              }
+              DispatchQueue.main.async {
+                   self.parent.text = fpnTextField.text ?? ""
+              }
 
-            parent.text = phoneNumberTextField.text ?? ""
-            parent.isValid = phoneNumberTextField.isValidNumber
-            parent.countryCode = phoneNumberTextField.currentRegion // Directly assign the non-optional String
-        }
-
-         func textFieldDidBeginEditing(_ textField: UITextField) {
-                parent.isFocused = true
-            }
-
-            func textFieldDidEndEditing(_ textField: UITextField) {
-                parent.isFocused = false
-            }
-
-
-    }
+          }
+      }
 }

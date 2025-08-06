@@ -1,6 +1,15 @@
 {
-  "originHash" : "7c89196fb71cdef717feaf92418a7314272a6bb37846280c7241e995e93318b5",
+  "originHash" : "ed070190cf80dec931871ac0f72bc35d55bd29b61629256a3fa04ed25e9ae9c3",
   "pins" : [
+    {
+      "identity" : "flagphonenumber",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/chronotruck/FlagPhoneNumber",
+      "state" : {
+        "revision" : "578ea3c5046f9423e6ce6b54c3f408cbe0f496d3",
+        "version" : "0.9.0"
+      }
+    },
     {
       "identity" : "lottie-ios",
       "kind" : "remoteSourceControl",
@@ -8,15 +17,6 @@
       "state" : {
         "revision" : "a004050748dc197c56256a14dca49a035d74726c",
         "version" : "4.5.2"
-      }
-    },
-    {
-      "identity" : "phonenumberkit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/marmelroy/PhoneNumberKit.git",
-      "state" : {
-        "revision" : "c107075aa8d394be7aced273a46e944afe8b321b",
-        "version" : "3.8.0"
       }
     },
     {
