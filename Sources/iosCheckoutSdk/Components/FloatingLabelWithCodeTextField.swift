@@ -59,7 +59,7 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
     @Binding var countryCode: String
     @Binding var isFocused: Bool
 
-    var onChangeCode: ((_ countryCode : String, _ name : String, _ phoneCode : String) -> Void)? = nil
+    var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
 
     func makeUIView(context: Context) -> UIView {
         let container = UIView()
@@ -70,15 +70,12 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         countryPickerView.showCountryCodeInView = false
         countryPickerView.delegate = context.coordinator
         countryPickerView.translatesAutoresizingMaskIntoConstraints = false
+        countryPickerView.setCountryByCode(countryCode)
 
         let textField = UITextField()
         textField.keyboardType = .phonePad
         textField.delegate = context.coordinator
         textField.translatesAutoresizingMaskIntoConstraints = false
-
-        // Enable tapping on country picker to open the modal
-        countryPickerView.setCountryByCode(countryCode) // Initial setup
-        countryPickerView.showCountryCodeInView = true
 
         context.coordinator.textField = textField
         context.coordinator.countryPickerView = countryPickerView
@@ -105,26 +102,33 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        return Coordinator(text: $text, isValid: $isValid, countryCode: $countryCode, onChangeCode: onChangeCode, isFocused: $isFocused)
+        return Coordinator(
+            text: $text,
+            isValid: $isValid,
+            countryCode: $countryCode,
+            onChangeCode: onChangeCode,
+            isFocused: $isFocused
+        )
     }
 
     class Coordinator: NSObject, UITextFieldDelegate, CountryPickerViewDelegate {
-        
         @Binding var text: String
         @Binding var isValid: Bool?
         @Binding var countryCode: String
         @Binding var isFocused: Bool
-        var onChangeCode: ((_ countryCode : String, _ name : String, _ phoneCode : String) -> Void)?
+
+        var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
 
         weak var textField: UITextField?
         weak var countryPickerView: CountryPickerView?
 
+        private var hasInitialized = false
 
         init(
             text: Binding<String>,
             isValid: Binding<Bool?>,
             countryCode: Binding<String>,
-            onChangeCode: ((_ countryCode : String, _ name : String, _ phoneCode : String) -> Void)?,
+            onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?,
             isFocused: Binding<Bool>
         ) {
             _text = text
@@ -134,17 +138,30 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
             _isFocused = isFocused
         }
 
-        // ✅ One-time setup when UI is ready
         func performInitialBindingIfNeeded() {
-            DispatchQueue.main.async {
-                self.textField?.text = self.text
-                self.countryPickerView?.setCountryByCode(self.countryCode)
+            guard !hasInitialized,
+                  let textField = self.textField,
+                  let countryPicker = self.countryPickerView else { return }
+
+            hasInitialized = true
+
+            let phoneCode = countryPicker.selectedCountry.phoneCode.replacingOccurrences(of: "+", with: "")
+
+            // Strip E.164 prefix if present
+            if self.text.hasPrefix("+\(phoneCode)") {
+                let localNumber = String(self.text.dropFirst(phoneCode.count + 1))
+                self.text = localNumber
+                textField.text = localNumber
+            } else {
+                textField.text = self.text
             }
+
+            countryPicker.setCountryByCode(self.countryCode)
         }
 
         func textFieldDidChangeSelection(_ textField: UITextField) {
             self.text = textField.text ?? ""
-            self.isValid = !self.text.isEmpty // Simplified validity check
+            self.isValid = !self.text.isEmpty
         }
 
         func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -156,14 +173,14 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         }
 
         nonisolated func countryPickerView(_ countryPickerView: CountryPickerView, didSelectCountry country: Country) {
-            print("\(country)")
             let code = country.code
             let name = country.name
             let phoneCode = country.phoneCode
             DispatchQueue.main.async {
+                self.countryCode = code
                 self.onChangeCode?(code, name, phoneCode)
             }
         }
     }
-
 }
+
