@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import CountryPickerView
+import PhoneNumberKit
 
 struct FloatingLabelWithCodeTextField: View {
     let placeholder: String
@@ -36,7 +37,7 @@ struct FloatingLabelWithCodeTextField: View {
                 .font(.custom("Poppins-Regular", size: (isFocused) ? 14 : 16))
 
             CountryCodePhoneTextField(
-                text: $text,
+                phoneNumber: $text,
                 isValid: $isValid,
                 countryCode: $countryCode,
                 isFocused: $isFocused,
@@ -44,132 +45,114 @@ struct FloatingLabelWithCodeTextField: View {
                     onChangeCode(newCountryCode, newName, newPhoneCode)
                 }
             )
-            .padding(.top, 22)
+            .padding(.top, 12)
             .padding(.bottom, 8)
-            .padding(.leading, 12)
+            .padding(.horizontal, 12)
             .frame(maxWidth: .infinity)
         }
     }
 }
 
 struct CountryCodePhoneTextField: UIViewRepresentable {
-    @Binding var text: String
+    @Binding var phoneNumber: String
     @Binding var isValid: Bool?
     @Binding var countryCode: String
     @Binding var isFocused: Bool
-
+    
     var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
+
+    func makeCoordinator() -> Coordinator {
+        return Coordinator(
+            phoneNumber: $phoneNumber,
+            isValid: $isValid,
+            countryCode: $countryCode,
+            isFocused: $isFocused,
+            onChangeCode: onChangeCode
+        )
+    }
 
     func makeUIView(context: Context) -> UIView {
         let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-
-        let countryPickerView = CountryPickerView()
-        countryPickerView.showPhoneCodeInView = true
-        countryPickerView.showCountryCodeInView = false
-        countryPickerView.delegate = context.coordinator
-        countryPickerView.translatesAutoresizingMaskIntoConstraints = false
-        countryPickerView.setCountryByCode(countryCode)
 
         let textField = UITextField()
         textField.keyboardType = .phonePad
         textField.delegate = context.coordinator
-        textField.translatesAutoresizingMaskIntoConstraints = false
-
         context.coordinator.textField = textField
-        context.coordinator.countryPickerView = countryPickerView
 
-        container.addSubview(countryPickerView)
+        let picker = CountryPickerView()
+        picker.delegate = context.coordinator
+        picker.showPhoneCodeInView = true
+        picker.showCountryCodeInView = false
+        picker.setCountryByCode(countryCode)
+        context.coordinator.countryPickerView = picker
+
+        textField.leftView = picker
+        textField.leftViewMode = .always
+
         container.addSubview(textField)
-
+        textField.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            countryPickerView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 8),
-            countryPickerView.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            countryPickerView.widthAnchor.constraint(equalToConstant: 100),
-
-            textField.leadingAnchor.constraint(equalTo: countryPickerView.trailingAnchor, constant: 8),
-            textField.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -8),
-            textField.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            textField.heightAnchor.constraint(equalToConstant: 44)
+            textField.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            textField.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            textField.topAnchor.constraint(equalTo: container.topAnchor),
+            textField.bottomAnchor.constraint(equalTo: container.bottomAnchor)
         ])
 
         return container
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-            context.coordinator.performInitialBindingIfNeeded()
-            
-            if let textField = context.coordinator.textField {
-                if textField.text != text {
-                    textField.text = text
-                }
-                
-                if isFocused {
-                    textField.becomeFirstResponder()
-                } else {
-                    textField.resignFirstResponder()
-                }
-            }
+        if let textField = context.coordinator.textField {
+            textField.text = phoneNumber
         }
-
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(
-            text: $text,
-            isValid: $isValid,
-            countryCode: $countryCode,
-            onChangeCode: onChangeCode,
-            isFocused: $isFocused
-        )
     }
 
     class Coordinator: NSObject, UITextFieldDelegate, CountryPickerViewDelegate {
-        @Binding var text: String
+        @Binding var phoneNumber: String
         @Binding var isValid: Bool?
         @Binding var countryCode: String
         @Binding var isFocused: Bool
 
         var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
-
+        
         weak var textField: UITextField?
         weak var countryPickerView: CountryPickerView?
 
+        private let phoneNumberUtility = PhoneNumberUtility()
+
         init(
-            text: Binding<String>,
+            phoneNumber: Binding<String>,
             isValid: Binding<Bool?>,
             countryCode: Binding<String>,
-            onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?,
-            isFocused: Binding<Bool>
+            isFocused: Binding<Bool>,
+            onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
         ) {
-            self._text = text
+            self._phoneNumber = phoneNumber
             self._isValid = isValid
             self._countryCode = countryCode
-            self.onChangeCode = onChangeCode
             self._isFocused = isFocused
+            self.onChangeCode = onChangeCode
         }
-
-        // MARK: - UITextFieldDelegate
 
         func textFieldDidChangeSelection(_ textField: UITextField) {
-            self.text = textField.text ?? ""
-            
-            // Validate number (placeholder logic, replace with actual validation)
-            self.isValid = !self.text.isEmpty && self.text.allSatisfy { $0.isNumber }
+            let number = textField.text ?? ""
+            phoneNumber = number
+
+            do {
+                let parsedNumber = try phoneNumberUtility.parse(number, withRegion: countryCode)
+                isValid = phoneNumberUtility.isValidPhoneNumber(number, withRegion: countryCode)
+            } catch {
+                isValid = false
+            }
         }
 
-        func performInitialBindingIfNeeded() {
-            textField?.text = text
-            countryPickerView?.setCountryByCode(countryCode)
-        }
-        
         func textFieldDidBeginEditing(_ textField: UITextField) {
-            self.isFocused = true
+            isFocused = true
         }
 
         func textFieldDidEndEditing(_ textField: UITextField) {
-            self.isFocused = false
+            isFocused = false
         }
-
-        // MARK: - CountryPickerViewDelegate
 
         nonisolated func countryPickerView(_ countryPickerView: CountryPickerView, didSelectCountry country: Country) {
             let code = country.code
