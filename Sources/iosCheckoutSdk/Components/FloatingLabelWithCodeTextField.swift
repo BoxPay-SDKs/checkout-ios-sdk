@@ -44,9 +44,10 @@ struct FloatingLabelWithCodeTextField: View {
                     onChangeCode(newCountryCode, newName, newPhoneCode)
                 }
             )
-            .padding(.top, 30)
+            .padding(.top, 20)
             .padding(.bottom, 8)
-            .padding(.trailing, 12)
+            .padding(.leading, 12)
+            .frame(height: 50)
         }
     }
 }

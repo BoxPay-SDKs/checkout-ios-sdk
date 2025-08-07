@@ -62,6 +62,7 @@ struct AddressSectionView: View {
                 .rotationEffect(.degrees(90))
         }
         .commonCardStyle()
+        .padding(20)
     }
 
     private var infoDisplayView: some View {
@@ -85,6 +86,7 @@ struct AddressSectionView: View {
                     .rotationEffect(.degrees(90))
             }
             .commonCardStyle()
+            .padding(20)
         }
     }
 
