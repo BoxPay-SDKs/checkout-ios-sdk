@@ -44,7 +44,7 @@ struct FloatingLabelWithCodeTextField: View {
                     onChangeCode(newCountryCode, newName, newPhoneCode)
                 }
             )
-            .padding(.top, 25)
+            .padding(.top, 23)
             .padding(.bottom, 8)
             .padding(.leading, 12)
             .frame(height: 40)
@@ -119,7 +119,6 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         weak var textField: UITextField?
         weak var countryPickerView: CountryPickerView?
 
-        private var didInitialUpdate = false  // ✅ Flag to ensure one-time setup
 
         init(
             text: Binding<String>,
@@ -137,9 +136,6 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
 
         // ✅ One-time setup when UI is ready
         func performInitialBindingIfNeeded() {
-            guard !didInitialUpdate else { return }
-            didInitialUpdate = true
-
             DispatchQueue.main.async {
                 self.textField?.text = self.text
                 self.countryPickerView?.setCountryByCode(self.countryCode)

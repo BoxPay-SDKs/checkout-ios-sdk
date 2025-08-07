@@ -10,7 +10,6 @@ import SwiftUI
 extension View {
     func commonCardStyle() -> some View {
         self
-            .padding(16)
             .frame(maxWidth: .infinity)
             .background(Color.white)
             .cornerRadius(12)
