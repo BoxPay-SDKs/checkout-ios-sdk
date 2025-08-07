@@ -44,10 +44,11 @@ struct FloatingLabelWithCodeTextField: View {
                     onChangeCode(newCountryCode, newName, newPhoneCode)
                 }
             )
-            .padding(.top, 20)
+            .padding(.top, 25)
             .padding(.bottom, 8)
             .padding(.leading, 12)
             .frame(height: 50)
+            .frame(maxWidth: .infinity)
         }
     }
 }
@@ -65,7 +66,7 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         container.translatesAutoresizingMaskIntoConstraints = false
 
         let countryPickerView = CountryPickerView()
-        countryPickerView.showPhoneCodeInView = true
+        countryPickerView.showPhoneCodeInView = false
         countryPickerView.delegate = context.coordinator
         countryPickerView.translatesAutoresizingMaskIntoConstraints = false
 
