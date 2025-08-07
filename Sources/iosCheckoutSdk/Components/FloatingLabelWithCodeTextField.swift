@@ -47,7 +47,7 @@ struct FloatingLabelWithCodeTextField: View {
             .padding(.top, 25)
             .padding(.bottom, 8)
             .padding(.leading, 12)
-            .frame(height: 50)
+            .frame(height: 40)
             .frame(maxWidth: .infinity)
         }
     }
@@ -66,7 +66,8 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         container.translatesAutoresizingMaskIntoConstraints = false
 
         let countryPickerView = CountryPickerView()
-        countryPickerView.showPhoneCodeInView = false
+        countryPickerView.showPhoneCodeInView = true
+        countryPickerView.showCountryCodeInView = false
         countryPickerView.delegate = context.coordinator
         countryPickerView.translatesAutoresizingMaskIntoConstraints = false
 
