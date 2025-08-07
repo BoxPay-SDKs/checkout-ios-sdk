@@ -47,7 +47,7 @@ struct FloatingLabelWithCodeTextField: View {
             .padding(.top, 23)
             .padding(.bottom, 8)
             .padding(.leading, 12)
-            .frame(height: 40)
+            .frame(height: 36)
             .frame(maxWidth: .infinity)
         }
     }
@@ -142,8 +142,6 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
             guard !hasInitialized,
                   let textField = self.textField,
                   let countryPicker = self.countryPickerView else { return }
-
-            hasInitialized = true
 
             let phoneCode = countryPicker.selectedCountry.phoneCode.replacingOccurrences(of: "+", with: "")
 
