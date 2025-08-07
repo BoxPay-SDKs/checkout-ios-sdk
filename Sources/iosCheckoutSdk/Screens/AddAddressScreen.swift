@@ -83,8 +83,8 @@ struct AddAddressScreen : View {
                                         onChangeText: { string in
                                             viewModel.onChangeMobileNumber(updatedText: string)
                                         },
-                                        onChangeCode: { string in
-                                            viewModel.onChangeCountryCodeTextField(updatedText: string)
+                                        onChangeCode: { newCode, newName, newPhoneCode  in
+                                            viewModel.onChangeCountryCodeTextField(newCountryCode: newCode, newName: newName, newPhoneCode: newPhoneCode)
                                         }
                                     )
                                     if(viewModel.isMobileNumberValid == false) {

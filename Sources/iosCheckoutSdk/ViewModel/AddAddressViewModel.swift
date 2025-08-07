@@ -119,8 +119,10 @@ class AddAddressViewModel: ObservableObject {
         let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
     }
     
-    func onChangeCountryCodeTextField(updatedText : String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
+    func onChangeCountryCodeTextField(newCountryCode: String, newName : String, newPhoneCode : String) {
+        selectedCountryCode = newCountryCode
+        selectedCountryNumberCode = newPhoneCode
+        countryTextField = newName
     }
     
     func onChangeMobileNumber(updatedText: String) {

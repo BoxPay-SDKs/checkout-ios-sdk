@@ -13,7 +13,6 @@ extension View {
             .frame(maxWidth: .infinity)
             .background(Color.white)
             .cornerRadius(12)
-            .padding(16)
             .shadow(radius: 1)
             .padding(.horizontal, 16)
     }
