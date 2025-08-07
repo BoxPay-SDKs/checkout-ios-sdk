@@ -44,10 +44,9 @@ struct FloatingLabelWithCodeTextField: View {
                     onChangeCode(newCountryCode, newName, newPhoneCode)
                 }
             )
-            .padding(.top, 23)
+            .padding(.top, 22)
             .padding(.bottom, 8)
             .padding(.leading, 12)
-            .frame(height: 36)
             .frame(maxWidth: .infinity)
         }
     }
@@ -98,8 +97,20 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-        context.coordinator.performInitialBindingIfNeeded()
-    }
+            context.coordinator.performInitialBindingIfNeeded()
+            
+            if let textField = context.coordinator.textField {
+                if textField.text != text {
+                    textField.text = text
+                }
+                
+                if isFocused {
+                    textField.becomeFirstResponder()
+                } else {
+                    textField.resignFirstResponder()
+                }
+            }
+        }
 
     func makeCoordinator() -> Coordinator {
         return Coordinator(
@@ -122,8 +133,6 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         weak var textField: UITextField?
         weak var countryPickerView: CountryPickerView?
 
-        private var hasInitialized = false
-
         init(
             text: Binding<String>,
             isValid: Binding<Bool?>,
@@ -131,44 +140,36 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
             onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?,
             isFocused: Binding<Bool>
         ) {
-            _text = text
-            _isValid = isValid
-            _countryCode = countryCode
+            self._text = text
+            self._isValid = isValid
+            self._countryCode = countryCode
             self.onChangeCode = onChangeCode
-            _isFocused = isFocused
+            self._isFocused = isFocused
         }
 
-        func performInitialBindingIfNeeded() {
-            guard !hasInitialized,
-                  let textField = self.textField,
-                  let countryPicker = self.countryPickerView else { return }
-
-            let phoneCode = countryPicker.selectedCountry.phoneCode.replacingOccurrences(of: "+", with: "")
-
-            // Strip E.164 prefix if present
-            if self.text.hasPrefix("+\(phoneCode)") {
-                let localNumber = String(self.text.dropFirst(phoneCode.count + 1))
-                self.text = localNumber
-                textField.text = localNumber
-            } else {
-                textField.text = self.text
-            }
-
-            countryPicker.setCountryByCode(self.countryCode)
-        }
+        // MARK: - UITextFieldDelegate
 
         func textFieldDidChangeSelection(_ textField: UITextField) {
             self.text = textField.text ?? ""
-            self.isValid = !self.text.isEmpty
+            
+            // Validate number (placeholder logic, replace with actual validation)
+            self.isValid = !self.text.isEmpty && self.text.allSatisfy { $0.isNumber }
         }
 
+        func performInitialBindingIfNeeded() {
+            textField?.text = text
+            countryPickerView?.setCountryByCode(countryCode)
+        }
+        
         func textFieldDidBeginEditing(_ textField: UITextField) {
-            isFocused = true
+            self.isFocused = true
         }
 
         func textFieldDidEndEditing(_ textField: UITextField) {
-            isFocused = false
+            self.isFocused = false
         }
+
+        // MARK: - CountryPickerViewDelegate
 
         nonisolated func countryPickerView(_ countryPickerView: CountryPickerView, didSelectCountry country: Country) {
             let code = country.code
