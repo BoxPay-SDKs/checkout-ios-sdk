@@ -124,12 +124,12 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
             _isFocused = isFocused
         }
 
-        func updateBindings(text: String, code: String) {
-            if text != self.text {
-                self.text = text
-            }
-            countryPickerView?.setCountryByCode(code)
-        }
+//        func updateBindings(text: String, code: String) {
+//            if text != self.text {
+//                self.text = text
+//            }
+//            countryPickerView?.setCountryByCode(code)
+//        }
 
         func textFieldDidChangeSelection(_ textField: UITextField) {
             self.text = textField.text ?? ""
