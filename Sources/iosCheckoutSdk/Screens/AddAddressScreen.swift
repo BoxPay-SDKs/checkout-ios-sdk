@@ -24,7 +24,6 @@ struct AddAddressScreen : View {
                     currencySymbol: "",
                     amount: "",
                     onBackPress: {
-                        isCheckoutFocused = true
                         presentationMode.wrappedValue.dismiss()
                     }
                 )

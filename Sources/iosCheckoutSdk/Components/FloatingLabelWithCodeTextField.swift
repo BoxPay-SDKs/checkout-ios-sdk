@@ -74,8 +74,10 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         textField.keyboardType = .phonePad
         textField.delegate = context.coordinator
         context.coordinator.textField = textField
-        textField.contentVerticalAlignment = .center // ✅ fix for vertical alignment
+        textField.contentVerticalAlignment = .center
+        textField.font = UIFont(name: "Poppins-Regular", size: 16)
 
+        // Country Picker
         let picker = CountryPickerView()
         picker.delegate = context.coordinator
         picker.showPhoneCodeInView = true
@@ -83,21 +85,25 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         picker.setCountryByCode(countryCode)
         context.coordinator.countryPickerView = picker
 
+        // Left container
         let leftContainer = UIView()
+        leftContainer.translatesAutoresizingMaskIntoConstraints = false
+        leftContainer.widthAnchor.constraint(equalToConstant: 60).isActive = true // Adjust as needed
         leftContainer.addSubview(picker)
 
         picker.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             picker.leadingAnchor.constraint(equalTo: leftContainer.leadingAnchor),
+            picker.trailingAnchor.constraint(equalTo: leftContainer.trailingAnchor),
             picker.topAnchor.constraint(equalTo: leftContainer.topAnchor),
-            picker.bottomAnchor.constraint(equalTo: leftContainer.bottomAnchor),
-            picker.trailingAnchor.constraint(equalTo: leftContainer.trailingAnchor, constant: -8)
+            picker.bottomAnchor.constraint(equalTo: leftContainer.bottomAnchor)
         ])
 
         textField.leftView = leftContainer
         textField.leftViewMode = .always
 
         container.addSubview(textField)
+        textField.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             textField.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             textField.trailingAnchor.constraint(equalTo: container.trailingAnchor),
