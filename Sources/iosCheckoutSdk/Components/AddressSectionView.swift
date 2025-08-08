@@ -61,6 +61,7 @@ struct AddressSectionView: View {
                 .frame(width: 10, height: 10)
                 .rotationEffect(.degrees(90))
         }
+        .padding(12)
         .commonCardStyle()
     }
 
@@ -84,6 +85,7 @@ struct AddressSectionView: View {
                     .frame(width: 10, height: 10)
                     .rotationEffect(.degrees(90))
             }
+            .padding(12)
             .commonCardStyle()
         }
     }
