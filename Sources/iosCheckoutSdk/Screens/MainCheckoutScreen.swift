@@ -11,7 +11,6 @@ import SwiftUI
 struct MainCheckoutScreen : View {
     @ObservedObject var viewModel: CheckoutViewModel
     @Binding var isCheckoutMainScreenFocused : Bool
-    var triggerPaymentStatusCallBack : () -> Void
     
     @ObservedObject private var upiViewModel: UpiViewModel = UpiViewModel()
     @ObservedObject private var fetchStatusViewModel: FetchStatusViewModel = FetchStatusViewModel()
@@ -56,7 +55,7 @@ struct MainCheckoutScreen : View {
                         currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
                         amount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
                         onBackPress: {
-                            triggerPaymentStatusCallBack()
+                            isCheckoutMainScreenFocused = true
                         }
                     )
                     ScrollView {
@@ -190,7 +189,7 @@ struct MainCheckoutScreen : View {
             SessionExpireScreen(
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
-                    triggerPaymentStatusCallBack()
+                    isCheckoutMainScreenFocused = true
                 }
             )
         }
@@ -204,7 +203,7 @@ struct MainCheckoutScreen : View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "", onDone: {
                 sessionCompleteScreen = false
-                triggerPaymentStatusCallBack()
+                isCheckoutMainScreenFocused = true
             },brandColor: viewModel.brandColor)
         }
         .bottomSheet(isPresented: $showTimerSheet) {

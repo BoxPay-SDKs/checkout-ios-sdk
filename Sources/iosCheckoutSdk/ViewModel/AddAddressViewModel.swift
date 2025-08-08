@@ -322,6 +322,7 @@ class AddAddressViewModel: ObservableObject {
             }
             let _: EmptyResponse = try await apiService.request(
                 endpoint: "shoppers/validations",
+                includeToken : false,
                 method: .POST,
                 body: jsonData,
                 responseType: EmptyResponse.self
