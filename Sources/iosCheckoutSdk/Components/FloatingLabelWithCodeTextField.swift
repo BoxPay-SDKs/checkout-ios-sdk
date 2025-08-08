@@ -58,6 +58,8 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
     @Binding var isFocused: Bool
     
     var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
+    
+    private let phoneNumberUtility = PhoneNumberUtility()
 
     func makeCoordinator() -> Coordinator {
         return Coordinator(
@@ -65,7 +67,8 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
             isValid: $isValid,
             countryCode: $countryCode,
             isFocused: $isFocused,
-            onChangeCode: onChangeCode
+            onChangeCode: onChangeCode,
+            phoneNumberUtility: phoneNumberUtility
         )
     }
 
@@ -101,7 +104,15 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
 
     func updateUIView(_ uiView: UIView, context: Context) {
         if let textField = context.coordinator.textField {
-            context.coordinator.textFieldDidChangeSelection(textField)
+            do {
+                let parsedNumber = try phoneNumberUtility.parse(phoneNumber, withRegion: countryCode)
+                
+                // Convert national number to String and assign to the text field
+                let nationalNumber = String(parsedNumber.nationalNumber)
+                textField.text = nationalNumber
+            } catch {
+                isValid = false
+            }
         }
     }
 
@@ -112,24 +123,26 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         @Binding var isFocused: Bool
 
         var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
+        var phoneNumberUtility : PhoneNumberUtility
         
         weak var textField: UITextField?
         weak var countryPickerView: CountryPickerView?
 
-        private let phoneNumberUtility = PhoneNumberUtility()
 
         init(
             phoneNumber: Binding<String>,
             isValid: Binding<Bool?>,
             countryCode: Binding<String>,
             isFocused: Binding<Bool>,
-            onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
+            onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?,
+            phoneNumberUtility : PhoneNumberUtility
         ) {
             self._phoneNumber = phoneNumber
             self._isValid = isValid
             self._countryCode = countryCode
             self._isFocused = isFocused
             self.onChangeCode = onChangeCode
+            self.phoneNumberUtility = phoneNumberUtility
         }
 
         func textFieldDidChangeSelection(_ textField: UITextField) {
