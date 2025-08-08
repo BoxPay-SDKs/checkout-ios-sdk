@@ -37,7 +37,6 @@ struct FloatingLabelWithCodeTextField: View {
 
             CountryCodePhoneTextField(
                 phoneNumber: $text,
-                isValid: $isValid,
                 countryCode: $countryCode,
                 isFocused: $isFocused,
                 onChangeCode: { newCountryCode, newName, newPhoneCode in
@@ -53,22 +52,17 @@ struct FloatingLabelWithCodeTextField: View {
 
 struct CountryCodePhoneTextField: UIViewRepresentable {
     @Binding var phoneNumber: String
-    @Binding var isValid: Bool?
     @Binding var countryCode: String
     @Binding var isFocused: Bool
     
     var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
     
-    private let phoneNumberUtility = PhoneNumberUtility()
-
     func makeCoordinator() -> Coordinator {
         return Coordinator(
             phoneNumber: $phoneNumber,
-            isValid: $isValid,
             countryCode: $countryCode,
             isFocused: $isFocused,
-            onChangeCode: onChangeCode,
-            phoneNumberUtility: phoneNumberUtility
+            onChangeCode: onChangeCode
         )
     }
 
@@ -103,27 +97,32 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-        if let textField = context.coordinator.textField {
-            do {
-                let parsedNumber = try phoneNumberUtility.parse(phoneNumber, withRegion: countryCode)
-                
-                // Convert national number to String and assign to the text field
-                let nationalNumber = String(parsedNumber.nationalNumber)
+        guard let textField = context.coordinator.textField else { return }
+
+        // Don't update @Binding here — only update the UITextField's visible text
+        do {
+            let parsedNumber = try context.coordinator.phoneNumberUtility.parse(phoneNumber, withRegion: countryCode)
+            let nationalNumber = String(parsedNumber.nationalNumber)
+
+            if textField.text != nationalNumber {
                 textField.text = nationalNumber
-            } catch {
-                isValid = false
+            }
+        } catch {
+            // If parsing fails, show raw value (still don't touch the @Binding)
+            if textField.text != phoneNumber {
+                textField.text = phoneNumber
             }
         }
     }
 
+
     class Coordinator: NSObject, UITextFieldDelegate, CountryPickerViewDelegate {
         @Binding var phoneNumber: String
-        @Binding var isValid: Bool?
         @Binding var countryCode: String
         @Binding var isFocused: Bool
 
         var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
-        var phoneNumberUtility : PhoneNumberUtility
+        let phoneNumberUtility = PhoneNumberUtility()
         
         weak var textField: UITextField?
         weak var countryPickerView: CountryPickerView?
@@ -131,36 +130,30 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
 
         init(
             phoneNumber: Binding<String>,
-            isValid: Binding<Bool?>,
             countryCode: Binding<String>,
             isFocused: Binding<Bool>,
-            onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?,
-            phoneNumberUtility : PhoneNumberUtility
+            onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
         ) {
             self._phoneNumber = phoneNumber
-            self._isValid = isValid
             self._countryCode = countryCode
             self._isFocused = isFocused
             self.onChangeCode = onChangeCode
-            self.phoneNumberUtility = phoneNumberUtility
         }
 
         func textFieldDidChangeSelection(_ textField: UITextField) {
             let number = textField.text ?? ""
-            phoneNumber = number
 
             do {
                 let parsedNumber = try phoneNumberUtility.parse(number, withRegion: countryCode)
-                
-                // Convert national number to String and assign to the text field
                 let nationalNumber = String(parsedNumber.nationalNumber)
+                
+                phoneNumber = nationalNumber
                 textField.text = nationalNumber
-
-                isValid = phoneNumberUtility.isValidPhoneNumber(number, withRegion: countryCode)
             } catch {
-                isValid = false
+                phoneNumber = number
             }
         }
+
 
         func textFieldDidBeginEditing(_ textField: UITextField) {
             isFocused = true
