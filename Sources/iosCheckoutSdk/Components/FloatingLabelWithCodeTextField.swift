@@ -75,7 +75,6 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         textField.delegate = context.coordinator
         context.coordinator.textField = textField
         textField.contentVerticalAlignment = .center
-        textField.font = UIFont(name: "Poppins-Regular", size: 16)
 
         // Country Picker
         let picker = CountryPickerView()

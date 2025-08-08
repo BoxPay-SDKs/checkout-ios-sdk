@@ -92,7 +92,7 @@ class AddAddressViewModel: ObservableObject {
                 let phoneNumberUtility = try phoneNumberUtility.parse(await userDataManager.getPhone() ?? "")
                 self.mobileNumberTextField = String(phoneNumberUtility.nationalNumber)
             } catch {
-                self.mobileNumberTextField = await userDataManager.getPhone() ?? ""
+                self.mobileNumberTextField = ""
             }
             self.emailIdTextField = await userDataManager.getEmail() ?? ""
             self.postalCodeTextField = await userDataManager.getPinCode() ?? ""
