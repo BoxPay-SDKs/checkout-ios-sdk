@@ -125,11 +125,6 @@ class AddAddressViewModel: ObservableObject {
         countryTextField = newName
     }
     
-    func onChangeMobileNumber(updatedText: String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
-        let mobileNumberPredicate = NSPredicate(format: "SELF MATCHES %@", numberRegex)
-    }
-    
     func onChangeEmailId(updatedText : String) {
         let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
         let emailPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)

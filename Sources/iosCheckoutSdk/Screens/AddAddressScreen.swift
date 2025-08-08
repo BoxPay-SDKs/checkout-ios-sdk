@@ -80,9 +80,6 @@ struct AddAddressScreen : View {
                                         isValid: $viewModel.isMobileNumberValid,
                                         isFocused: $viewModel.isMobileNumberTextFieldFocused,
                                         isCodeFocused: $viewModel.isCountryCodeTextFieldFocused,
-                                        onChangeText: { string in
-                                            viewModel.onChangeMobileNumber(updatedText: string)
-                                        },
                                         onChangeCode: { newCode, newName, newPhoneCode  in
                                             viewModel.onChangeCountryCodeTextField(newCountryCode: newCode, newName: newName, newPhoneCode: newPhoneCode)
                                         }

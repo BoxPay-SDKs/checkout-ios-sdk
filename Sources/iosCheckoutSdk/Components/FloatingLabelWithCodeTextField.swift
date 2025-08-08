@@ -10,7 +10,6 @@ struct FloatingLabelWithCodeTextField: View {
     @Binding var isValid: Bool?
     @Binding var isFocused: Bool       // Focus state for main text field
     @Binding var isCodeFocused: Bool     // Focus state for code field (not really used anymore)
-    var onChangeText: ((String) -> Void)? = nil
     var onChangeCode: ((_ countryCode : String, _ name : String, _ phoneCode : String) -> Void)  // called when the country code changes
 
     var body: some View {
@@ -45,9 +44,10 @@ struct FloatingLabelWithCodeTextField: View {
                     onChangeCode(newCountryCode, newName, newPhoneCode)
                 }
             )
-            .padding(.top, 12)
+            .padding(.top, 22)
             .padding(.bottom, 8)
             .padding(.horizontal, 12)
+            .frame(height: 40)
             .frame(maxWidth: .infinity)
         }
     }
@@ -140,6 +140,11 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
 
             do {
                 let parsedNumber = try phoneNumberUtility.parse(number, withRegion: countryCode)
+                
+                // Convert national number to String and assign to the text field
+                let nationalNumber = String(parsedNumber.nationalNumber)
+                textField.text = nationalNumber
+
                 isValid = phoneNumberUtility.isValidPhoneNumber(number, withRegion: countryCode)
             } catch {
                 isValid = false
