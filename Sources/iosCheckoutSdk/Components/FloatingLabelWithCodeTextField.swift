@@ -44,11 +44,9 @@ struct FloatingLabelWithCodeTextField: View {
                     onChangeCode(newCountryCode, newName, newPhoneCode)
                 }
             )
-            .padding(.top, 22)
-            .padding(.bottom, 8)
-            .padding(.horizontal, 12)
+            .textFieldStyle(PlainTextFieldStyle())
             .frame(height: 40)
-            .frame(maxWidth: .infinity)
+            .padding(.vertical, 0)
         }
     }
 }
@@ -103,7 +101,7 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
 
     func updateUIView(_ uiView: UIView, context: Context) {
         if let textField = context.coordinator.textField {
-            textField.text = phoneNumber
+            context.coordinator.textFieldDidChangeSelection(textField)
         }
     }
 
