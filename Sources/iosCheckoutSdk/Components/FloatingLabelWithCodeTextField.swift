@@ -54,11 +54,11 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
     @Binding var phoneNumber: String
     @Binding var countryCode: String
     @Binding var isFocused: Bool
-    
+
     var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
-    
+
     func makeCoordinator() -> Coordinator {
-        return Coordinator(
+        Coordinator(
             phoneNumber: $phoneNumber,
             countryCode: $countryCode,
             isFocused: $isFocused,
@@ -73,6 +73,7 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         textField.keyboardType = .phonePad
         textField.delegate = context.coordinator
         context.coordinator.textField = textField
+        textField.contentVerticalAlignment = .center // ✅ fix for vertical alignment
 
         let picker = CountryPickerView()
         picker.delegate = context.coordinator
@@ -99,22 +100,11 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
     func updateUIView(_ uiView: UIView, context: Context) {
         guard let textField = context.coordinator.textField else { return }
 
-        // Don't update @Binding here — only update the UITextField's visible text
-        do {
-            let parsedNumber = try context.coordinator.phoneNumberUtility.parse(phoneNumber, withRegion: countryCode)
-            let nationalNumber = String(parsedNumber.nationalNumber)
-
-            if textField.text != nationalNumber {
-                textField.text = nationalNumber
-            }
-        } catch {
-            // If parsing fails, show raw value (still don't touch the @Binding)
-            if textField.text != phoneNumber {
-                textField.text = phoneNumber
-            }
+        // ✅ Only set if different to avoid text flickering
+        if textField.text != phoneNumber {
+            textField.text = phoneNumber
         }
     }
-
 
     class Coordinator: NSObject, UITextFieldDelegate, CountryPickerViewDelegate {
         @Binding var phoneNumber: String
@@ -122,11 +112,8 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         @Binding var isFocused: Bool
 
         var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
-        let phoneNumberUtility = PhoneNumberUtility()
-        
         weak var textField: UITextField?
         weak var countryPickerView: CountryPickerView?
-
 
         init(
             phoneNumber: Binding<String>,
@@ -141,19 +128,8 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         }
 
         func textFieldDidChangeSelection(_ textField: UITextField) {
-            let number = textField.text ?? ""
-
-            do {
-                let parsedNumber = try phoneNumberUtility.parse(number, withRegion: countryCode)
-                let nationalNumber = String(parsedNumber.nationalNumber)
-                
-                phoneNumber = nationalNumber
-                textField.text = nationalNumber
-            } catch {
-                phoneNumber = number
-            }
+            phoneNumber = textField.text ?? ""
         }
-
 
         func textFieldDidBeginEditing(_ textField: UITextField) {
             isFocused = true
@@ -174,4 +150,5 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         }
     }
 }
+
 

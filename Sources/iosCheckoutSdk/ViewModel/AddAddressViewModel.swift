@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import PhoneNumberKit
 
 @MainActor
 class AddAddressViewModel: ObservableObject {
@@ -58,6 +59,8 @@ class AddAddressViewModel: ObservableObject {
     @Published var isEmailIdEnabled = false
     @Published var isEmailIdEditable = false
     @Published var dataUpdationCompleted = false
+    
+    private let phoneNumberUtility = PhoneNumberUtility()
 
     
     let emailRegex = "^(?!.*\\.\\.)(?!.*\\.\\@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
@@ -85,7 +88,12 @@ class AddAddressViewModel: ObservableObject {
             let firstName = await userDataManager.getFirstName() ?? ""
             let lastName = await userDataManager.getLastName() ?? ""
             self.fullNameTextField = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
-            self.mobileNumberTextField = await userDataManager.getPhone() ?? ""
+            do {
+                let phoneNumberUtility = try phoneNumberUtility.parse(await userDataManager.getPhone() ?? "")
+                self.mobileNumberTextField = String(phoneNumberUtility.nationalNumber)
+            } catch {
+                self.mobileNumberTextField = await userDataManager.getPhone() ?? ""
+            }
             self.emailIdTextField = await userDataManager.getEmail() ?? ""
             self.postalCodeTextField = await userDataManager.getPinCode() ?? ""
             self.cityTextField = await userDataManager.getCity() ?? ""
