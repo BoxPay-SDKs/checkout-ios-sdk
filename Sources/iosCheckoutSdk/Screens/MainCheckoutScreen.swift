@@ -10,6 +10,8 @@ import SwiftUI
 
 struct MainCheckoutScreen : View {
     @ObservedObject var viewModel: CheckoutViewModel
+    @Environment(\.presentationMode) var presentationMode
+
     @Binding var isCheckoutMainScreenFocused : Bool
     
     @ObservedObject private var upiViewModel: UpiViewModel = UpiViewModel()
@@ -56,6 +58,7 @@ struct MainCheckoutScreen : View {
                         amount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
                         onBackPress: {
                             isCheckoutMainScreenFocused = true
+                            presentationMode.wrappedValue.dismiss()
                         }
                     )
                     ScrollView {
@@ -190,6 +193,7 @@ struct MainCheckoutScreen : View {
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
                     isCheckoutMainScreenFocused = true
+                    presentationMode.wrappedValue.dismiss()
                 }
             )
         }
@@ -204,6 +208,7 @@ struct MainCheckoutScreen : View {
             GeneralSuccessScreen(transactionID: transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "", onDone: {
                 sessionCompleteScreen = false
                 isCheckoutMainScreenFocused = true
+                presentationMode.wrappedValue.dismiss()
             },brandColor: viewModel.brandColor)
         }
         .bottomSheet(isPresented: $showTimerSheet) {
