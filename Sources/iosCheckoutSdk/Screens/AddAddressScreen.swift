@@ -24,12 +24,8 @@ struct AddAddressScreen : View {
                     currencySymbol: "",
                     amount: "",
                     onBackPress: {
-                        if(viewModel.isAllDetailsValid()) {
-                            presentationMode.wrappedValue.dismiss()
-                        } else {
-                            isCheckoutFocused = true
-                            presentationMode.wrappedValue.dismiss()
-                        }
+                        isCheckoutFocused = true
+                        presentationMode.wrappedValue.dismiss()
                     }
                 )
                 ScrollView {
@@ -216,8 +212,11 @@ struct AddAddressScreen : View {
                 .padding(.horizontal, 16)
                 
                 Button(action: {
-                    if viewModel.isAllDetailsValid() {
-                        viewModel.updateUserData()
+                    Task {
+                        let result = await viewModel.isAllDetailsValid()
+                        if result {
+                            viewModel.updateUserData()
+                        }
                     }
                 }){
                     Text("Save Address")

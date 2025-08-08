@@ -46,6 +46,7 @@ struct FloatingLabelWithCodeTextField: View {
             .textFieldStyle(PlainTextFieldStyle())
             .frame(height: 40)
             .padding(.vertical, 0)
+            .padding(.horizontal, 12)
         }
     }
 }
@@ -82,11 +83,21 @@ struct CountryCodePhoneTextField: UIViewRepresentable {
         picker.setCountryByCode(countryCode)
         context.coordinator.countryPickerView = picker
 
-        textField.leftView = picker
+        let leftContainer = UIView()
+        leftContainer.addSubview(picker)
+
+        picker.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            picker.leadingAnchor.constraint(equalTo: leftContainer.leadingAnchor),
+            picker.topAnchor.constraint(equalTo: leftContainer.topAnchor),
+            picker.bottomAnchor.constraint(equalTo: leftContainer.bottomAnchor),
+            picker.trailingAnchor.constraint(equalTo: leftContainer.trailingAnchor, constant: -8)
+        ])
+
+        textField.leftView = leftContainer
         textField.leftViewMode = .always
 
         container.addSubview(textField)
-        textField.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             textField.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             textField.trailingAnchor.constraint(equalTo: container.trailingAnchor),

@@ -61,7 +61,7 @@ class AddAddressViewModel: ObservableObject {
     @Published var dataUpdationCompleted = false
     
     private let phoneNumberUtility = PhoneNumberUtility()
-
+    private let apiService = ApiService.shared
     
     let emailRegex = "^(?!.*\\.\\.)(?!.*\\.\\@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
     let numberRegex = "^[0-9]+$"
@@ -200,7 +200,7 @@ class AddAddressViewModel: ObservableObject {
         }
     }
     
-    func isAllDetailsValid() -> Bool {
+    func isAllDetailsValid() async -> Bool {
         var isAllValid = true
 
         // Full Name
@@ -257,7 +257,8 @@ class AddAddressViewModel: ObservableObject {
                 isAllValid = false
             }
         }
-
+        let isServerValid = await toCheckValidityThroughAPI()
+        isAllValid = isAllValid && isServerValid
         return isAllValid
     }
     
@@ -305,5 +306,35 @@ class AddAddressViewModel: ObservableObject {
             .filter { !$0.isEmpty }
 
         return filteredComponents.joined(separator: ", ")
+    }
+    
+    func toCheckValidityThroughAPI() async -> Bool {
+        do {
+            let payload: [String: Any] = await [
+                "email": emailIdTextField,
+                "uniqueReference" : userDataManager.getUniqueId(),
+                "phoneNumber" : "\(selectedCountryNumberCode)\(mobileNumberTextField)"
+            ]
+            guard JSONSerialization.isValidJSONObject(payload),
+                  let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+                  let _ = String(data: jsonData, encoding: .utf8) else {
+                return false
+            }
+            let _: EmptyResponse = try await apiService.request(
+                endpoint: "shoppers/validations",
+                method: .POST,
+                body: jsonData,
+                responseType: EmptyResponse.self
+            )
+            return true
+        } catch let apiError as ApiErrorResponse {
+            for item in apiError.fieldErrorItems {
+                print("Field error:", item.message)
+            }
+            return false
+        } catch {
+            print("Unexpected error:", error.localizedDescription)
+            return false
+        }
     }
 }

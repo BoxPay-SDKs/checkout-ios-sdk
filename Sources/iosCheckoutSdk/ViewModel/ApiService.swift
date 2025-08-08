@@ -16,11 +16,15 @@ public actor ApiService {
     static let shared = ApiService()
     private init() {}
 
-    private func constructURL(endpoint: String? = nil) async -> String {
+    private func constructURL(endpoint: String? = nil, includeToken: Bool) async -> String {
         let baseURL = await CheckoutManager.shared.getBaseURL()
-        let token = await CheckoutManager.shared.getMainToken()
         
-        var fullPath = "\(baseURL)/v0/checkout/sessions/\(token)"
+        var fullPath = baseURL
+        
+        if includeToken {
+            let token = await CheckoutManager.shared.getMainToken()
+            fullPath += "/v0/checkout/sessions/\(token)/"
+        }
         
         if let endpoint = endpoint, !endpoint.isEmpty {
             fullPath += "/\(endpoint)"
@@ -29,14 +33,16 @@ public actor ApiService {
         return fullPath
     }
 
+
     func request<T: Decodable>(
         endpoint: String? = nil,
+        includeToken: Bool = true,
         method: HTTPMethod = .GET,
         headers: [String: String] = ["Content-Type": "application/json"],
         body: Data? = nil,
         responseType: T.Type
     ) async throws -> T {
-        let urlString = await constructURL(endpoint: endpoint)
+        let urlString = await constructURL(endpoint: endpoint, includeToken: includeToken)
         guard let url = URL(string: urlString) else {
             throw NSError(domain: "Invalid URL", code: -1)
         }
@@ -52,9 +58,8 @@ public actor ApiService {
             let decoded = try JSONDecoder().decode(responseType, from: data)
             return decoded
         } catch {
-            // Try to parse error message from response
-            if let errorMessage = try? JSONDecoder().decode(ApiErrorResponse.self, from: data) {
-                throw NSError(domain: errorMessage.message, code: -3)
+            if let apiError = try? JSONDecoder().decode(ApiErrorResponse.self, from: data) {
+                throw apiError
             } else {
                 throw error
             }

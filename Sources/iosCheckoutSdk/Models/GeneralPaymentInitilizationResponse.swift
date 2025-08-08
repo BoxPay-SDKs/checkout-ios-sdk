@@ -28,7 +28,15 @@ struct GeneralActionResponse: Codable,Sendable {
     let htmlPageString : String?
 }
 
-struct ApiErrorResponse : Codable, Sendable {
-    let errorCode : String
-    let message:String
+struct ApiErrorResponse: Codable, Error {
+    let errorCode: String
+    let message: String
+    let fieldErrorItems: [FieldErrorItem]
 }
+
+struct FieldErrorItem: Codable {
+    let message: String
+    let fieldErrorCode: String
+}
+
+struct EmptyResponse: Decodable,Sendable {}
