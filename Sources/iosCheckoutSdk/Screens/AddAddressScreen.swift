@@ -38,9 +38,7 @@ struct AddAddressScreen : View {
                                     placeholder: "Country*",
                                     text: $viewModel.countryTextField,
                                     isValid: .constant(nil),
-                                    onChange: { string in
-                                        viewModel.onChangeCountryTextField(updatedText: string)
-                                    },
+                                    onChange: nil,
                                     isFocused: $viewModel.isCountryTextFieldFocused,
                                     trailingIcon: .constant("chevron"),
                                     leadingIcon: .constant(""),
@@ -245,14 +243,12 @@ struct AddAddressScreen : View {
         }
     }
     
-    private var coordinator: CountryPickerCoordinator {
-        CountryPickerCoordinator { country in
+    private func showPicker() {
+        var coordinator = CountryPickerCoordinator { country in
             viewModel.countryTextField = country.name
             viewModel.selectedCountryCode = country.code
+            viewModel.isCountryTextFieldFocused = false
         }
-    }
-
-    private func showPicker() {
         if let rootVC = topViewController() {
             cpv.delegate = coordinator
             cpv.showCountriesList(from: rootVC)
