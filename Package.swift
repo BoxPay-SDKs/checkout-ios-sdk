@@ -19,7 +19,9 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/airbnb/lottie-ios.git", from: "4.5.1"),
         .package(url: "https://github.com/SDWebImage/SDWebImageSwiftUI.git", from: "3.1.3"),
-        .package(url: "https://github.com/SDWebImage/SDWebImageSVGCoder.git", from: "1.7.0")
+        .package(url: "https://github.com/SDWebImage/SDWebImageSVGCoder.git", from: "1.7.0"),
+        .package(url: "https://github.com/kizitonwose/CountryPickerView", .upToNextMajor(from: "3.3.0")),
+        .package(url: "https://github.com/marmelroy/PhoneNumberKit", from: "4.1.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -34,7 +36,9 @@ let package = Package(
                 "CrossPlatformSDK",
                 .product(name: "Lottie", package: "lottie-ios"),
                 .product(name: "SDWebImageSwiftUI", package: "SDWebImageSwiftUI"),
-                .product(name: "SDWebImageSVGCoder", package: "SDWebImageSVGCoder")
+                .product(name: "SDWebImageSVGCoder", package: "SDWebImageSVGCoder"),
+                .product(name: "CountryPickerView", package: "CountryPickerView"),
+                .product(name: "PhoneNumberKit", package: "PhoneNumberKit")
             ],
             path: "Sources/iosCheckoutSdk",
             resources: [
@@ -42,8 +46,7 @@ let package = Package(
                 .process("PaymentFailed.json"),
                 .process("PaymentSuccessful.json"),
                 .process("SessionExpired.json"),
-                .process("Fonts"),
-                .process("CountryCodes.json")
+                .process("Fonts")
             ]
         ),
 

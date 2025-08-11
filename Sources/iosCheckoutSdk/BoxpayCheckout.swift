@@ -38,8 +38,7 @@ public struct BoxpayCheckout : View {
         // Replace this with your actual SDK UI
         MainCheckoutScreen(
             viewModel : viewModel,
-            isCheckoutMainScreenFocused : $isCheckoutMainScreenFocused,
-            triggerPaymentStatusCallBack : triggerPaymentStatusCallBack
+            isCheckoutMainScreenFocused : $isCheckoutMainScreenFocused
         )
         .onAppear {
             if !viewModel.isInitialized {

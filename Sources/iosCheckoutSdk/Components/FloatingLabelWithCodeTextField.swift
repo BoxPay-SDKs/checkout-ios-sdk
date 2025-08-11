@@ -1,36 +1,22 @@
-//
-//  FloatingLabelWithCodeTextField.swift
-//  checkout_ios_sdk
-//
-//  Created by Ishika Bansal on 03/06/25.
-//
-
-
 import SwiftUI
 import UIKit
+import CountryPickerView
+import PhoneNumberKit
 
 struct FloatingLabelWithCodeTextField: View {
     let placeholder: String
-    @Binding var countryCode: String    // Editable code field
-    @Binding var text: String            // Main text field
+    @Binding var countryCode: String    //  ISO Country Code (e.g., "US", "GB")
+    @Binding var text: String            // Main text field (raw input)
     @Binding var isValid: Bool?
-    @Binding var isFocused: Bool         // Focus state for main text field
-    @Binding var isCodeFocused: Bool     // Focus state for code field
-    var onChangeText: ((String) -> Void)? = nil
-    var onChangeCode: ((String) -> Void)
-    var onFocusEnd : (() -> Void)? = nil
-    var keyboardType: UIKeyboardType = .default
-    @Binding var trailingIcon :String?
-    @Binding var leadingIcon : String?
-    var onClickIcon : (() -> Void)? = nil
-    @Binding var isSecureText : Bool
+    @Binding var isFocused: Bool       // Focus state for main text field
+    var onChangeCode: ((_ countryCode : String, _ name : String, _ phoneCode : String) -> Void)  // called when the country code changes
 
     var body: some View {
         ZStack(alignment: .leading) {
             RoundedRectangle(cornerRadius: 8)
                 .strokeBorder(
                     (isValid == false) ? Color(hex: "#E12121") :
-                    (isFocused || isCodeFocused) ? Color(hex: "#2D2B32") :
+                    (isFocused) ? Color(hex: "#2D2B32") :
                     Color(hex: "#E6E6E6"),
                     lineWidth: 1
                 )
@@ -38,59 +24,146 @@ struct FloatingLabelWithCodeTextField: View {
 
             Text(placeholder)
                 .foregroundColor((isValid == false) ? Color(hex: "#E12121") :
-                                    (isFocused || isCodeFocused || !text.isEmpty || !countryCode.isEmpty) ? Color(hex: "#2D2B32") :
+                                    (isFocused || !text.isEmpty || !countryCode.isEmpty) ? Color(hex: "#2D2B32") :
                                  Color(hex: "#E6E6E6"))
                 .background(Color.white)
                 .padding(.horizontal, 5)
-                .scaleEffect((isFocused || isCodeFocused || !text.isEmpty || !countryCode.isEmpty) ? 0.8 : 1.0, anchor: .leading)
-                .offset(y: (isFocused || isCodeFocused || !text.isEmpty || !countryCode.isEmpty) ? -22: 0)
+                .scaleEffect((isFocused || !text.isEmpty || !countryCode.isEmpty) ? 0.8 : 1.0, anchor: .leading)
+                .offset(y: (isFocused || !text.isEmpty || !countryCode.isEmpty) ? -22: 0)
                 .padding(.leading, 12)
-                .animation(.easeOut(duration: 0.2), value: isFocused || isCodeFocused || !text.isEmpty || !countryCode.isEmpty)
-                .font(.custom("Poppins-Regular", size: (isFocused || isCodeFocused) ? 14 : 16))
+                .animation(.easeOut(duration: 0.2), value: isFocused || !text.isEmpty || !countryCode.isEmpty)
+                .font(.custom("Poppins-Regular", size: (isFocused) ? 14 : 16))
 
-            HStack(spacing: 0) {
-                // Small editable country code text field
-                HStack(spacing: 4) {
-                    TextField("", text: $countryCode, onEditingChanged: { focused in
-                        isCodeFocused = focused
-                    })
-                    .keyboardType(.phonePad)
-                    .font(.custom("Poppins-Regular", size: 16))
-                    .foregroundColor(Color(hex: "#0A090B"))
-                    .multilineTextAlignment(.leading)
-                    .autocapitalization(.none)
-                    .disableAutocorrection(true)
-                    .padding(.leading, 12)
-                    .onChange(of: countryCode) { newValue in
-                        onChangeCode(newValue)
-                    }
-                    Image(frameworkAsset: "chevron")
-                        .frame(width: 10, height: 10)
-                        .rotationEffect(.degrees(180))
+            CountryCodePhoneTextField(
+                phoneNumber: $text,
+                countryCode: $countryCode,
+                isFocused: $isFocused,
+                onChangeCode: { newCountryCode, newName, newPhoneCode in
+                    onChangeCode(newCountryCode, newName, newPhoneCode)
                 }
-                .frame(width: 80)
-                .padding(.top, 4)
-                
-                // Main custom text field
-                CustomTextFieldRepresentable(
-                    text: $text,
-                    isFocused: $isFocused,
-                    placeholder: "",
-                    onChange: onChangeText,
-                    onFocusLost: onFocusEnd,
-                    textColor: UIColor(Color(hex: "#0A090B")),
-                    accentColor: UIColor(Color(hex: "#2D2B32")),
-                    font: UIFont(name: "Poppins-Regular", size: 16) ?? UIFont.systemFont(ofSize: 16),
-                    keyboardType: keyboardType,
-                    trailingIconName: $trailingIcon,
-                    leadingIconName: $leadingIcon,
-                    onTrailingIconTap: onClickIcon,
-                    isSecureText: $isSecureText
-                )
-                .padding(.top, 12)
-                .padding(.bottom, 8)
-                .padding(.trailing, 12)
+            )
+            .textFieldStyle(PlainTextFieldStyle())
+            .frame(height: 40)
+            .padding(.vertical, 0)
+            .padding(.horizontal, 12)
+        }
+    }
+}
+
+struct CountryCodePhoneTextField: UIViewRepresentable {
+    @Binding var phoneNumber: String
+    @Binding var countryCode: String
+    @Binding var isFocused: Bool
+
+    var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(
+            phoneNumber: $phoneNumber,
+            countryCode: $countryCode,
+            isFocused: $isFocused,
+            onChangeCode: onChangeCode
+        )
+    }
+
+    func makeUIView(context: Context) -> UIView {
+        let container = UIView()
+
+        let textField = UITextField()
+        textField.keyboardType = .phonePad
+        textField.delegate = context.coordinator
+        context.coordinator.textField = textField
+        textField.contentVerticalAlignment = .center
+
+        // Country Picker
+        let picker = CountryPickerView()
+        picker.delegate = context.coordinator
+        picker.showPhoneCodeInView = true
+        picker.showCountryCodeInView = false
+        picker.setCountryByCode(countryCode)
+        context.coordinator.countryPickerView = picker
+
+        // Left container
+        let leftContainer = UIView()
+        leftContainer.translatesAutoresizingMaskIntoConstraints = false
+        leftContainer.widthAnchor.constraint(equalToConstant: 60).isActive = true // Adjust as needed
+        leftContainer.addSubview(picker)
+
+        picker.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            picker.leadingAnchor.constraint(equalTo: leftContainer.leadingAnchor),
+            picker.trailingAnchor.constraint(equalTo: leftContainer.trailingAnchor),
+            picker.topAnchor.constraint(equalTo: leftContainer.topAnchor),
+            picker.bottomAnchor.constraint(equalTo: leftContainer.bottomAnchor)
+        ])
+
+        textField.leftView = leftContainer
+        textField.leftViewMode = .always
+
+        container.addSubview(textField)
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            textField.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            textField.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            textField.topAnchor.constraint(equalTo: container.topAnchor),
+            textField.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+
+        return container
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        guard let textField = context.coordinator.textField else { return }
+
+        // ✅ Only set if different to avoid text flickering
+        if textField.text != phoneNumber {
+            textField.text = phoneNumber
+        }
+    }
+
+    class Coordinator: NSObject, UITextFieldDelegate, CountryPickerViewDelegate {
+        @Binding var phoneNumber: String
+        @Binding var countryCode: String
+        @Binding var isFocused: Bool
+
+        var onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
+        weak var textField: UITextField?
+        weak var countryPickerView: CountryPickerView?
+
+        init(
+            phoneNumber: Binding<String>,
+            countryCode: Binding<String>,
+            isFocused: Binding<Bool>,
+            onChangeCode: ((_ countryCode: String, _ name: String, _ phoneCode: String) -> Void)?
+        ) {
+            self._phoneNumber = phoneNumber
+            self._countryCode = countryCode
+            self._isFocused = isFocused
+            self.onChangeCode = onChangeCode
+        }
+
+        func textFieldDidChangeSelection(_ textField: UITextField) {
+            phoneNumber = textField.text ?? ""
+        }
+
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            isFocused = true
+        }
+
+        func textFieldDidEndEditing(_ textField: UITextField) {
+            isFocused = false
+        }
+
+        nonisolated func countryPickerView(_ countryPickerView: CountryPickerView, didSelectCountry country: Country) {
+            let code = country.code
+            let name = country.name
+            let phoneCode = country.phoneCode
+            DispatchQueue.main.async {
+                self.countryCode = code
+                self.onChangeCode?(code, name, phoneCode)
             }
         }
     }
 }
+
+

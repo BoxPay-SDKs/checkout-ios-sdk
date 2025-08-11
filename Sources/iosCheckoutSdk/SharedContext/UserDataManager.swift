@@ -23,6 +23,7 @@ public actor UserDataManager {
     private var labelTypeStored: String? = nil
     private var labelNameStored : String? = nil
     private var uniqueIdStored : String?  = nil
+    private var countryFullName : String? = nil
 
     private init() {}
 
@@ -42,6 +43,7 @@ public actor UserDataManager {
     func getLabelType() -> String? {return labelTypeStored}
     func getLabelName() -> String? {return labelNameStored}
     func getUniqueId() -> String? {return uniqueIdStored}
+    func getCountryFullName() -> String? {return countryFullName}
     
     // setter methods
     func setFirstName(_ firstName:String?) {firstNameStored = firstName}
@@ -59,6 +61,7 @@ public actor UserDataManager {
     func setLabelType(_ labelType:String?) {labelTypeStored = labelType}
     func setLabelName(_ labelName:String?) {labelNameStored = labelName}
     func setUniqueId(_ uniqueId:String?) {uniqueIdStored = uniqueId}
+    func setCountryFullName(_ fullName : String?) {countryFullName = fullName}
     
     func clearAllFields() {
         firstNameStored = nil
@@ -76,6 +79,6 @@ public actor UserDataManager {
         labelTypeStored = nil
         labelNameStored = nil
         uniqueIdStored = nil
-
+        countryFullName = nil
     }
 }

@@ -6,13 +6,12 @@
 //
 
 import UIKit
+import PhoneNumberKit
 
 @MainActor
 class AddAddressViewModel: ObservableObject {
     @Published var fullNameTextField = ""
     @Published var mobileNumberTextField = ""
-    @Published var mobileNumberMinLength = 10
-    @Published var mobileNumberMaxLength = 10
     @Published var emailIdTextField = ""
     @Published var postalCodeTextField = ""
     @Published var postalCodeMaxLength = 6
@@ -33,7 +32,6 @@ class AddAddressViewModel: ObservableObject {
     @Published var isMainAddressTextFieldFocused = false
     @Published var isSecondaryAddressTextFieldFocused = false
     @Published var isCountryTextFieldFocused = false
-    @Published var isCountryCodeTextFieldFocused = false
     
     @Published var isFullNameValid : Bool? = nil
     @Published var isMobileNumberValid : Bool? = nil
@@ -51,13 +49,6 @@ class AddAddressViewModel: ObservableObject {
     @Published var stateErrorText = ""
     @Published var mainAddressErrorText = ""
     
-    @Published var countryData: [String: Country] = [:]
-    @Published var countryNames: [String] = []
-    private var allCountryNames: [String] = [] // Full list of countries
-    
-    @Published var countryCodes: [String] = []
-    private var allCountryCodes: [String] = []
-    
     @Published var isShippingEnabled = false
     @Published var isShippingEditable = false
     @Published var isFullNameEnabled = false
@@ -67,7 +58,9 @@ class AddAddressViewModel: ObservableObject {
     @Published var isEmailIdEnabled = false
     @Published var isEmailIdEditable = false
     @Published var dataUpdationCompleted = false
-
+    
+    private let phoneNumberUtility = PhoneNumberUtility()
+    private let apiService = ApiService.shared
     
     let emailRegex = "^(?!.*\\.\\.)(?!.*\\.\\@)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
     let numberRegex = "^[0-9]+$"
@@ -82,6 +75,7 @@ class AddAddressViewModel: ObservableObject {
     init() {
         Task {
             self.brandColor = await checkoutManager.getBrandColor()
+            self.selectedCountryCode = await userDataManager.getCountryCode() ?? "IN"
             self.isShippingEnabled = await checkoutManager.getIsShippingAddressEnabled()
             self.isShippingEditable = await checkoutManager.getIsShippingAddressEditable()
             self.isFullNameEnabled = await checkoutManager.getIsFullNameEnabled()
@@ -90,20 +84,23 @@ class AddAddressViewModel: ObservableObject {
             self.isMobileNumberEditable = await checkoutManager.getIsMobileNumberEditable()
             self.isEmailIdEnabled = await checkoutManager.getIsEmailIdEnabled()
             self.isEmailIdEditable = await checkoutManager.getIsEmailIdEditable()
-            
             let firstName = await userDataManager.getFirstName() ?? ""
             let lastName = await userDataManager.getLastName() ?? ""
+            self.countryTextField = await userDataManager.getCountryFullName() ?? "India"
             self.fullNameTextField = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
-            self.mobileNumberTextField = await userDataManager.getPhone() ?? ""
+            do {
+                let phoneNumberUtility = try phoneNumberUtility.parse(await userDataManager.getPhone() ?? "", withRegion: selectedCountryCode, ignoreType: true)
+                self.mobileNumberTextField = String(phoneNumberUtility.nationalNumber)
+                self.selectedCountryNumberCode = String(phoneNumberUtility.countryCode)
+            } catch {
+                self.mobileNumberTextField = ""
+            }
             self.emailIdTextField = await userDataManager.getEmail() ?? ""
             self.postalCodeTextField = await userDataManager.getPinCode() ?? ""
             self.cityTextField = await userDataManager.getCity() ?? ""
             self.stateTextField = await userDataManager.getState() ?? ""
             self.mainAddressTextField = await userDataManager.getAddress1() ?? ""
             self.secondaryAddressTextField = await userDataManager.getAddress2() ?? ""
-            self.selectedCountryCode = await userDataManager.getCountryCode() ?? "IN"
-            
-            loadCountryData()
             
             address = await formattedAddress()
             let labelName = await userDataManager.getLabelName()
@@ -125,44 +122,10 @@ class AddAddressViewModel: ObservableObject {
         }
     }
     
-    func onChangeCountryTextField(updatedText : String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
-        
-        if trimmedText.isEmpty {
-                countryNames = allCountryNames
-            } else {
-                countryNames = allCountryNames.filter {
-                    $0.lowercased().contains(trimmedText.lowercased())
-                }.sorted()
-            }
-    }
-    
-    func onChangeCountryCodeTextField(updatedText : String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
-        
-        if trimmedText.isEmpty {
-            countryCodes = allCountryCodes
-            } else {
-                countryCodes = allCountryCodes.filter {
-                    $0.lowercased().contains(trimmedText.lowercased())
-                }.sorted()
-            }
-    }
-    
-    func onChangeMobileNumber(updatedText: String) {
-        let trimmedText = updatedText.trimmingCharacters(in: .whitespaces)
-        let mobileNumberPredicate = NSPredicate(format: "SELF MATCHES %@", numberRegex)
-        
-        if trimmedText.isEmpty {
-            mobileNumberErrorText = "Required"
-            isMobileNumberValid = false
-        } else if trimmedText.count < mobileNumberMinLength || trimmedText.count > mobileNumberMaxLength || !mobileNumberPredicate.evaluate(with: trimmedText) {
-            mobileNumberErrorText = "Mobile number must be \(mobileNumberMaxLength) digits"
-            isMobileNumberValid = false
-        } else {
-            mobileNumberErrorText = ""
-            isMobileNumberValid = true
-        }
+    func onChangeCountryCodeTextField(newCountryCode: String, newName : String, newPhoneCode : String) {
+        selectedCountryCode = newCountryCode
+        selectedCountryNumberCode = newPhoneCode
+        countryTextField = newName
     }
     
     func onChangeEmailId(updatedText : String) {
@@ -232,7 +195,7 @@ class AddAddressViewModel: ObservableObject {
         }
     }
     
-    func isAllDetailsValid() -> Bool {
+    func isAllDetailsValid() async -> Bool {
         var isAllValid = true
 
         // Full Name
@@ -240,18 +203,6 @@ class AddAddressViewModel: ObservableObject {
         isFullNameValid = !fullNameTrimmed.isEmpty && isFullNameEnabled
         if isFullNameValid == false {
             onChangeFullName(updatedText: fullNameTextField)
-            isAllValid = false
-        }
-
-        // Mobile Number
-        let mobileTrimmed = mobileNumberTextField.trimmingCharacters(in: .whitespaces)
-        let mobilePredicate = NSPredicate(format: "SELF MATCHES %@", numberRegex)
-        isMobileNumberValid = !mobileTrimmed.isEmpty &&
-                              mobileTrimmed.count >= mobileNumberMinLength &&
-                              mobileTrimmed.count <= mobileNumberMaxLength &&
-        mobilePredicate.evaluate(with: mobileTrimmed) && isMobileNumberEnabled
-        if isMobileNumberValid == false {
-            onChangeMobileNumber(updatedText: mobileNumberTextField)
             isAllValid = false
         }
 
@@ -301,70 +252,9 @@ class AddAddressViewModel: ObservableObject {
                 isAllValid = false
             }
         }
-
+        let isServerValid = await toCheckValidityThroughAPI()
+        isAllValid = isAllValid && isServerValid
         return isAllValid
-    }
-
-    
-    func loadCountryData() {
-            guard let url = Bundle.module.url(forResource: "CountryCodes", withExtension: "json") else {
-                print("countryCodes.json not found")
-                return
-            }
-            do {
-                let data = try Data(contentsOf: url)
-                let decoded = try JSONDecoder().decode([String: Country].self, from: data)
-                let sorted = decoded.sorted { $0.key < $1.key }
-
-                DispatchQueue.main.async {
-                    self.countryData = Dictionary(uniqueKeysWithValues: sorted)
-                    self.countryCodes = sorted.map { $0.value.isdCode }
-                    self.countryNames = sorted.map { $0.value.fullName }
-                    self.allCountryCodes = sorted.map { $0.value.isdCode}
-                    self.allCountryNames = sorted.map { $0.value.fullName }
-                    self.updatePhoneLengths()
-                    
-                    if let (_, country) = self.countryData.first(where: { $0.key == self.selectedCountryCode }) {
-                        self.countryTextField = country.fullName
-                        self.selectedCountryNumberCode = country.isdCode
-                    }
-                    if !self.mobileNumberTextField.isEmpty, self.mobileNumberTextField.hasPrefix(self.selectedCountryNumberCode) {
-                        self.mobileNumberTextField = String(self.mobileNumberTextField.dropFirst(self.selectedCountryNumberCode.count))
-                    }
-                }
-            } catch {
-                print("Error loading JSON: \(error)")
-            }
-        }
-
-    func updatePhoneLengths() {
-        if let lengths = countryData[selectedCountryCode]?.phoneNumberLength, !lengths.isEmpty {
-            mobileNumberMinLength = lengths.min() ?? 0
-            mobileNumberMaxLength = lengths.max() ?? 0
-        } else {
-            mobileNumberMinLength = 0
-            mobileNumberMaxLength = 0
-        }
-    }
-    
-    func onSelectCountryPicker(selectedCountry: String) {
-        if let (code, country) = countryData.first(where: { $0.value.fullName == selectedCountry }) {
-            selectedCountryCode = code
-            countryTextField = country.fullName
-            selectedCountryNumberCode = country.isdCode
-        }
-        isCountryTextFieldFocused = false
-        updatePhoneLengths()
-    }
-
-    func onSelectedCountryCodePicker(selectedCode : String) {
-        if let (code, country) = countryData.first(where: { $0.value.isdCode == selectedCode }) {
-            selectedCountryCode = code
-            countryTextField = country.fullName
-            selectedCountryNumberCode = country.isdCode
-        }
-        isCountryCodeTextFieldFocused = false
-        updatePhoneLengths()
     }
     
     func updateUserData() {
@@ -378,6 +268,7 @@ class AddAddressViewModel: ObservableObject {
             await userDataManager.setCountryCode(selectedCountryCode)
             await userDataManager.setCity(cityTextField)
             await userDataManager.setState(stateTextField)
+            await userDataManager.setCountryFullName(countryTextField)
             await userDataManager.setAddress1(mainAddressTextField)
             await userDataManager.setAddress2(secondaryAddressTextField)
             
@@ -411,5 +302,48 @@ class AddAddressViewModel: ObservableObject {
             .filter { !$0.isEmpty }
 
         return filteredComponents.joined(separator: ", ")
+    }
+    
+    func toCheckValidityThroughAPI() async -> Bool {
+        do {
+            let payload: [String: Any] = await [
+                "email": emailIdTextField,
+                "uniqueReference" : userDataManager.getUniqueId(),
+                "phoneNumber" : "\(selectedCountryNumberCode)\(mobileNumberTextField)"
+            ]
+            guard JSONSerialization.isValidJSONObject(payload),
+                  let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+                  let _ = String(data: jsonData, encoding: .utf8) else {
+                return false
+            }
+            let _: EmptyResponse = try await apiService.request(
+                endpoint: "shoppers/validations",
+                includeToken : false,
+                method: .POST,
+                body: jsonData,
+                responseType: EmptyResponse.self
+            )
+            return true
+        } catch let apiError as ApiErrorResponse {
+            for item in apiError.fieldErrorItems {
+                print("Field error:", item.message)
+                let fieldName = item.message.components(separatedBy: ":").first?.trimmingCharacters(in: .whitespaces) ?? ""
+                let errorMessage = item.message.components(separatedBy: ":").dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
+                switch fieldName {
+                case "email":
+                    emailIdErrorText = "Invalid Email"
+                    isEmailIdValid = false
+                case "phoneNumber":
+                    mobileNumberErrorText = !errorMessage.isEmpty ? errorMessage : "Invalid phone number"
+                    isMobileNumberValid = false
+                default:
+                    continue
+                }
+            }
+            return false
+        } catch {
+            print("Unexpected error:", error.localizedDescription)
+            return false
+        }
     }
 }
