@@ -32,7 +32,6 @@ class AddAddressViewModel: ObservableObject {
     @Published var isMainAddressTextFieldFocused = false
     @Published var isSecondaryAddressTextFieldFocused = false
     @Published var isCountryTextFieldFocused = false
-    @Published var isCountryCodeTextFieldFocused = false
     
     @Published var isFullNameValid : Bool? = nil
     @Published var isMobileNumberValid : Bool? = nil

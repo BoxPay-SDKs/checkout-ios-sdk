@@ -19,15 +19,15 @@ public actor ApiService {
     private func constructURL(endpoint: String? = nil, includeToken: Bool) async -> String {
         let baseURL = await CheckoutManager.shared.getBaseURL()
         
-        var fullPath = baseURL
+        var fullPath = "\(baseURL)/v0/checkout/sessions/"
         
         if includeToken {
             let token = await CheckoutManager.shared.getMainToken()
-            fullPath += "/v0/checkout/sessions/\(token)"
+            fullPath += token
         }
         
         if let endpoint = endpoint, !endpoint.isEmpty {
-            fullPath += "/\(endpoint)"
+            fullPath += endpoint
         }
         
         return fullPath

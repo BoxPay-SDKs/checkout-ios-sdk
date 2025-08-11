@@ -9,7 +9,6 @@ struct FloatingLabelWithCodeTextField: View {
     @Binding var text: String            // Main text field (raw input)
     @Binding var isValid: Bool?
     @Binding var isFocused: Bool       // Focus state for main text field
-    @Binding var isCodeFocused: Bool     // Focus state for code field (not really used anymore)
     var onChangeCode: ((_ countryCode : String, _ name : String, _ phoneCode : String) -> Void)  // called when the country code changes
 
     var body: some View {
@@ -17,7 +16,7 @@ struct FloatingLabelWithCodeTextField: View {
             RoundedRectangle(cornerRadius: 8)
                 .strokeBorder(
                     (isValid == false) ? Color(hex: "#E12121") :
-                    (isFocused) ? Color(hex: "#2D2B32") : //isCodeFocused is no longer relevant
+                    (isFocused) ? Color(hex: "#2D2B32") :
                     Color(hex: "#E6E6E6"),
                     lineWidth: 1
                 )
