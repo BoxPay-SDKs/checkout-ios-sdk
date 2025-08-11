@@ -91,6 +91,7 @@ class AddAddressViewModel: ObservableObject {
             do {
                 let phoneNumberUtility = try phoneNumberUtility.parse(await userDataManager.getPhone() ?? "", withRegion: selectedCountryCode)
                 self.mobileNumberTextField = String(phoneNumberUtility.nationalNumber)
+                self.selectedCountryNumberCode = String(phoneNumberUtility.countryCode)
             } catch {
                 self.mobileNumberTextField = ""
             }
@@ -100,8 +101,6 @@ class AddAddressViewModel: ObservableObject {
             self.stateTextField = await userDataManager.getState() ?? ""
             self.mainAddressTextField = await userDataManager.getAddress1() ?? ""
             self.secondaryAddressTextField = await userDataManager.getAddress2() ?? ""
-            self.selectedCountryCode = await userDataManager.getCountryCode() ?? "IN"
-            
             
             address = await formattedAddress()
             let labelName = await userDataManager.getLabelName()
