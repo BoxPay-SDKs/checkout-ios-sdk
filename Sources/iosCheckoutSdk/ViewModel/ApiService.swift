@@ -55,14 +55,16 @@ public actor ApiService {
         let (data, _) = try await URLSession.shared.data(for: request)
 
         do {
+            if let apiError = try? JSONDecoder().decode(ApiErrorResponse.self, from: data),
+               !(apiError.errorCode.isEmpty && apiError.message.isEmpty && apiError.fieldErrorItems.isEmpty) {
+                throw apiError
+            }
+            
             let decoded = try JSONDecoder().decode(responseType, from: data)
             return decoded
         } catch {
-            if let apiError = try? JSONDecoder().decode(ApiErrorResponse.self, from: data) {
-                throw apiError
-            } else {
-                throw error
-            }
+            throw error
         }
+
     }
 }
