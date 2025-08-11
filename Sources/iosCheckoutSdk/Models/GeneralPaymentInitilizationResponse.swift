@@ -5,6 +5,8 @@
 //  Created by Ishika Bansal on 13/05/25.
 //
 
+import UIKit
+
 
 struct GeneralPaymentInitilizationResponse: Codable,Sendable {
     let message : String?
@@ -40,3 +42,9 @@ struct FieldErrorItem: Codable {
 }
 
 struct EmptyResponse: Decodable,Sendable {}
+
+struct DeliveryAddressErrorHandlingData {
+    var errorMessage: String
+    var isTextValid: Bool
+    var defaultMessage: String
+}

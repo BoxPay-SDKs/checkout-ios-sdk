@@ -328,13 +328,39 @@ class AddAddressViewModel: ObservableObject {
             )
             return true
         } catch let apiError as ApiErrorResponse {
+            let fieldMetaMap = setupFieldMetaMap()
             for item in apiError.fieldErrorItems {
                 print("Field error:", item.message)
+                let fieldName = item.message.components(separatedBy: ":").first?.trimmingCharacters(in: .whitespaces) ?? ""
+                let errorMessage = item.message.components(separatedBy: ":").dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
+                if var meta = fieldMetaMap[fieldName] {
+                    if fieldName.lowercased().contains("phoneNumber") {
+                        meta.errorMessage = errorMessage
+                    } else {
+                        meta.errorMessage = meta.defaultMessage
+                    }
+                    meta.isTextValid = false
+                }
             }
             return false
         } catch {
             print("Unexpected error:", error.localizedDescription)
             return false
         }
+    }
+    private func setupFieldMetaMap() -> [String: DeliveryAddressErrorHandlingData] {
+        let fieldMetaMap = [
+            "email": DeliveryAddressErrorHandlingData(
+                errorMessage: emailIdErrorText,
+                isTextValid: isEmailIdValid == true,
+                defaultMessage: "Invalid Email"
+            ),
+            "phoneNumber": DeliveryAddressErrorHandlingData(
+                errorMessage: mobileNumberErrorText,
+                isTextValid: isMobileNumberValid == true,
+                defaultMessage: "Invalid phone number"
+            )
+        ]
+        return fieldMetaMap
     }
 }
