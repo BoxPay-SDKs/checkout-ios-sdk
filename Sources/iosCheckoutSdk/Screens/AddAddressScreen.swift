@@ -14,6 +14,7 @@ struct AddAddressScreen : View {
     @State private var cpv = CountryPickerView()
     @StateObject private var viewModel = AddAddressViewModel()
     @Environment(\.presentationMode) private var presentationMode
+    @State private var countryPickerCoordinator: CountryPickerCoordinator? // Keep a reference
 
     var body: some View {
         ZStack{
@@ -244,13 +245,13 @@ struct AddAddressScreen : View {
     }
     
     private func showPicker() {
-        var coordinator = CountryPickerCoordinator { country in
+        countryPickerCoordinator = CountryPickerCoordinator { country in  //assigning value to state variable
             viewModel.countryTextField = country.name
             viewModel.selectedCountryCode = country.code
             viewModel.isCountryTextFieldFocused = false
         }
         if let rootVC = topViewController() {
-            cpv.delegate = coordinator
+            cpv.delegate = countryPickerCoordinator
             cpv.showCountriesList(from: rootVC)
         }
     }
