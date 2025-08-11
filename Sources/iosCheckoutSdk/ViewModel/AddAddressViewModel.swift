@@ -75,6 +75,7 @@ class AddAddressViewModel: ObservableObject {
     init() {
         Task {
             self.brandColor = await checkoutManager.getBrandColor()
+            self.selectedCountryCode = await userDataManager.getCountryCode() ?? "IN"
             self.isShippingEnabled = await checkoutManager.getIsShippingAddressEnabled()
             self.isShippingEditable = await checkoutManager.getIsShippingAddressEditable()
             self.isFullNameEnabled = await checkoutManager.getIsFullNameEnabled()
@@ -88,7 +89,7 @@ class AddAddressViewModel: ObservableObject {
             let lastName = await userDataManager.getLastName() ?? ""
             self.fullNameTextField = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
             do {
-                let phoneNumberUtility = try phoneNumberUtility.parse(await userDataManager.getPhone() ?? "")
+                let phoneNumberUtility = try phoneNumberUtility.parse(await userDataManager.getPhone() ?? "", withRegion: selectedCountryCode)
                 self.mobileNumberTextField = String(phoneNumberUtility.nationalNumber)
             } catch {
                 self.mobileNumberTextField = ""
