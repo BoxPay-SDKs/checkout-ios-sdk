@@ -7,9 +7,11 @@
 
 import SwiftUICore
 import SwiftUI
+import CountryPickerView
 
 struct AddAddressScreen : View {
     @Binding var isCheckoutFocused : Bool
+    @State private var cpv = CountryPickerView()
     @StateObject private var viewModel = AddAddressViewModel()
     @Environment(\.presentationMode) private var presentationMode
 
@@ -236,21 +238,50 @@ struct AddAddressScreen : View {
                 presentationMode.wrappedValue.dismiss()
             }
         }
+        .onChange(of: viewModel.isCountryTextFieldFocused) { focused in
+            if(focused) {
+                showPicker()
+            }
+        }
+    }
+    
+    private var coordinator: CountryPickerCoordinator {
+        CountryPickerCoordinator { country in
+            viewModel.countryTextField = country.name
+            viewModel.selectedCountryCode = country.code
+        }
+    }
+
+    private func showPicker() {
+        if let rootVC = topViewController() {
+            cpv.delegate = coordinator
+            cpv.showCountriesList(from: rootVC)
+        }
+    }
+    
+    private func topViewController() -> UIViewController? {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+            return nil
+        }
+        guard let root = scene.windows.first(where: { $0.isKeyWindow })?.rootViewController else {
+            return nil
+        }
+        var top = root
+        while let presented = top.presentedViewController {
+            top = presented
+        }
+        return top
     }
 }
 
-struct CountryFieldBoundsPreferenceKey: PreferenceKey {
-    static let defaultValue: CGRect = .zero
-
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        value = nextValue()
+class CountryPickerCoordinator: NSObject, CountryPickerViewDelegate {
+    var onSelect: (Country) -> Void
+    
+    init(onSelect: @escaping (Country) -> Void) {
+        self.onSelect = onSelect
     }
-}
-
-struct CountryCodeFieldBoundsPreferenceKey: PreferenceKey {
-    static let defaultValue: CGRect = .zero
-
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        value = nextValue()
+    
+    func countryPickerView(_ countryPickerView: CountryPickerView, didSelectCountry country: Country) {
+        onSelect(country)
     }
 }

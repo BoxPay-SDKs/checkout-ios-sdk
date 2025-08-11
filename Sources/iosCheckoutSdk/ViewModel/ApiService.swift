@@ -60,8 +60,13 @@ public actor ApiService {
                 throw apiError
             }
             
-            let decoded = try JSONDecoder().decode(responseType, from: data)
-            return decoded
+            if (!data.isEmpty) {
+                let decoded = try JSONDecoder().decode(responseType, from: data)
+                return decoded
+            } else {
+                return EmptyResponse() as! T
+            }
+            
         } catch {
             throw error
         }

@@ -337,7 +337,7 @@ class AddAddressViewModel: ObservableObject {
                     emailIdErrorText = "Invalid Email"
                     isEmailIdValid = false
                 case "phoneNumber":
-                    mobileNumberErrorText = errorMessage.isEmpty ? errorMessage : "Invalid phone number"
+                    mobileNumberErrorText = !errorMessage.isEmpty ? errorMessage : "Invalid phone number"
                     isMobileNumberValid = false
                 default:
                     continue
