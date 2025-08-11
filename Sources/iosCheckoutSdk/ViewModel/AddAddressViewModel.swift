@@ -84,12 +84,12 @@ class AddAddressViewModel: ObservableObject {
             self.isMobileNumberEditable = await checkoutManager.getIsMobileNumberEditable()
             self.isEmailIdEnabled = await checkoutManager.getIsEmailIdEnabled()
             self.isEmailIdEditable = await checkoutManager.getIsEmailIdEditable()
-            
             let firstName = await userDataManager.getFirstName() ?? ""
             let lastName = await userDataManager.getLastName() ?? ""
+            self.countryTextField = await userDataManager.getCountryFullName() ?? "India"
             self.fullNameTextField = "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
             do {
-                let phoneNumberUtility = try phoneNumberUtility.parse(await userDataManager.getPhone() ?? "", withRegion: selectedCountryCode)
+                let phoneNumberUtility = try phoneNumberUtility.parse(await userDataManager.getPhone() ?? "", withRegion: selectedCountryCode, ignoreType: true)
                 self.mobileNumberTextField = String(phoneNumberUtility.nationalNumber)
                 self.selectedCountryNumberCode = String(phoneNumberUtility.countryCode)
             } catch {
@@ -268,6 +268,7 @@ class AddAddressViewModel: ObservableObject {
             await userDataManager.setCountryCode(selectedCountryCode)
             await userDataManager.setCity(cityTextField)
             await userDataManager.setState(stateTextField)
+            await userDataManager.setCountryFullName(countryTextField)
             await userDataManager.setAddress1(mainAddressTextField)
             await userDataManager.setAddress2(secondaryAddressTextField)
             
