@@ -240,6 +240,8 @@ struct AddAddressScreen : View {
         .onChange(of: viewModel.isCountryTextFieldFocused) { focused in
             if(focused) {
                 showPicker()
+            } else {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             }
         }
     }
