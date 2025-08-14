@@ -33,6 +33,7 @@ struct SavedAddressCard: View {
                 HStack(spacing: 6) {
                     Image(frameworkAsset: labelIcon, isTemplate: true)
                         .frame(width: 16, height: 16)
+                        .background(Color(hex: "#2D2B32"))
                     
                     Text(addressDetails.labelName ?? addressDetails.labelType)
                         .font(.custom("Poppins-SemiBold", size: 14))
@@ -54,13 +55,12 @@ struct SavedAddressCard: View {
                 
                 // Address
                 Text("\(addressDetails.address1), \(addressDetails.address2), \(addressDetails.city), \(addressDetails.state), \(addressDetails.postalCode), \(addressDetails.countryCode)")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .font(.custom("Poppins-Regular", size: 12))
+                    .foregroundColor(Color(hex: "#7F7D83"))
                 
                 // Phone Number (only if present)
                 if !addressDetails.phoneNumber.isEmpty {
-                    Text("+\(addressDetails.phoneNumber)")
+                    Text(addressDetails.phoneNumber)
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
