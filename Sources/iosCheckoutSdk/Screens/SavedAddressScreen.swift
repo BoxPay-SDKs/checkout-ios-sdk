@@ -10,6 +10,8 @@ import SwiftUI
 struct SavedAddressScreen : View {
     @StateObject private var viewModel = SavedAddressViewModel()
     @Environment(\.presentationMode) private var presentationMode
+    @State private var navigateToAddressScreen = false
+
 
     var body: some View {
         ZStack {
@@ -33,7 +35,11 @@ struct SavedAddressScreen : View {
                         )
                     }
                     .background(Color.white)
-                    addPromptView(text: "Add new address", brandColor : viewModel.brandColor)
+                    Button(action : {
+                        navigateToAddressScreen = true
+                    }) {
+                        addPromptView(text: "Add new address", brandColor : viewModel.brandColor)
+                    }
                     ScrollView{
                         TitleHeaderView(text: "Saved Addresses")
                             .padding(.bottom, 8)
@@ -71,10 +77,14 @@ struct SavedAddressScreen : View {
                             }
                         }
                     }
-                    .padding(16)
+                    .padding(.horizontal,16)
                 }
                 .background(Color(hex: "#F5F6FB"))
             }
+            
+            NavigationLink(destination: AddAddressScreen(), isActive: $navigateToAddressScreen) {
+                        EmptyView()
+                    }
         }
         .onAppear {
             viewModel.getSavedAddress()

@@ -33,7 +33,7 @@ struct SavedAddressCard: View {
                 HStack(spacing: 6) {
                     Image(frameworkAsset: labelIcon, isTemplate: true)
                         .frame(width: 16, height: 16)
-                        .background(Color(hex: "#2D2B32"))
+                        .foregroundColor(Color(hex: "#2D2B32"))
                     
                     Text(addressDetails.labelName ?? addressDetails.labelType)
                         .font(.custom("Poppins-SemiBold", size: 14))

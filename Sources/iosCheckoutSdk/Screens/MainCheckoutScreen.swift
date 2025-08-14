@@ -186,7 +186,7 @@ struct MainCheckoutScreen : View {
             NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: AddAddressScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToAddressScreen) {
+            NavigationLink(destination: AddAddressScreen(), isActive: $navigateToAddressScreen) {
                         EmptyView()
                     }
             NavigationLink(destination: SavedAddressScreen(), isActive: $navigateToSavedAddressScreen) {
