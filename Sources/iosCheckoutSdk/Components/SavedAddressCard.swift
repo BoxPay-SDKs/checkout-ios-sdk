@@ -34,7 +34,7 @@ struct SavedAddressCard: View {
                     Image(frameworkAsset: labelIcon, isTemplate: true)
                         .frame(width: 16, height: 16)
                     
-                    Text(addressDetails.labelName)
+                    Text(addressDetails.labelName ?? addressDetails.labelType)
                         .font(.custom("Poppins-SemiBold", size: 14))
                         .foregroundColor(Color(hex: "#2D2B32"))
                     
@@ -53,7 +53,7 @@ struct SavedAddressCard: View {
                 }
                 
                 // Address
-                Text("\(addressDetails.address1), \(addressDetails.address2), \(addressDetails.address3), \(addressDetails.city), \(addressDetails.state), \(addressDetails.postalCode), \(addressDetails.countryCode)")
+                Text("\(addressDetails.address1), \(addressDetails.address2), \(addressDetails.city), \(addressDetails.state), \(addressDetails.postalCode), \(addressDetails.countryCode)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .fixedSize(horizontal: false, vertical: true)
