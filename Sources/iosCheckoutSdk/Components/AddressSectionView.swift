@@ -27,9 +27,9 @@ struct AddressSectionView: View {
     @ViewBuilder
     private var contentView: some View {
         if viewModel.isShippingEnabled && viewModel.address.isEmpty {
-            addPromptView(text: "Add new address")
+            addPromptView(text: "Add new address", brandColor : viewModel.brandColor)
         } else if needsPersonalDetails {
-            addPromptView(text: "Add personal details")
+            addPromptView(text: "Add personal details",brandColor : viewModel.brandColor)
         } else {
             infoDisplayView
         }
@@ -46,23 +46,6 @@ struct AddressSectionView: View {
         (viewModel.isEmailIdEnabled && viewModel.emailIdTextField.isEmpty) ||
         (viewModel.isMobileNumberEnabled && viewModel.mobileNumberTextField.isEmpty) ||
         (viewModel.isFullNameEnabled && viewModel.fullNameTextField.isEmpty)
-    }
-
-    private func addPromptView(text: String) -> some View {
-        HStack {
-            Image(frameworkAsset: "add_green", isTemplate: true)
-                .foregroundColor(Color(hex: viewModel.brandColor))
-                .frame(width:16, height:16)
-            Text(text)
-                .font(.custom("Poppins-SemiBold", size: 14))
-                .foregroundColor(Color(hex: viewModel.brandColor))
-            Spacer()
-            Image(frameworkAsset: "chevron")
-                .frame(width: 10, height: 10)
-                .rotationEffect(.degrees(90))
-        }
-        .padding(12)
-        .commonCardStyle()
     }
 
     private var infoDisplayView: some View {

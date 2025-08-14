@@ -23,7 +23,7 @@ public actor ApiService {
         
         if includeToken {
             let token = await CheckoutManager.shared.getMainToken()
-            fullPath += token
+            fullPath += "\(token)/"
         }
         
         if let endpoint = endpoint, !endpoint.isEmpty {
