@@ -12,7 +12,6 @@ struct SavedAddressScreen : View {
     @Environment(\.presentationMode) private var presentationMode
     @State private var navigateToAddressScreen = false
 
-
     var body: some View {
         ZStack {
             if viewModel.isFirstLoad {
@@ -70,8 +69,8 @@ struct SavedAddressScreen : View {
                                     onClickAddress: { selected in
                                         viewModel.setSelectedAddressRef(addressRef: selected)
                                     },
-                                    onClickOtherOptions: { selectedAddress in 
-                                        print("other optrion clicked")
+                                    onClickOtherOptions: { selectedAddress in
+                                        viewModel.setSelectedAddress(address: selectedAddress)
                                     }
                                 )
                             }
@@ -95,6 +94,12 @@ struct SavedAddressScreen : View {
             if(focused) {
                 presentationMode.wrappedValue.dismiss()
             }
+        }
+        .sheet(isPresented: $viewModel.toShowMoreOptions) {
+            EditOrDeleteBottomSheet(address: viewModel.selectedAddress!, onEdit: {selectedAddress in
+            }, onSetDefault: {selectedAddress in
+            }, onDelete: {selectedAddress in
+            })
         }
     }
 }

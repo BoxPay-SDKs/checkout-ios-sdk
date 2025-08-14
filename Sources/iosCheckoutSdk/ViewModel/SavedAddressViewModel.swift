@@ -25,6 +25,8 @@ class SavedAddressViewModel : ObservableObject {
     @Published var brandColor = ""
     @Published var transactionId = ""
     @Published var selectedAddressRef = ""
+    @Published var selectedAddress : SavedAddressResponse? = nil
+    @Published var toShowMoreOptions = false
     
     func getSavedAddress() {
         Task {
@@ -40,7 +42,6 @@ class SavedAddressViewModel : ObservableObject {
                     responseType: [SavedAddressResponse].self
                 )
                 self.savedAddressList = data
-                print(data)
 
                 self.itemsCount = await checkoutManager.getItemsCount()
                 self.currencySymbol = await checkoutManager.getCurrencySymbol()
@@ -56,6 +57,11 @@ class SavedAddressViewModel : ObservableObject {
     func setSelectedAddressRef(addressRef : String) {
         selectedAddressRef = addressRef
         updateUserData()
+    }
+    
+    func setSelectedAddress(address : SavedAddressResponse) {
+        selectedAddress = address
+        toShowMoreOptions = true
     }
     
     func extractNames(from fullName: String) -> (firstName: String, lastName: String) {
