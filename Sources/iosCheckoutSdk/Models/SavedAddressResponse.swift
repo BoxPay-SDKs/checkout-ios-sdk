@@ -7,7 +7,7 @@
 
 struct SavedAddressResponse : Codable , Sendable {
     let address1 : String
-    let address2 : String
+    let address2 : String?
     let address3 : String?
     let city : String
     let state : String

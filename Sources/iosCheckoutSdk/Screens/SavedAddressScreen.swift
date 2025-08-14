@@ -70,7 +70,7 @@ struct SavedAddressScreen : View {
                                     onClickAddress: { selected in
                                         viewModel.setSelectedAddressRef(addressRef: selected)
                                     },
-                                    onClickOtherOptions: {
+                                    onClickOtherOptions: { selectedAddress in 
                                         print("other optrion clicked")
                                     }
                                 )
