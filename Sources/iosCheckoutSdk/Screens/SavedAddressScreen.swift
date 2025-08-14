@@ -91,5 +91,10 @@ struct SavedAddressScreen : View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
+        .onChange(of: viewModel.dataUpdationCompleted) { focused in
+            if(focused) {
+                presentationMode.wrappedValue.dismiss()
+            }
+        }
     }
 }

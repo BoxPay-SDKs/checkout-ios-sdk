@@ -17,7 +17,7 @@ struct SavedAddressResponse : Codable , Sendable {
     let addressRef : String
     let labelType : String
     let labelName : String?
-    let name : String?
+    let name : String
     let email : String
     let phoneNumber : String
 }

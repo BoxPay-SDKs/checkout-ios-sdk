@@ -17,6 +17,8 @@ class SavedAddressViewModel : ObservableObject {
     
     @Published var savedAddressList : [SavedAddressResponse] = []
     
+    @Published var dataUpdationCompleted = false
+    
     @Published var itemsCount = 0
     @Published var currencySymbol = ""
     @Published var totalAmount = ""
@@ -53,5 +55,37 @@ class SavedAddressViewModel : ObservableObject {
     
     func setSelectedAddressRef(addressRef : String) {
         selectedAddressRef = addressRef
+        updateUserData()
+    }
+    
+    func extractNames(from fullName: String) -> (firstName: String, lastName: String) {
+        let components = fullName.split(separator: " ")
+        
+        guard let first = components.first else {
+            return ("", "")
+        }
+
+        let last = components.dropFirst().joined(separator: " ")
+        
+        return (String(first), last)
+    }
+    
+    func updateUserData() {
+        Task {
+            let selectedAddress = savedAddressList.first { $0.addressRef == selectedAddressRef }
+            let (firstName, lastName) = extractNames(from: selectedAddress?.name ?? "")
+            await userDataManager.setFirstName(firstName)
+            await userDataManager.setLastName(lastName)
+            await userDataManager.setPhone(selectedAddress?.phoneNumber)
+            await userDataManager.setEmail(selectedAddress?.email)
+            await userDataManager.setPinCode(selectedAddress?.postalCode)
+            await userDataManager.setCountryCode(selectedAddress?.countryCode)
+            await userDataManager.setCity(selectedAddress?.city)
+            await userDataManager.setState(selectedAddress?.state)
+            await userDataManager.setAddress1(selectedAddress?.address1)
+            await userDataManager.setAddress2(selectedAddress?.address2)
+            
+            self.dataUpdationCompleted = true
+        }
     }
 }

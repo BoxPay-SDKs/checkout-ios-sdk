@@ -57,6 +57,7 @@ struct SavedAddressCard: View {
                 Text("\(addressDetails.address1), \(addressDetails.address2), \(addressDetails.city), \(addressDetails.state), \(addressDetails.postalCode), \(addressDetails.countryCode)")
                     .font(.custom("Poppins-Regular", size: 12))
                     .foregroundColor(Color(hex: "#7F7D83"))
+                    .multilineTextAlignment(.leading)
                 
                 // Phone Number (only if present)
                 if !addressDetails.phoneNumber.isEmpty {
