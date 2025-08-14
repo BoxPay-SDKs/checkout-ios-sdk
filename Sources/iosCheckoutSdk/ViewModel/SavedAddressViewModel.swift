@@ -27,9 +27,14 @@ class SavedAddressViewModel : ObservableObject {
     func getSavedAddress() {
         Task {
             do {
+                let shopperToken = await checkoutManager.getShopperToken()
                 let uniqueRef = await userDataManager.getUniqueId() ?? ""
                 let data = try await apiService.request(
                     endpoint: "shoppers/\(uniqueRef)/addresses",
+                    method: .GET,
+                    headers: [
+                        "Authorization" : "Session \(shopperToken)"
+                    ],
                     responseType: [SavedAddressResponse].self
                 )
                 self.savedAddressList = data
