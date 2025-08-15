@@ -121,7 +121,6 @@ struct EditOrDeleteBottomSheet : View {
                     }
                     .padding(.horizontal)
                     
-                    Divider()
                     
                     // Edit
             Button(action: {

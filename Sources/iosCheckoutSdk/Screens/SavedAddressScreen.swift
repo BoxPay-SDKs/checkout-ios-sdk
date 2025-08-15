@@ -95,7 +95,7 @@ struct SavedAddressScreen : View {
                 presentationMode.wrappedValue.dismiss()
             }
         }
-        .sheet(isPresented: $viewModel.toShowMoreOptions) {
+        .bottomSheet(isPresented: $viewModel.toShowMoreOptions) {
             EditOrDeleteBottomSheet(address: viewModel.selectedAddress!, onEdit: {selectedAddress in
             }, onSetDefault: {selectedAddress in
             }, onDelete: {selectedAddress in
