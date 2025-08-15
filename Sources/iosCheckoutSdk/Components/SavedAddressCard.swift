@@ -151,7 +151,7 @@ struct EditOrDeleteBottomSheet : View {
                 .padding(.top, 10)
                         
                         Divider()
-                    .padding(10)
+                    .padding(.vertical,10)
                         
                         // Set as Default
                 Button(action: {
@@ -165,8 +165,8 @@ struct EditOrDeleteBottomSheet : View {
             }
             .frame(maxWidth: .infinity)
             .background(Color.white)
-            .padding(.horizontal,16)
             .cornerRadius(12)
+            .padding(.horizontal,16)
                     
             Button(action: {
                 onDelete(address)

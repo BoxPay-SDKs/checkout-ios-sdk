@@ -70,7 +70,7 @@ struct SavedAddressScreen : View {
                                         viewModel.setSelectedAddress(address: selectedAddress, proceedToAddress: false)
                                     },
                                     onClickOtherOptions: { selectedAddress in
-                                        viewModel.setSelectedAddress(address: selectedAddress, proceedToAddress: false)
+                                        viewModel.setSelectedAddress(address: selectedAddress, proceedToAddress: true)
                                         viewModel.toShowMoreOptions = true
                                     }
                                 )
@@ -104,6 +104,7 @@ struct SavedAddressScreen : View {
             }, onSetDefault: {selectedAddress in
                 viewModel.setSelectedAddress(address: selectedAddress, proceedToAddress: false)
             }, onDelete: {selectedAddress in
+                viewModel.deleteAddress(address: selectedAddress)
             })
         }
     }

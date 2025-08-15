@@ -86,7 +86,25 @@ class SavedAddressViewModel : ObservableObject {
             await userDataManager.setLabelName(selectedAddress?.labelName)
             await userDataManager.setLabelType(selectedAddress?.labelType)
             
-            self.dataUpdationCompleted = proceedToAddress
+            self.dataUpdationCompleted = !proceedToAddress
+        }
+    }
+    
+    func deleteAddress(address : SavedAddressResponse) {
+        Task {
+            do {
+                let shopperToken = await checkoutManager.getShopperToken()
+                let uniqueRef = await userDataManager.getUniqueId() ?? ""
+                let data = try await apiService.request(
+                    endpoint: "shoppers/\(uniqueRef)/addresses/\(address.addressRef)",
+                    method: .DELETE,
+                    headers: [
+                        "Authorization" : "Session \(shopperToken)"
+                    ],
+                    responseType: SavedAddressResponse.self
+                )
+                getSavedAddress()
+            }
         }
     }
 }
