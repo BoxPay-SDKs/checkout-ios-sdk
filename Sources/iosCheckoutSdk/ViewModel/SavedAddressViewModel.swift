@@ -84,7 +84,7 @@ class SavedAddressViewModel : ObservableObject {
             await userDataManager.setAddress1(selectedAddress?.address1)
             await userDataManager.setAddress2(selectedAddress?.address2)
             
-            self.dataUpdationCompleted = !proceedToAddress
+            self.dataUpdationCompleted = proceedToAddress
         }
     }
 }
