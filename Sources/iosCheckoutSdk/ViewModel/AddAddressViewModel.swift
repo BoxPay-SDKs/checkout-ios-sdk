@@ -59,6 +59,13 @@ class AddAddressViewModel: ObservableObject {
     @Published var isEmailIdEditable = false
     @Published var dataUpdationCompleted = false
     
+    @Published var labelType = ""
+    @Published var labelNameTextField = ""
+    @Published var isLabelNameFocused = false
+    @Published var isLabelNameValid = false
+    
+    @Published var shopperToken : String? = nil
+    
     private let phoneNumberUtility = PhoneNumberUtility()
     private let apiService = ApiService.shared
     
@@ -80,6 +87,7 @@ class AddAddressViewModel: ObservableObject {
             self.isShippingEditable = await checkoutManager.getIsShippingAddressEditable()
             self.isFullNameEnabled = await checkoutManager.getIsFullNameEnabled()
             self.isFullNameEditable = await checkoutManager.getIsFullNameEditable()
+            self.shopperToken = await checkoutManager.getShopperToken()
             self.isMobileNumberEnabled = await checkoutManager.getIsMobileNumberEnabled()
             self.isMobileNumberEditable = await checkoutManager.getIsMobileNumberEditable()
             self.isEmailIdEnabled = await checkoutManager.getIsEmailIdEnabled()
@@ -344,6 +352,47 @@ class AddAddressViewModel: ObservableObject {
         } catch {
             print("Unexpected error:", error.localizedDescription)
             return false
+        }
+    }
+    
+    func saveAddressPost() {
+        Task {
+            do {
+                let uniqueRef = await userDataManager.getUniqueId() ?? ""
+                let (firstName, lastName) = extractNames(from: fullNameTextField)
+                let payload: [String: Any] = [
+                    "firstName": firstName,
+                    "lastName" : lastName,
+                    "phoneNumber" : "\(selectedCountryNumberCode)\(mobileNumberTextField)",
+                    "email" : emailIdTextField,
+                    "address1" : mainAddressTextField,
+                    "address2" : secondaryAddressTextField,
+                    "city" : cityTextField,
+                    "state" : stateTextField,
+                    "countryCode" : selectedCountryCode,
+                    "postalCode" : postalCodeTextField,
+                    "labelType" : labelType,
+                    "labelName" : labelNameTextField
+                ]
+                guard JSONSerialization.isValidJSONObject(payload),
+                      let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+                      let _ = String(data: jsonData, encoding: .utf8) else {
+                    return
+                }
+                let _: EmptyResponse = try await apiService.request(
+                    endpoint: "shoppers/\(uniqueRef)/addresses",
+                    includeToken : true,
+                    method: .POST,
+                    headers: [
+                        "Authorization" : "Session \(shopperToken)"
+                    ],
+                    body: jsonData,
+                    responseType: EmptyResponse.self
+                )
+                self.dataUpdationCompleted = true
+            } catch let apiError as ApiErrorResponse {
+                print("Unexpected error:", apiError.message)
+            }
         }
     }
 }
