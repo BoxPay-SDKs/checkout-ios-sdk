@@ -64,13 +64,14 @@ struct SavedAddressScreen : View {
                             ForEach(Array(viewModel.savedAddressList.enumerated()), id: \.element.addressRef) { index, address in
                                 SavedAddressCard(
                                     addressDetails: address,
-                                    selectedAddressRef: $viewModel.selectedAddressRef,
+                                    selectedAddressRef: $viewModel.selectedAddress,
                                     brandColor: viewModel.brandColor,
-                                    onClickAddress: { selected in
-                                        viewModel.setSelectedAddressRef(addressRef: selected)
+                                    onClickAddress: { selectedAddress in
+                                        viewModel.setSelectedAddress(address: selectedAddress, proceedToAddress: false)
                                     },
                                     onClickOtherOptions: { selectedAddress in
-                                        viewModel.setSelectedAddress(address: selectedAddress)
+                                        viewModel.setSelectedAddress(address: selectedAddress, proceedToAddress: false)
+                                        viewModel.toShowMoreOptions = true
                                     }
                                 )
                             }
@@ -93,11 +94,15 @@ struct SavedAddressScreen : View {
         .onChange(of: viewModel.dataUpdationCompleted) { focused in
             if(focused) {
                 presentationMode.wrappedValue.dismiss()
+            } else {
+                navigateToAddressScreen = true
             }
         }
         .bottomSheet(isPresented: $viewModel.toShowMoreOptions) {
             EditOrDeleteBottomSheet(address: viewModel.selectedAddress!, onEdit: {selectedAddress in
+                viewModel.setSelectedAddress(address: selectedAddress, proceedToAddress: true)
             }, onSetDefault: {selectedAddress in
+                viewModel.setSelectedAddress(address: selectedAddress, proceedToAddress: false)
             }, onDelete: {selectedAddress in
             })
         }

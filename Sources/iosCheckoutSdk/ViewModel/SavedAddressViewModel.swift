@@ -24,7 +24,6 @@ class SavedAddressViewModel : ObservableObject {
     @Published var totalAmount = ""
     @Published var brandColor = ""
     @Published var transactionId = ""
-    @Published var selectedAddressRef = ""
     @Published var selectedAddress : SavedAddressResponse? = nil
     @Published var toShowMoreOptions = false
     
@@ -54,14 +53,9 @@ class SavedAddressViewModel : ObservableObject {
         }
     }
     
-    func setSelectedAddressRef(addressRef : String) {
-        selectedAddressRef = addressRef
-        updateUserData()
-    }
-    
-    func setSelectedAddress(address : SavedAddressResponse) {
+    func setSelectedAddress(address : SavedAddressResponse, proceedToAddress : Bool) {
         selectedAddress = address
-        toShowMoreOptions = true
+        updateUserData(proceedToAddress: proceedToAddress)
     }
     
     func extractNames(from fullName: String) -> (firstName: String, lastName: String) {
@@ -76,9 +70,8 @@ class SavedAddressViewModel : ObservableObject {
         return (String(first), last)
     }
     
-    func updateUserData() {
+    func updateUserData(proceedToAddress : Bool) {
         Task {
-            let selectedAddress = savedAddressList.first { $0.addressRef == selectedAddressRef }
             let (firstName, lastName) = extractNames(from: selectedAddress?.name ?? "")
             await userDataManager.setFirstName(firstName)
             await userDataManager.setLastName(lastName)
@@ -91,7 +84,7 @@ class SavedAddressViewModel : ObservableObject {
             await userDataManager.setAddress1(selectedAddress?.address1)
             await userDataManager.setAddress2(selectedAddress?.address2)
             
-            self.dataUpdationCompleted = true
+            self.dataUpdationCompleted = !proceedToAddress
         }
     }
 }

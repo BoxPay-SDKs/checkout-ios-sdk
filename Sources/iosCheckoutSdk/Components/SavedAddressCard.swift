@@ -8,9 +8,9 @@ import SwiftUI
 
 struct SavedAddressCard: View {
     var addressDetails: SavedAddressResponse
-    @Binding var selectedAddressRef: String
+    @Binding var selectedAddressRef: SavedAddressResponse?
     var brandColor : String
-    var onClickAddress : (_ addressRef : String) -> Void
+    var onClickAddress : (_ addressRef : SavedAddressResponse) -> Void
     var onClickOtherOptions :(_ address : SavedAddressResponse) -> Void
     
     private var labelIcon: String {
@@ -26,7 +26,7 @@ struct SavedAddressCard: View {
     
     var body: some View {
         Button(action: {
-            onClickAddress(addressDetails.addressRef)
+            onClickAddress(addressDetails)
         }) {
             VStack(alignment: .leading, spacing: 8) {
                 // Title Row
@@ -39,7 +39,7 @@ struct SavedAddressCard: View {
                         .font(.custom("Poppins-SemiBold", size: 14))
                         .foregroundColor(Color(hex: "#2D2B32"))
                     
-                    if selectedAddressRef == addressDetails.addressRef {
+                    if selectedAddressRef?.addressRef == addressDetails.addressRef {
                         FilterTag(filterText: "CURRENTLY SELECTED")
                     }
                     
@@ -69,7 +69,7 @@ struct SavedAddressCard: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .stroke(selectedAddressRef == addressDetails.addressRef ? Color(hex: brandColor) : Color.clear, lineWidth: 1)
+                    .stroke(selectedAddressRef?.addressRef == addressDetails.addressRef ? Color(hex: brandColor) : Color.clear, lineWidth: 1)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.white)
