@@ -83,6 +83,8 @@ class SavedAddressViewModel : ObservableObject {
             await userDataManager.setState(selectedAddress?.state)
             await userDataManager.setAddress1(selectedAddress?.address1)
             await userDataManager.setAddress2(selectedAddress?.address2)
+            await userDataManager.setLabelName(selectedAddress?.labelName)
+            await userDataManager.setLabelType(selectedAddress?.labelType)
             
             self.dataUpdationCompleted = proceedToAddress
         }

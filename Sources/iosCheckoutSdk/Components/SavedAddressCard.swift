@@ -52,9 +52,18 @@ struct SavedAddressCard: View {
                             .frame(width: 20, height: 20)
                     }
                 }
+                let addressString = [
+                    addressDetails.address1,
+                    addressDetails.address2?.isEmpty == false ? addressDetails.address2 : nil,
+                    addressDetails.city,
+                    addressDetails.state,
+                    addressDetails.postalCode
+                ]
+                .compactMap { $0 } // remove nil values
+                .joined(separator: ", ")
                 
                 // Address
-                Text("\(addressDetails.address1), \(addressDetails.address2), \(addressDetails.city), \(addressDetails.state), \(addressDetails.postalCode), \(addressDetails.countryCode)")
+                Text(addressString)
                     .font(.custom("Poppins-Regular", size: 12))
                     .foregroundColor(Color(hex: "#7F7D83"))
                     .multilineTextAlignment(.leading)
@@ -88,18 +97,28 @@ struct EditOrDeleteBottomSheet : View {
     var onDelete : (_ address : SavedAddressResponse) -> Void
     
     private var labelIcon: String {
-            switch address.labelType.lowercased() {
-            case "home":
-                return "ic_home"
-            case "office":
-                return "ic_work"
-            default:
-                return "ic_other" // for 'others'
-            }
+        switch address.labelType.lowercased() {
+        case "home":
+            return "ic_home"
+        case "office":
+            return "ic_work"
+        default:
+            return "ic_other" // for 'others'
         }
+    }
+
     
     var body: some View {
         VStack(spacing: 16) {
+            let addressString = [
+                address.address1,
+                address.address2?.isEmpty == false ? address.address2 : nil,
+                address.city,
+                address.state,
+                address.postalCode
+            ]
+            .compactMap { $0 } // remove nil values
+            .joined(separator: ", ")
                     
                     // Address Header
                     HStack(alignment: .top, spacing: 8) {
@@ -112,7 +131,7 @@ struct EditOrDeleteBottomSheet : View {
                                 .font(.custom("Poppins-SemiBold", size: 16))
                                 .foregroundColor(.black)
                             
-                            Text("\(address.address1), \(address.address2), \(address.city), \(address.state), \(address.postalCode)")
+                            Text(addressString)
                                 .font(.custom("Poppins-Regular", size: 12))
                                 .foregroundColor(Color(hex: "#7F7D83"))
                                 .lineLimit(1)
@@ -121,49 +140,48 @@ struct EditOrDeleteBottomSheet : View {
                     }
                     .padding(.horizontal)
                     
+            VStack {
+                Button(action: {
+                    onEdit(address)
+                }) {
+                            Text("Edit")
+                                .font(.custom("Poppins-Regular", size: 16))
+                                .foregroundColor(Color(hex: "#2D2B32"))
+                        }
+                .padding(.top, 10)
+                        
+                        Divider()
+                    .padding(10)
+                        
+                        // Set as Default
+                Button(action: {
+                    onSetDefault(address)
+                }) {
+                            Text("Set as Default")
+                                .font(.custom("Poppins-Regular", size: 16))
+                                .foregroundColor(Color(hex: "#2D2B32"))
+                        }
+                .padding(.bottom, 10)
+            }
+            .frame(maxWidth: .infinity)
+            .background(Color.white)
+            .padding(.horizontal,16)
+            .cornerRadius(12)
                     
-                    // Edit
-            Button(action: {
-                onEdit(address)
-            }) {
-                        Text("Edit")
-                            .font(.custom("Poppins-Regular", size: 14))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.white)
-                    }
-                    
-                    Divider()
-                    
-                    // Set as Default
-            Button(action: {
-                onSetDefault(address)
-            }) {
-                        Text("Set as Default")
-                            .font(.custom("Poppins-Regular", size: 14))
-                            .foregroundColor(.black)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.white)
-                    }
-                    
-                    // Delete
             Button(action: {
                 onDelete(address)
             }) {
                         Text("Delete address")
-                            .font(.custom("Poppins-Regular", size: 14))
-                            .foregroundColor(.red)
+                            .font(.custom("Poppins-Regular", size: 16))
+                            .foregroundColor(Color(hex: "#FF4D4F"))
                             .frame(maxWidth: .infinity)
                             .padding()
                     }
                     
                 }
-                .padding(.top, 20)
+                .padding(.top, 10)
                 .padding(.bottom, 30)
                 .background(Color(hex: "#F8F9FD"))
                 .cornerRadius(20)
     }
 }
-
