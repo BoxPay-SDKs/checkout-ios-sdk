@@ -16,6 +16,7 @@ struct BnplScreen: View {
     @StateObject private var viewModel = BnplViewModel()
     
     @StateObject var fetchStatusViewModel = FetchStatusViewModel()
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
     
     @State private var sessionExpireScreen = false
     @State private var sessionCompleteScreen = false
@@ -74,6 +75,9 @@ struct BnplScreen: View {
                             PaymentOptionView(
                                 items: $viewModel.bnplDataClass,
                                 onProceed: { instrumentValue, _ , _ in
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "BNPLScreen", "")
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "BNPLScreen", "")
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "BNPLScreen", "")
                                     viewModel.initiateBnplPostRequest(instrumentValue: instrumentValue)
                                 },
                                 showLastUsed: false

@@ -25,6 +25,7 @@ struct CardScreen : View {
     var onClickBack : () -> Void = {}
     
     @StateObject private var viewModel = CardViewModel()
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
     
     @State private var isCardNumberFocused = false
     @State private var isCardExpiryFocused = false
@@ -302,8 +303,14 @@ struct CardScreen : View {
                     .padding(.horizontal, 16)
                     Button(action: {
                         if checkCardValid() && durationNumber == nil {
+                            analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "CardsScreen", "")
+                            analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "CardsScreen", "")
+                            analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "CardsScreen", "")
                             viewModel.initiateCardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, isSavedCardCheckBoxClicked: isSavedCardCheckBoxClicked, cardNickName: cardNickNameTextInput)
                         } else if (checkCardValid() && durationNumber != nil) {
+                            analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "EMIScreen", "")
+                            analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "EMIScreen", "")
+                            analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "EMIScreen", "")
                             viewModel.initiateEMICardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, cardType: cardType ?? "", offerCode: offerCode, duration: "\(durationNumber ?? 0)",isSavedCardCheckBoxClicked: isSavedCardCheckBoxClicked, cardNickName: cardNickNameTextInput)
                         }
                     }){

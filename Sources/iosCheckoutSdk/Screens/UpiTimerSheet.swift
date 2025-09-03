@@ -13,6 +13,8 @@ struct UpiTimerSheet: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var _vpa: String
     var brandColor:String
+    
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
 
     @State private var timeRemaining: Int = 300 // 5 minutes = 300 seconds
     @State private var progress: CGFloat = 1.0
@@ -24,6 +26,7 @@ struct UpiTimerSheet: View {
         VStack {
             HStack {
                 Button(action: {
+                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIID Timer Screen Cancel Button Clicked", "")
                     onCancelButton()
                 }) {
                     Image(systemName: "xmark")
@@ -98,6 +101,7 @@ struct UpiTimerSheet: View {
             Divider()
 
             Button(action: {
+                analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIID Timer Screen Cancel Button Clicked", "")
                 onCancelButton()
             }) {
                 Text("Cancel Payment")
@@ -111,6 +115,7 @@ struct UpiTimerSheet: View {
                 timeRemaining -= 1
                 progress = CGFloat(timeRemaining) / 300.0
             } else {
+                analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIID Timer Timed Out", "")
                 presentationMode.wrappedValue.dismiss()
             }
         }

@@ -15,6 +15,7 @@ struct EmiScreen : View {
 
     @StateObject private var viewModel = EmiViewModel()
     @StateObject private var fetchStatusViewModel = FetchStatusViewModel()
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
     
     @State private var sessionExpireScreen = false
     @State private var sessionCompleteScreen = false
@@ -153,6 +154,9 @@ struct EmiScreen : View {
                                                     PaymentOptionRow(isSelected: selectedOtherInstrumentValue == bank.cardLessEmiValue, imageUrl: bank.iconUrl, title: bank.name, currencySymbol: viewModel.currencySymbol, amount: viewModel.totalAmount, instrumentValue: bank.cardLessEmiValue, brandColor: viewModel.brandColor, onClick: { instrumentValue , _  in
                                                         selectedOtherInstrumentValue = instrumentValue
                                                     }, onProceedButton: {
+                                                        analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "EMIScreen - Other Selected", "")
+                                                        analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "EMIScreen - Other Selected", "")
+                                                        analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "EMIScreen - Other Selected", "")
                                                         viewModel.initiatedOtherEmiPostRequest(instrumentValue: selectedOtherInstrumentValue)
                                                     }, fallbackImage: "ic_bnpl_semi_bold")
                                                 } else {

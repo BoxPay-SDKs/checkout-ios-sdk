@@ -148,6 +148,7 @@ class UpiViewModel: ObservableObject {
                 } else {
                     await self.checkoutManager.setStatus("FAILED")
                 }
+                AnalyticsViewModel().callUIAnalytics(AnalyticsEvents.ERROR_GETTING_UPI_URL.rawValue, "UPIScreen", errorDescription)
                 self.actions = await PaymentActionUtils.handle(
                     timeStamp: "",
                     reasonCode: "",

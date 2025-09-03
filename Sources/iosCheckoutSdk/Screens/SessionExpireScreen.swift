@@ -15,6 +15,8 @@ struct SessionExpireScreen: View {
     var brandColor:String
     var onGoBackToHome: () -> Void
     
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
+    
     var body: some View {
         VStack(spacing: 20) {
             // Warning Icon
@@ -43,6 +45,7 @@ struct SessionExpireScreen: View {
             VStack(spacing: 15) {
                 Button(action: {
                     // Retry Payment Action
+                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "Session Expired Screen Proceed Button Clicked", "")
                     onGoBackToHome()
                 }) {
                     Text("Go Back")

@@ -14,6 +14,7 @@ struct NetBankingScreen: View {
     @Binding var isCheckoutFocused : Bool
 
     @StateObject private var viewModel = NetBankingViewModel()
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
     @State private var searchTextField: String = ""
     @State private var isSearchTextFieldFocused: Bool = false
     @State private var selectedInstrumentValue: String = ""
@@ -111,6 +112,9 @@ struct NetBankingScreen: View {
                             PaymentOptionView(
                                 items: $viewModel.netBankingDataClass,
                                 onProceed: { instrumentValue , _ , _ in
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "NetBankingScreen", "")
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "NetBankingScreen", "")
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "NetBankingScreen", "")
                                     viewModel.initiateNetBankingPostRequest(instrumentValue: instrumentValue)
                                 },
                                 showLastUsed: false

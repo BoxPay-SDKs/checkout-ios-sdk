@@ -17,6 +17,8 @@ struct GeneralSuccessScreen: View {
     var currencySymbol:String
     var onDone: (() -> Void)
     var brandColor:String
+    
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
 
     var body: some View {
         VStack(spacing: 20) {
@@ -87,6 +89,7 @@ struct GeneralSuccessScreen: View {
             // Additional Info Text
             // Done Button
             Button(action: {
+                analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "Success Screen Proceed Button Clicked", "")
                 onDone() // Execute the callback when "Done" is pressed
             }) {
                 Text("Done")
