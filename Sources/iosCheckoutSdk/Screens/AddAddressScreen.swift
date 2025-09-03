@@ -10,7 +10,6 @@ import SwiftUI
 import CountryPickerView
 
 struct AddAddressScreen : View {
-    @Binding var isCheckoutFocused : Bool
     @State private var cpv = CountryPickerView()
     @StateObject private var viewModel = AddAddressViewModel()
     @Environment(\.presentationMode) private var presentationMode
@@ -214,7 +213,11 @@ struct AddAddressScreen : View {
                     Task {
                         let result = await viewModel.isAllDetailsValid()
                         if result {
-                            viewModel.updateUserData()
+                            if viewModel.shopperToken?.isEmpty == false {
+                                viewModel.saveAddressPost()
+                            } else {
+                                viewModel.updateUserData()
+                            }
                         }
                     }
                 }){

@@ -35,6 +35,7 @@ struct MainCheckoutScreen : View {
     @State private var navigateToBnplScreen = false
     @State private var navigateToEmiScreen = false
     @State private var navigateToAddressScreen = false
+    @State private var navigateToSavedAddressScreen = false
         
     @State private var paymentUrl : String? = nil
     @State private var paymentHtmlString: String? = nil
@@ -68,7 +69,11 @@ struct MainCheckoutScreen : View {
                             TitleHeaderView(text: viewModel.isShippingEnabled ? "Address" : "Personal Details")
                             AddressSectionView(
                                 onClick:{
-                                    navigateToAddressScreen = true
+                                    if ((viewModel.shopperTokenSaved?.isEmpty) == false) {
+                                        navigateToSavedAddressScreen = true
+                                    } else {
+                                        navigateToAddressScreen = true
+                                    }
                                 }
                             )
                         }
@@ -189,7 +194,10 @@ struct MainCheckoutScreen : View {
             NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: AddAddressScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToAddressScreen) {
+            NavigationLink(destination: AddAddressScreen(), isActive: $navigateToAddressScreen) {
+                        EmptyView()
+                    }
+            NavigationLink(destination: SavedAddressScreen(), isActive: $navigateToSavedAddressScreen) {
                         EmptyView()
                     }
         }

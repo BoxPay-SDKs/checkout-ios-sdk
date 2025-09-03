@@ -35,6 +35,8 @@ class CheckoutViewModel: ObservableObject {
     let userDataManager = UserDataManager.shared
     let apiManager = ApiService.shared
     private var hasFetechedCheckoutDetails = false
+    
+    @Published var shopperTokenSaved : String? = nil
 
     @Published var sessionData: CheckoutSession? {
         didSet {
@@ -62,6 +64,7 @@ class CheckoutViewModel: ObservableObject {
                     await checkoutManager.setMainToken(token)
                 }
                 if let shopperTokenPresent = shopperToken {
+                    shopperTokenSaved = shopperToken
                     await checkoutManager.setShopperToken(shopperTokenPresent)
                 }
 
