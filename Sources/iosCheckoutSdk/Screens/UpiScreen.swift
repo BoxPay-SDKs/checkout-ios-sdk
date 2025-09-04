@@ -201,7 +201,7 @@ struct UpiScreen: View {
                     .padding(.bottom, 16)
                 }
                 
-                if isUPIQRVisible {
+                if isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
                     VStack {
                         Button(action: toggleQRSection) {
                             HStack {
