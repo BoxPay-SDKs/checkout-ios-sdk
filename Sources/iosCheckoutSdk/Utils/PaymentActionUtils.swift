@@ -32,7 +32,7 @@ struct PaymentActionUtils {
                     let base64 = decodeBase64(url: first.url ?? "")
                     return .openIntentUrl(url: base64 ?? "")
                 case "UPIQR" :
-                    let base64 = decodeBase64(url: first.url ?? "")
+                    let base64 = decodeBase64(url: first.content ?? "")
                     return .openQRUrl(url: base64 ?? "")
                 default:
                     if first.type == "html" {
