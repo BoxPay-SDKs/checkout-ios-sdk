@@ -19,6 +19,10 @@ struct UpiScreen: View {
     @Binding var isUpiCollectVisible: Bool
     @Binding var isUPIQRVisible : Bool
     @Binding var qrUrl : String
+    @Binding var timerCancellable: AnyCancellable?
+    
+    @State private var timeRemaining: Int = 300 // 5 minutes = 300 seconds
+    @State private var progress: CGFloat = 1.0
     
     private let detector = UPIAppDetectorIOS()
     @State private var installedApps : [String] = []
@@ -48,6 +52,7 @@ struct UpiScreen: View {
                             intentButton(title: "GPay", imageName: "gpay_upi_logo", isSelected: viewModel.selectedIntent == "GPay") {
                                 viewModel.selectedIntent = "GPay"
                                 viewModel.resetCollect()
+                                timerCancellable?.cancel()
                             }
                         }
 
@@ -55,6 +60,7 @@ struct UpiScreen: View {
                             intentButton(title: "PhonePe", imageName: "phonepe", isSelected: viewModel.selectedIntent == "PhonePe") {
                                 viewModel.selectedIntent = "PhonePe"
                                 viewModel.resetCollect()
+                                timerCancellable?.cancel()
                             }
                         }
 
@@ -62,6 +68,7 @@ struct UpiScreen: View {
                             intentButton(title: "PayTm", imageName: "paytm_upi_logo", isSelected: viewModel.selectedIntent == "PayTm") {
                                 viewModel.selectedIntent = "PayTm"
                                 viewModel.resetCollect()
+                                timerCancellable?.cancel()
                             }
                         }
 
@@ -103,7 +110,10 @@ struct UpiScreen: View {
 
                 if isUpiCollectVisible {
                     VStack {
-                        Button(action: viewModel.toggleCollectSection) {
+                        Button(action: {
+                            viewModel.toggleCollectSection()
+                            timerCancellable?.cancel()
+                        }) {
                             HStack {
                                 Image(frameworkAsset: "add_green", isTemplate: true)
                                     .foregroundColor(Color(hex: viewModel.brandColor))
@@ -243,7 +253,7 @@ struct UpiScreen: View {
                                     Text("QR code will expire in")
                                         .foregroundColor(Color(hex: "#2D2B32"))
                                         .font(.custom("Poppins-Medium", size: 12))
-                                    Text(StringUtils.formattedTime(timeRemaining: $viewModel.timeRemaining))
+                                    Text(StringUtils.formattedTime(timeRemaining: $timeRemaining))
                                         .font(.custom("Poppins-SemiBold", size: 20))
                                         .foregroundColor(Color(hex: viewModel.brandColor))
                                 }
@@ -269,11 +279,11 @@ struct UpiScreen: View {
                 }
                 qrImage = UIImage(data: data)
                 viewModel.toggleQRSection()
-                viewModel.startTimer()
+                startTimer()
             }
         }
         .onDisappear {
-            viewModel.timerCancellable?.cancel()
+            timerCancellable?.cancel()
         }
         .frame(maxWidth: .infinity)
         .background(Color.white)
@@ -307,6 +317,21 @@ struct UpiScreen: View {
                 .font(.custom(isSelected ? "Poppins-SemiBold" : "Poppins-Regular", size: 14))
         }
         .padding(.leading, 16)
+    }
+    func startTimer() {
+        timerCancellable?.cancel() // Cancel any existing timer
+        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                if timeRemaining > 0 {
+                    timeRemaining -= 1
+                    progress = CGFloat(timeRemaining) / 300.0
+                } else {
+                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIQR Timer Timed Out", "")
+                    viewModel.qrIsExpired = true
+                    timerCancellable?.cancel()
+                }
+            }
     }
 
     func handleTextChange(_ text: String) {

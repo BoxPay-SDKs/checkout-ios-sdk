@@ -21,11 +21,7 @@ class UpiViewModel: ObservableObject {
     @Published var isCollectChevronRotated = false
     @Published var isFocused = false
     @Published var selectedIntent: String? = nil
-    @Published var timerCancellable: AnyCancellable?
     @Published var qrIsExpired = false
-    
-    @Published var timeRemaining: Int = 300 // 5 minutes = 300 seconds
-    @Published var progress: CGFloat = 1.0
 
     let checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
@@ -41,21 +37,6 @@ class UpiViewModel: ObservableObject {
             amount = await checkoutManager.getTotalAmount()
             currencySymbol = await checkoutManager.getCurrencySymbol()
         }
-    }
-    func startTimer() {
-        timerCancellable?.cancel() // Cancel any existing timer
-        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
-            .autoconnect()
-            .sink { _ in
-                if self.timeRemaining > 0 {
-                    self.timeRemaining -= 1
-                    self.progress = CGFloat(self.timeRemaining) / 300.0
-                } else {
-                    AnalyticsViewModel().callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIQR Timer Timed Out", "")
-                    self.qrIsExpired = true
-                    self.timerCancellable?.cancel()
-                }
-            }
     }
 
     func initiateUpiPostRequest(_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?, _ selectedIntrumentRefType : String?) {
@@ -310,7 +291,6 @@ class UpiViewModel: ObservableObject {
         upiQRVisible = false
         isQRChevronRotated = false
         isCollectChevronRotated.toggle()
-        timerCancellable?.cancel()
     }
     
     func toggleQRSection() {
@@ -327,6 +307,5 @@ class UpiViewModel: ObservableObject {
         isQRChevronRotated = false
         isCollectChevronRotated = false
         upiCollectError = false
-        timerCancellable?.cancel()
     }
 }
