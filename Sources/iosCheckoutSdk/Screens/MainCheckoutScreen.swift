@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 
 struct MainCheckoutScreen : View {
@@ -40,6 +41,8 @@ struct MainCheckoutScreen : View {
     @State private var paymentUrl : String? = nil
     @State private var paymentHtmlString: String? = nil
     @State private var showWebView = false
+    @State private var timerCancellable: AnyCancellable?
+
     
     @State private var status : String = ""
     @State private var transactionId : String = ""
@@ -104,7 +107,8 @@ struct MainCheckoutScreen : View {
                                 isUpiIntentVisible: $viewModel.upiIntentMethod,
                                 isUpiCollectVisible: $viewModel.upiCollectMethod,
                                 isUPIQRVisible : $viewModel.upiQrMethod,
-                                qrUrl : $upiViewModel.qrUrl
+                                qrUrl : $upiViewModel.qrUrl,
+                                timerCancellable  : $timerCancellable
                             )
                         }
 
@@ -130,6 +134,7 @@ struct MainCheckoutScreen : View {
                                 if(viewModel.cardsMethod && viewModel.savedCards.isEmpty) {
                                     MorePaymentContainer(
                                         handleButtonClick: {
+                                            timerCancellable?.cancel()
                                             navigateToCardScreen = true
                                         },
                                         image: "ic_card",
@@ -141,6 +146,7 @@ struct MainCheckoutScreen : View {
                                 }
                                 if(viewModel.walletsMethod) {
                                     MorePaymentContainer(handleButtonClick: {
+                                        timerCancellable?.cancel()
                                         navigateToWalletScreen = true
                                     }, image: "ic_wallet", title: "Wallet")
                                     if(viewModel.netBankingMethod || viewModel.bnplMethod || viewModel.emiMethod) {
@@ -149,7 +155,7 @@ struct MainCheckoutScreen : View {
                                 }
                                 if(viewModel.netBankingMethod) {
                                     MorePaymentContainer(handleButtonClick: {
-                                        // click to navigate to netbanking screen
+                                        timerCancellable?.cancel()
                                         navigateToNetBankingScreen = true
                                     }, image: "ic_netBanking", title: "Netbanking")
                                     if(viewModel.bnplMethod || viewModel.emiMethod) {
@@ -158,7 +164,7 @@ struct MainCheckoutScreen : View {
                                 }
                                 if(viewModel.emiMethod) {
                                     MorePaymentContainer(handleButtonClick: {
-                                        // click to navigate to emi screen
+                                        timerCancellable?.cancel()
                                         navigateToEmiScreen = true
                                     }, image: "ic_emi", title: "EMI")
                                     if(viewModel.bnplMethod) {
@@ -167,7 +173,7 @@ struct MainCheckoutScreen : View {
                                 }
                                 if(viewModel.bnplMethod) {
                                     MorePaymentContainer(handleButtonClick: {
-                                        // click to navigate to bnpl screen
+                                        timerCancellable?.cancel()
                                         navigateToBnplScreen = true
                                     }, image: "ic_bnpl", title: "Pay Later")
                                 }

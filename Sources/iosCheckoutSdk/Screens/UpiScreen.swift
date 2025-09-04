@@ -19,6 +19,7 @@ struct UpiScreen: View {
     @Binding var isUpiCollectVisible: Bool
     @Binding var isUPIQRVisible : Bool
     @Binding var qrUrl : String
+    @Binding var timerCancellable: AnyCancellable?
     
     @State private var timeRemaining: Int = 300 // 5 minutes = 300 seconds
     @State private var progress: CGFloat = 1.0
@@ -40,8 +41,6 @@ struct UpiScreen: View {
     
     @State private var qrImage: UIImage?
     @State private var qrIsExpired = false
-    
-    @State private var timerCancellable: AnyCancellable?
 
     var body: some View {
         VStack{
