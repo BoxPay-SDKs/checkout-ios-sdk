@@ -27,6 +27,8 @@ struct UpiScreen: View {
     @State private var isFocused = false
     @State private var selectedIntent: String? = nil
     
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
+    
 
     var body: some View {
         VStack{
@@ -34,6 +36,9 @@ struct UpiScreen: View {
                 PaymentOptionView(
                     items: .constant(Array(savedUpiIds.prefix(2))),
                     onProceed: { instrumentValue, displayName, paymentType in
+                        analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "SavedUPI", "")
+                        analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "SavedUPI", "")
+                        analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "SavedUPI", "")
                         handleUpiPayment(nil, displayName, instrumentValue, paymentType)
                     },
                     showLastUsed: false
@@ -68,7 +73,10 @@ struct UpiScreen: View {
 
                     if let intent = selectedIntent, !intent.isEmpty {
                         Button(action: {
-                            handleUpiPayment(selectedIntent,nil, nil, "upi")
+                            analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "UPI Intent \(intent)", "")
+                            analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "UPI Intent \(intent)", "")
+                            analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "UPI Intent \(intent)", "")
+                            handleUpiPayment(intent,nil, nil, "upi")
                         }) {
                             (
                                 Text("Pay ")
@@ -150,6 +158,9 @@ struct UpiScreen: View {
 
                                 Button(action: {
                                     if let _ = upiCollectValid {
+                                        analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "UPI Collect", "")
+                                        analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "UPI Collect", "")
+                                        analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "UPI Collect", "")
                                         handleUpiPayment(nil, upiCollectTextInput, nil, "upi")
                                     } else {
                                         upiCollectError = true

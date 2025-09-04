@@ -16,18 +16,20 @@ public actor ApiService {
     static let shared = ApiService()
     private init() {}
 
-    private func constructURL(endpoint: String? = nil, includeToken: Bool) async -> String {
+    private func constructURL(endpoint: String? = nil, includeToken: Bool, analyticsCall : Bool) async -> String {
         let baseURL = await CheckoutManager.shared.getBaseURL()
         
-        var fullPath = "\(baseURL)/v0/checkout/sessions/"
+        var fullPath = analyticsCall ? "\(baseURL)/v0/ui-analytics" : "\(baseURL)/v0/checkout/sessions/"
         
-        if includeToken {
-            let token = await CheckoutManager.shared.getMainToken()
-            fullPath += "\(token)/"
-        }
-        
-        if let endpoint = endpoint, !endpoint.isEmpty {
-            fullPath += endpoint
+        if !analyticsCall {
+            if includeToken {
+                let token = await CheckoutManager.shared.getMainToken()
+                fullPath += token
+            }
+            
+            if let endpoint = endpoint, !endpoint.isEmpty {
+                fullPath += endpoint
+            }
         }
         
         return fullPath
@@ -37,12 +39,13 @@ public actor ApiService {
     func request<T: Decodable>(
         endpoint: String? = nil,
         includeToken: Bool = true,
+        analyticsCall : Bool = false,
         method: HTTPMethod = .GET,
         headers: [String: String] = ["Content-Type": "application/json"],
         body: Data? = nil,
         responseType: T.Type
     ) async throws -> T {
-        let urlString = await constructURL(endpoint: endpoint, includeToken: includeToken)
+        let urlString = await constructURL(endpoint: endpoint, includeToken: includeToken, analyticsCall: analyticsCall)
         guard let url = URL(string: urlString) else {
             throw NSError(domain: "Invalid URL", code: -1)
         }

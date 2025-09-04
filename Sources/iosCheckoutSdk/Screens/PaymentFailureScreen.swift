@@ -16,6 +16,8 @@ struct PaymentFailureScreen: View {
     var onReturnToPaymentOptions: () -> Void
     var brandColor:String
     
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
+    
     var body: some View {
         VStack(spacing: 20) {
             // Warning Icon
@@ -44,6 +46,7 @@ struct PaymentFailureScreen: View {
             VStack(spacing: 15) {
                 Button(action: {
                     // Retry Payment Action
+                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "Failure Screen Proceed Button Clicked", reason)
                     onRetryPayment()
                 }) {
                     Text("Retry Payment")

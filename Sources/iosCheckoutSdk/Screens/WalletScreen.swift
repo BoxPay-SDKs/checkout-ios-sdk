@@ -15,6 +15,8 @@ struct WalletScreen: View {
     @Binding var isCheckoutFocused : Bool
 
     @StateObject private var viewModel = WalletViewModel()
+    
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
     @State private var searchTextField: String = ""
     @State private var isSearchTextFieldFocused: Bool = false
     @State private var selectedInstrumentValue: String = ""
@@ -90,6 +92,9 @@ struct WalletScreen: View {
                             PaymentOptionView(
                                 items: $viewModel.walletDataClass,
                                 onProceed: { instrumentValue , _ , _ in
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "WalletScreen", "")
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "WalletScreen", "")
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "WalletScreen", "")
                                     viewModel.initiateWalletPostRequest(instrumentValue: instrumentValue)
                                 },
                                 showLastUsed: false

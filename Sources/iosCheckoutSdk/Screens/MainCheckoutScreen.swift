@@ -11,6 +11,8 @@ import SwiftUI
 struct MainCheckoutScreen : View {
     @ObservedObject var viewModel: CheckoutViewModel
     @Environment(\.presentationMode) var presentationMode
+    
+    @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
 
     @Binding var isCheckoutMainScreenFocused : Bool
     
@@ -81,6 +83,9 @@ struct MainCheckoutScreen : View {
                             PaymentOptionView(
                                 items: $viewModel.recommendedIds,
                                 onProceed: { instrumentValue, displayName, paymentType in
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "RecommendedUPI", "")
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "RecommendedUPI", "")
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "RecommendedUPI", "")
                                     upiViewModel.initiateUpiPostRequest(nil , displayName , instrumentValue , paymentType)
                                 },
                                 showLastUsed: true
@@ -105,6 +110,9 @@ struct MainCheckoutScreen : View {
                             SavedCardsComponent(
                                 savedItems : $viewModel.savedCards,
                                 onProceedButton : { instrumentValue in
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "SavedCards", "")
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "SavedCards", "")
+                                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "SavedCards", "")
                                     upiViewModel.initiateUpiPostRequest(nil, nil, instrumentValue, "card")
                                 },
                                 onClickAddNewCard : {
@@ -265,6 +273,9 @@ struct MainCheckoutScreen : View {
             if(focused) {
                 navigateToAddressScreen = true
             }
+        }
+        .onAppear() {
+            analyticsViewModel.callUIAnalytics(AnalyticsEvents.CHECKOUT_LOADED.rawValue, "MainCheckoutScreen", "")
         }
     }
     
