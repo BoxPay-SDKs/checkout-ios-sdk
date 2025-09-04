@@ -334,7 +334,6 @@ class AddAddressViewModel: ObservableObject {
             return true
         } catch let apiError as ApiErrorResponse {
             for item in apiError.fieldErrorItems {
-                print("Field error:", item.message)
                 let fieldName = item.message.components(separatedBy: ":").first?.trimmingCharacters(in: .whitespaces) ?? ""
                 let errorMessage = item.message.components(separatedBy: ":").dropFirst().joined(separator: ":").trimmingCharacters(in: .whitespaces)
                 switch fieldName {
@@ -350,7 +349,6 @@ class AddAddressViewModel: ObservableObject {
             }
             return false
         } catch {
-            print("Unexpected error:", error.localizedDescription)
             return false
         }
     }
@@ -390,8 +388,9 @@ class AddAddressViewModel: ObservableObject {
                     responseType: EmptyResponse.self
                 )
                 self.dataUpdationCompleted = true
-            } catch let apiError as ApiErrorResponse {
-                print("Unexpected error:", apiError.message)
+            } catch {
+                let errorDescription = error.localizedDescription.lowercased()
+                AnalyticsViewModel().callUIAnalytics(AnalyticsEvents.ERROR_GETTING_UPI_URL.rawValue, "AddressScreen Save Address function", errorDescription)
             }
         }
     }

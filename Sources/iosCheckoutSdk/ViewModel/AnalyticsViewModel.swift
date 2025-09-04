@@ -54,8 +54,6 @@ class AnalyticsViewModel: ObservableObject {
                     responseType: AnalyticsResponse.self
                 )
             } catch {
-                let errorDescription = error.localizedDescription.lowercased()
-                print("api error \(errorDescription)")
             }
         }
     }

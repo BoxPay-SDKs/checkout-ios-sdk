@@ -226,7 +226,7 @@ struct UpiScreen: View {
                                         Image(uiImage: qrImage)
                                             .resizable()
                                             .scaledToFill()
-                                            .frame(width: 200, height: 200)
+                                            .frame(width: 300, height: 300)
                                             .opacity(viewModel.qrIsExpired ? 0.2 : 1.0)
                                         
                                         // Blur overlay when expired
