@@ -201,6 +201,7 @@ struct UpiScreen: View {
                     }
                     .background(Color.white)
                     .cornerRadius(12)
+                    .padding(.bottom, 8)
                 }
                 
                 if isUpiCollectVisible && isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
@@ -226,19 +227,39 @@ struct UpiScreen: View {
                             .padding(.bottom , isQRChevronRotated ? 16 : 0)
                         }
                         if upiQRVisible {
-                            HStack {
+                            HStack(alignment: .center, spacing: 0) {
                                 if let qrImage = qrImage {
-                                    Image(uiImage: qrImage)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 300, height: 300)
-                                        .opacity(qrIsExpired ? 0.4 : 1.0)
+                                    ZStack {
+                                        Image(uiImage: qrImage)
+                                            .frame(width: 300, height: 300)
+                                            .opacity(qrIsExpired ? 0.4 : 1.0)
+                                        
+                                        // Blur overlay when expired
+                                        if qrIsExpired {
+                                            VStack(spacing: 16) {
+                                                
+                                                Button(action: {
+                                                    // Add your retry logic here
+                                                    handleQRPayment()
+                                                }) {
+                                                    HStack {
+                                                        Image(systemName: "arrow.clockwise")
+                                                        Text("Retry")
+                                                            .foregroundColor(Color(hex: viewModel.brandColor))
+                                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                                    }
+                                                    .padding(.horizontal, 24)
+                                                    .padding(.vertical, 12)
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                                 VStack(alignment: .leading) {
                                     Text("Scan & Pay with UPI Application")
                                         .foregroundColor(Color(hex: "#2D2B32"))
                                         .font(.custom("Poppins-Medium", size: 12))
-                                    Text("QR code will expire in \(timeRemaining)")
+                                    Text("QR code will expire in")
                                         .foregroundColor(Color(hex: "#2D2B32"))
                                         .font(.custom("Poppins-Medium", size: 12))
                                     Text(StringUtils.formattedTime(timeRemaining: $timeRemaining))
@@ -246,6 +267,8 @@ struct UpiScreen: View {
                                         .foregroundColor(Color(hex: viewModel.brandColor))
                                 }
                             }
+                            .padding(.horizontal, 12)
+                            .padding(.top, 12)
                         }
                     }
                     .background(Color.white)
@@ -267,6 +290,9 @@ struct UpiScreen: View {
                 toggleQRSection()
                 startTimer()
             }
+        }
+        .onDisappear {
+            timerCancellable?.cancel()
         }
         .frame(maxWidth: .infinity)
         .background(Color.white)
