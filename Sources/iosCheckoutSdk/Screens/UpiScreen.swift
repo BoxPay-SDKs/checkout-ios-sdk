@@ -138,6 +138,7 @@ struct UpiScreen: View {
                             Group {
                                 if upiCollectVisible {
                                     Image(frameworkAsset: "add_upi_id_background")
+                                        .resizable()
                                         .scaledToFill()
                                         .frame(maxWidth: .infinity)
                                 } else {
@@ -199,7 +200,6 @@ struct UpiScreen: View {
                     }
                     .background(Color.white)
                     .cornerRadius(12)
-                    .padding(.bottom, 16)
                 }
                 
                 if isUpiCollectVisible && isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
@@ -207,7 +207,7 @@ struct UpiScreen: View {
                 }
                 
                 if isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
-                    VStack {
+                    VStack(alignment: .leading) {
                         Button(action: handleQRPayment) {
                             HStack {
                                 Image(frameworkAsset: "qr_code",isTemplate : true)
@@ -228,6 +228,7 @@ struct UpiScreen: View {
                             Group {
                                 if upiQRVisible {
                                     Image(frameworkAsset: "add_upi_id_background")
+                                        .resizable()
                                         .scaledToFill()
                                         .frame(maxWidth: .infinity)
                                 } else {
@@ -274,6 +275,7 @@ struct UpiScreen: View {
                 progress = CGFloat(timeRemaining) / 300.0
             } else {
                 analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIQR Timer Timed Out", "")
+                qrIsExpired = true
             }
         }
         .onChange(of: qrUrl) { url in
@@ -283,8 +285,10 @@ struct UpiScreen: View {
                 }
                 qrImage = UIImage(data: data)
                 toggleQRSection()
+                timer.autoconnect()
             }
         }
+        .padding(.bottom, 16)
         .frame(maxWidth: .infinity)
         .background(Color.white)
         .cornerRadius(12)
