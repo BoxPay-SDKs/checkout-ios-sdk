@@ -244,7 +244,14 @@ class UpiViewModel: ObservableObject {
                 await self.checkoutManager.setStatus(response.status.status.uppercased())
                 await self.checkoutManager.setTransactionId(response.transactionId)
                 print(response)
-                
+                self.actions = await PaymentActionUtils.handle(
+                    timeStamp: response.transactionTimestampLocale,
+                    reasonCode: response.status.reasonCode,
+                    reason: response.status.reason,
+                    methodType: "UPIQR",
+                    response: PaymentActionResponse(action: response.actions),
+                    shopperVpa: ""
+                )
 
             } catch {
                 let errorDescription = error.localizedDescription.lowercased()
@@ -255,6 +262,14 @@ class UpiViewModel: ObservableObject {
                 }
                 AnalyticsViewModel().callUIAnalytics(AnalyticsEvents.ERROR_GETTING_UPI_URL.rawValue, "UPIScreen", errorDescription)
                 print(errorDescription)
+                self.actions = await PaymentActionUtils.handle(
+                    timeStamp: "",
+                    reasonCode: "",
+                    reason: error.localizedDescription,
+                    methodType: "",
+                    response: PaymentActionResponse(action: nil),
+                    shopperVpa: ""
+                )
             }
             self.isLoading = false
         }

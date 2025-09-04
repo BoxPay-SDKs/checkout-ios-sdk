@@ -277,9 +277,6 @@ struct MainCheckoutScreen : View {
                 navigateToAddressScreen = true
             }
         }
-        .onAppear() {
-            analyticsViewModel.callUIAnalytics(AnalyticsEvents.CHECKOUT_LOADED.rawValue, "MainCheckoutScreen", "")
-        }
     }
     
     private func handlePaymentAction(_ action: PaymentAction) {
@@ -316,6 +313,8 @@ struct MainCheckoutScreen : View {
                 fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
                 shopperVpa = vpa
                 showTimerSheet = true
+            case .openQRUrl(url: let url):
+                upiViewModel.qrUrl = url
             }
         }
     }

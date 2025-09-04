@@ -62,6 +62,7 @@ class CheckoutViewModel: ObservableObject {
                 
                 if !token.isEmpty {
                     await checkoutManager.setMainToken(token)
+                    AnalyticsViewModel().callUIAnalytics(AnalyticsEvents.CHECKOUT_LOADED.rawValue, "MainCheckoutScreen", "")
                 }
                 if let shopperTokenPresent = shopperToken {
                     shopperTokenSaved = shopperToken
