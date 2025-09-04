@@ -201,6 +201,11 @@ struct UpiScreen: View {
                     .padding(.bottom, 16)
                 }
                 
+                if isUpiCollectVisible && isUPIQRVisible {
+                    Divider()
+                        .padding(.top, 12)
+                }
+                
                 if isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
                     VStack {
                         Button(action: toggleQRSection) {
@@ -240,7 +245,7 @@ struct UpiScreen: View {
                                         .frame(width: 300, height: 300)
                                         .opacity(qrIsExpired ? 0.4 : 1.0)
                                 }
-                                VStack {
+                                VStack(alignment: .leading) {
                                     Text("Scan & Pay with UPI Application")
                                         .foregroundColor(Color(hex: "#2D2B32"))
                                         .font(.custom("Poppins-Medium", size: 12))
@@ -254,6 +259,9 @@ struct UpiScreen: View {
                             }
                         }
                     }
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .padding(.bottom, 16)
                 }
             }
         }
@@ -316,7 +324,7 @@ struct UpiScreen: View {
         selectedIntent = nil
         upiCollectVisible = false
         isQRChevronRotated.toggle()
-        upiQRVisible = true
+        upiQRVisible.toggle()
         isCollectChevronRotated = false
     }
 
