@@ -101,7 +101,8 @@ struct MainCheckoutScreen : View {
                                 savedUpiIds: $viewModel.savedUpiIds,
                                 viewModel : upiViewModel,
                                 isUpiIntentVisible: $viewModel.upiIntentMethod,
-                                isUpiCollectVisible: $viewModel.upiCollectMethod
+                                isUpiCollectVisible: $viewModel.upiCollectMethod,
+                                isUPIQRVisible : $viewModel.upiQrMethod
                             )
                         }
 

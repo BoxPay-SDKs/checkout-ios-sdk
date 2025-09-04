@@ -15,20 +15,30 @@ struct UpiScreen: View {
     @ObservedObject var viewModel : UpiViewModel
     @Binding var isUpiIntentVisible: Bool
     @Binding var isUpiCollectVisible: Bool
+    @Binding var isUPIQRVisible : Bool
+    
+    @State private var timeRemaining: Int = 300 // 5 minutes = 300 seconds
+    @State private var progress: CGFloat = 1.0
     
     private let detector = UPIAppDetectorIOS()
     @State private var installedApps : [String] = []
 
     @State private var upiCollectVisible = false
+    @State private var upiQRVisible = false
     @State private var upiCollectError = false
     @State private var upiCollectValid: Bool? = nil
     @State private var upiCollectTextInput = ""
-    @State private var isRotated = false
+    @State private var isQRChevronRotated = false
+    @State private var isCollectChevronRotated = false
     @State private var isFocused = false
     @State private var selectedIntent: String? = nil
     
     @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
     
+    @State private var qrImage: UIImage?
+    @State private var qrIsExpired = false
+    
+    let timer = Timer.publish(every: 1, on: .main, in: .common)
 
     var body: some View {
         VStack{
@@ -116,11 +126,11 @@ struct UpiScreen: View {
                                     .font(.custom("Poppins-SemiBold", size: 14))
                                 Spacer()
                                 Image(frameworkAsset: "chevron")
-                                    .rotationEffect(.degrees(isRotated ? 0 : 180))
+                                    .rotationEffect(.degrees(isCollectChevronRotated ? 0 : 180))
                             }
                             .padding(.horizontal, 12)
                             .padding(.top, 12)
-                            .padding(.bottom , isRotated ? 16 : 0)
+                            .padding(.bottom , isCollectChevronRotated ? 16 : 0)
                         }
                         .background(
                             Group {
@@ -190,12 +200,74 @@ struct UpiScreen: View {
                     .cornerRadius(12)
                     .padding(.bottom, 16)
                 }
-
+                
+                if isUPIQRVisible {
+                    VStack {
+                        Button(action: toggleQRSection) {
+                            HStack {
+                                Image(frameworkAsset: "qr_code",isTemplate : true)
+                                    .frame(width: 16, height: 15)
+                                    .foregroundColor(Color(hex: "black"))
+                                Text("Pay Using QR")
+                                    .foregroundColor(Color(hex: viewModel.brandColor))
+                                    .font(.custom("Poppins-SemiBold", size: 14))
+                                Spacer()
+                                Image(frameworkAsset: "chevron")
+                                    .rotationEffect(.degrees(isQRChevronRotated ? 0 : 180))
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.top, 12)
+                            .padding(.bottom , isQRChevronRotated ? 16 : 0)
+                        }
+                        .background(
+                            Group {
+                                if upiQRVisible {
+                                    Image(frameworkAsset: "add_upi_id_background")
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(maxWidth: .infinity)
+                                } else {
+                                    Color.white
+                                }
+                            }
+                        )
+                        if upiQRVisible {
+                            HStack {
+                                if let qrImage = qrImage {
+                                    Image(uiImage: qrImage)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 300, height: 300)
+                                        .opacity(qrIsExpired ? 0.4 : 1.0)
+                                }
+                                VStack {
+                                    Text("Scan & Pay with UPI Application")
+                                        .foregroundColor(Color(hex: "#2D2B32"))
+                                        .font(.custom("Poppins-Medium", size: 12))
+                                    Text("QR code will expire in \(timeRemaining)")
+                                        .foregroundColor(Color(hex: "#2D2B32"))
+                                        .font(.custom("Poppins-Medium", size: 12))
+                                    Text(StringUtils.formattedTime(timeRemaining: $timeRemaining))
+                                        .font(.custom("Poppins-SemiBold", size: 20))
+                                        .foregroundColor(Color(hex: viewModel.brandColor))
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         .onAppear() {
             let upiService = UPIService(detector: detector)
             installedApps = upiService.getAvailableApps()
+        }
+        .onReceive(timer) { _ in
+            if timeRemaining > 0 {
+                timeRemaining -= 1
+                progress = CGFloat(timeRemaining) / 300.0
+            } else {
+                analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIQR Timer Timed Out", "")
+            }
         }
         .frame(maxWidth: .infinity)
         .background(Color.white)
@@ -235,12 +307,24 @@ struct UpiScreen: View {
     func toggleCollectSection() {
         selectedIntent = nil
         upiCollectVisible.toggle()
-        isRotated.toggle()
+        upiQRVisible = false
+        isQRChevronRotated = false
+        isCollectChevronRotated.toggle()
+    }
+    
+    func toggleQRSection() {
+        selectedIntent = nil
+        upiCollectVisible = false
+        isQRChevronRotated.toggle()
+        upiQRVisible = true
+        isCollectChevronRotated = false
     }
 
     func resetCollect() {
         upiCollectVisible = false
-        isRotated = false
+        upiQRVisible = false
+        isQRChevronRotated = false
+        isCollectChevronRotated = false
         upiCollectError = false
     }
 

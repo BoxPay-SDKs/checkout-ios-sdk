@@ -81,7 +81,7 @@ struct UpiTimerSheet: View {
                     .rotationEffect(.degrees(-90))
                     .animation(.linear(duration: 1), value: progress)
 
-                Text(formattedTime())
+                Text(StringUtils.formattedTime(timeRemaining: $timeRemaining))
                     .font(.custom("Poppins-SemiBold", size: 20))
                     .foregroundColor(Color(hex: brandColor))
             }
@@ -119,11 +119,5 @@ struct UpiTimerSheet: View {
                 presentationMode.wrappedValue.dismiss()
             }
         }
-    }
-
-    private func formattedTime() -> String {
-        let minutes = timeRemaining / 60
-        let seconds = timeRemaining % 60
-        return String(format: "%02d:%02d", minutes, seconds)
     }
 }
