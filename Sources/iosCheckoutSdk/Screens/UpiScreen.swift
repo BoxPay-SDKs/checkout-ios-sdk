@@ -278,17 +278,10 @@ struct UpiScreen: View {
         }
         .onChange(of: qrUrl) { url in
             if !url.isEmpty {
-                let filter = CIFilter(name: "CIQRCodeGenerator")
-                filter?.setValue("H", forKey: "inputCorrectionLevel") // High error correction
-                let context = CIContext()
-                filter?.setValue(url.data(using: .utf8), forKey: "inputMessage")
-                
-                if let outputImage = filter?.outputImage {
-                    let scaledImage = outputImage.transformed(by: CGAffineTransform(scaleX: 10, y: 10))
-                    if let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) {
-                        qrImage = UIImage(cgImage: cgImage)
-                    }
+                guard let data = Data(base64Encoded: url) else {
+                    return
                 }
+                qrImage = UIImage(data: data)
                 toggleQRSection()
             }
         }
