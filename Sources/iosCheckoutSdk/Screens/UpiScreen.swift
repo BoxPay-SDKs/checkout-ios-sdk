@@ -224,7 +224,6 @@ struct UpiScreen: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.top, 12)
-                            .padding(.bottom , isQRChevronRotated ? 16 : 0)
                         }
                         if upiQRVisible {
                             HStack(alignment: .center, spacing: 0) {
@@ -236,22 +235,18 @@ struct UpiScreen: View {
                                         
                                         // Blur overlay when expired
                                         if qrIsExpired {
-                                            VStack(spacing: 16) {
-                                                
-                                                Button(action: {
-                                                    // Add your retry logic here
-                                                    handleQRPayment()
-                                                }) {
-                                                    HStack {
-                                                        Image(systemName: "arrow.clockwise")
-                                                        Text("Retry")
-                                                            .foregroundColor(Color(hex: viewModel.brandColor))
-                                                            .font(.custom("Poppins-SemiBold", size: 20))
-                                                    }
-                                                    .padding(.horizontal, 24)
-                                                    .padding(.vertical, 12)
+                                            Button(action: handleQRPayment) {
+                                                HStack {
+                                                    Image(systemName: "arrow.clockwise")
+                                                    Text("Retry")
+                                                        .foregroundColor(Color(hex: viewModel.brandColor))
+                                                        .font(.custom("Poppins-SemiBold", size: 20))
                                                 }
+                                                .padding(.horizontal, 24)
+                                                .padding(.vertical, 12)
                                             }
+                                            .background(Color.white)
+                                            .cornerRadius(12)
                                         }
                                     }
                                 }
@@ -352,6 +347,7 @@ struct UpiScreen: View {
         upiQRVisible = false
         isQRChevronRotated = false
         isCollectChevronRotated.toggle()
+        timerCancellable?.cancel()
     }
     
     func toggleQRSection() {
@@ -368,6 +364,7 @@ struct UpiScreen: View {
         isQRChevronRotated = false
         isCollectChevronRotated = false
         upiCollectError = false
+        timerCancellable?.cancel()
     }
 
     func handleTextChange(_ text: String) {
