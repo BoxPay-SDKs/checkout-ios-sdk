@@ -98,11 +98,13 @@ struct MainCheckoutScreen : View {
                                 .padding(.bottom, 8)
                             UpiScreen(
                                 handleUpiPayment: upiViewModel.initiateUpiPostRequest,
+                                handleQRPayment : upiViewModel.initiateUpiQRPostRequest,
                                 savedUpiIds: $viewModel.savedUpiIds,
                                 viewModel : upiViewModel,
                                 isUpiIntentVisible: $viewModel.upiIntentMethod,
                                 isUpiCollectVisible: $viewModel.upiCollectMethod,
-                                isUPIQRVisible : $viewModel.upiQrMethod
+                                isUPIQRVisible : $viewModel.upiQrMethod,
+                                qrUrl : $upiViewModel.qrUrl
                             )
                         }
 

@@ -49,11 +49,13 @@ class AnalyticsViewModel: ObservableObject {
             do {
                 let _ = try await apiService.request(
                     analyticsCall: true,
+                    method : .POST,
                     body: jsonData,
                     responseType: [EmptyResponse].self
                 )
             } catch {
-                print("api error")
+                let errorDescription = error.localizedDescription.lowercased()
+                print("api error \(errorDescription)")
             }
         }
     }

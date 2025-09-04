@@ -11,11 +11,13 @@ import CrossPlatformSDK
 
 struct UpiScreen: View {
     let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
+    let handleQRPayment : () -> ()
     @Binding var savedUpiIds : [CommonDataClass]
     @ObservedObject var viewModel : UpiViewModel
     @Binding var isUpiIntentVisible: Bool
     @Binding var isUpiCollectVisible: Bool
     @Binding var isUPIQRVisible : Bool
+    @Binding var qrUrl : String
     
     @State private var timeRemaining: Int = 300 // 5 minutes = 300 seconds
     @State private var progress: CGFloat = 1.0
@@ -110,6 +112,7 @@ struct UpiScreen: View {
                 // 👇 Insert the divider here
                 if (isGooglePayInstalled() || isPhonePeInstalled() || isPaytmInstalled()) && !upiCollectVisible {
                     Divider()
+                        .padding(.top, 12)
                 }
 
 
@@ -135,6 +138,7 @@ struct UpiScreen: View {
                             Group {
                                 if upiCollectVisible {
                                     Image(frameworkAsset: "add_upi_id_background")
+                                        .scaledToFill()
                                         .frame(maxWidth: .infinity)
                                 } else {
                                     Color.white
@@ -224,6 +228,7 @@ struct UpiScreen: View {
                             Group {
                                 if upiQRVisible {
                                     Image(frameworkAsset: "add_upi_id_background")
+                                        .scaledToFill()
                                         .frame(maxWidth: .infinity)
                                 } else {
                                     Color.white
@@ -269,6 +274,21 @@ struct UpiScreen: View {
                 progress = CGFloat(timeRemaining) / 300.0
             } else {
                 analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIQR Timer Timed Out", "")
+            }
+        }
+        .onChange(of: qrUrl) { url in
+            if !url.isEmpty {
+                let filter = CIFilter(name: "CIQRCodeGenerator")
+                filter?.setValue("H", forKey: "inputCorrectionLevel") // High error correction
+                let context = CIContext()
+                filter?.setValue(url.data(using: .utf8), forKey: "inputMessage")
+                
+                if let outputImage = filter?.outputImage {
+                    let scaledImage = outputImage.transformed(by: CGAffineTransform(scaleX: 10, y: 10))
+                    if let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) {
+                        qrImage = UIImage(cgImage: cgImage)
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity)
@@ -320,6 +340,7 @@ struct UpiScreen: View {
         isQRChevronRotated.toggle()
         upiQRVisible.toggle()
         isCollectChevronRotated = false
+        handleQRPayment()
     }
 
     func resetCollect() {
