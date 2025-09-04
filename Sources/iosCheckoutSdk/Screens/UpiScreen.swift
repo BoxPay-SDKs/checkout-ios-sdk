@@ -8,6 +8,7 @@
 
 import SwiftUI
 import CrossPlatformSDK
+import Combine
 
 struct UpiScreen: View {
     let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
@@ -40,7 +41,7 @@ struct UpiScreen: View {
     @State private var qrImage: UIImage?
     @State private var qrIsExpired = false
     
-    let timer = Timer.publish(every: 1, on: .main, in: .common)
+    @State private var timerCancellable: AnyCancellable?
 
     var body: some View {
         VStack{
@@ -207,7 +208,7 @@ struct UpiScreen: View {
                 }
                 
                 if isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 0) {
                         Button(action: handleQRPayment) {
                             HStack {
                                 Image(frameworkAsset: "qr_code",isTemplate : true)
@@ -224,18 +225,6 @@ struct UpiScreen: View {
                             .padding(.top, 12)
                             .padding(.bottom , isQRChevronRotated ? 16 : 0)
                         }
-                        .background(
-                            Group {
-                                if upiQRVisible {
-                                    Image(frameworkAsset: "add_upi_id_background")
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(maxWidth: .infinity)
-                                } else {
-                                    Color.white
-                                }
-                            }
-                        )
                         if upiQRVisible {
                             HStack {
                                 if let qrImage = qrImage {
@@ -269,15 +258,6 @@ struct UpiScreen: View {
             let upiService = UPIService(detector: detector)
             installedApps = upiService.getAvailableApps()
         }
-        .onReceive(timer) { _ in
-            if timeRemaining > 0 {
-                timeRemaining -= 1
-                progress = CGFloat(timeRemaining) / 300.0
-            } else {
-                analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIQR Timer Timed Out", "")
-                qrIsExpired = true
-            }
-        }
         .onChange(of: qrUrl) { url in
             if !url.isEmpty {
                 guard let data = Data(base64Encoded: url) else {
@@ -285,10 +265,9 @@ struct UpiScreen: View {
                 }
                 qrImage = UIImage(data: data)
                 toggleQRSection()
-                timer.autoconnect()
+                startTimer()
             }
         }
-        .padding(.bottom, 16)
         .frame(maxWidth: .infinity)
         .background(Color.white)
         .cornerRadius(12)
@@ -321,6 +300,23 @@ struct UpiScreen: View {
                 .font(.custom(isSelected ? "Poppins-SemiBold" : "Poppins-Regular", size: 14))
         }
         .padding(.leading, 16)
+    }
+    
+    private func startTimer() {
+        timerCancellable?.cancel() // Cancel any existing timer
+        
+        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                if timeRemaining > 0 {
+                    timeRemaining -= 1
+                    progress = CGFloat(timeRemaining) / 300.0
+                } else {
+                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIQR Timer Timed Out", "")
+                    qrIsExpired = true
+                    timerCancellable?.cancel()
+                }
+            }
     }
 
 
