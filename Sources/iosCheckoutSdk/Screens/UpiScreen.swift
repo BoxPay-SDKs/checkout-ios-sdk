@@ -110,7 +110,6 @@ struct UpiScreen: View {
                 // 👇 Insert the divider here
                 if (isGooglePayInstalled() || isPhonePeInstalled() || isPaytmInstalled()) && !upiCollectVisible {
                     Divider()
-                        .padding(.top, 12)
                 }
 
 
@@ -136,8 +135,6 @@ struct UpiScreen: View {
                             Group {
                                 if upiCollectVisible {
                                     Image(frameworkAsset: "add_upi_id_background")
-                                        .resizable()
-                                        .scaledToFill()
                                         .frame(maxWidth: .infinity)
                                 } else {
                                     Color.white
@@ -201,9 +198,8 @@ struct UpiScreen: View {
                     .padding(.bottom, 16)
                 }
                 
-                if isUpiCollectVisible && isUPIQRVisible {
+                if isUpiCollectVisible && isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
                     Divider()
-                        .padding(.top, 12)
                 }
                 
                 if isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
@@ -228,8 +224,6 @@ struct UpiScreen: View {
                             Group {
                                 if upiQRVisible {
                                     Image(frameworkAsset: "add_upi_id_background")
-                                        .resizable()
-                                        .scaledToFill()
                                         .frame(maxWidth: .infinity)
                                 } else {
                                     Color.white
