@@ -51,7 +51,7 @@ class AnalyticsViewModel: ObservableObject {
                     analyticsCall: true,
                     method : .POST,
                     body: jsonData,
-                    responseType: [EmptyResponse].self
+                    responseType: [AnalyticsResponse].self
                 )
             } catch {
                 let errorDescription = error.localizedDescription.lowercased()

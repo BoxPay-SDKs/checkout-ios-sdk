@@ -208,7 +208,7 @@ struct UpiScreen: View {
                 
                 if isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
                     VStack {
-                        Button(action: toggleQRSection) {
+                        Button(action: handleQRPayment) {
                             HStack {
                                 Image(frameworkAsset: "qr_code",isTemplate : true)
                                     .frame(width: 16, height: 15)
@@ -289,6 +289,7 @@ struct UpiScreen: View {
                         qrImage = UIImage(cgImage: cgImage)
                     }
                 }
+                toggleQRSection()
             }
         }
         .frame(maxWidth: .infinity)
@@ -340,7 +341,6 @@ struct UpiScreen: View {
         isQRChevronRotated.toggle()
         upiQRVisible.toggle()
         isCollectChevronRotated = false
-        handleQRPayment()
     }
 
     func resetCollect() {
