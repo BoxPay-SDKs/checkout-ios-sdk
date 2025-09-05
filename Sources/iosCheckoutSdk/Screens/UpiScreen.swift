@@ -27,6 +27,10 @@ struct UpiScreen: View {
     private let detector = UPIAppDetectorIOS()
     @State private var installedApps : [String] = []
     
+    @State private var upiCollectError = false
+    @State private var upiCollectValid: Bool? = nil
+    @State private var upiCollectTextInput = ""
+    
     @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
     
     @State private var qrImage: UIImage?
@@ -146,8 +150,8 @@ struct UpiScreen: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 FloatingLabelTextField(
                                     placeholder: "Enter UPI ID",
-                                    text: $viewModel.upiCollectTextInput,
-                                    isValid: $viewModel.upiCollectValid,
+                                    text: $upiCollectTextInput,
+                                    isValid: $upiCollectValid,
                                     onChange: { newText in
                                         handleTextChange(newText)
                                     },
@@ -157,20 +161,20 @@ struct UpiScreen: View {
                                     isSecureText: .constant(false)
                                 )
 
-                                if viewModel.upiCollectError {
+                                if upiCollectError {
                                     Text("Please enter a valid UPI Id")
                                         .foregroundColor(Color(hex: "#E12121"))
                                         .font(.custom("Poppins-Regular", size: 12))
                                 }
 
                                 Button(action: {
-                                    if let _ = viewModel.upiCollectValid {
+                                    if let _ = upiCollectValid {
                                         analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "UPI Collect", "")
                                         analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "UPI Collect", "")
                                         analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "UPI Collect", "")
-                                        handleUpiPayment(nil, viewModel.upiCollectTextInput, nil, "upi")
+                                        handleUpiPayment(nil, upiCollectTextInput, nil, "upi")
                                     } else {
-                                        viewModel.upiCollectError = true
+                                        upiCollectError = true
                                     }
                                 }){
                                     (
@@ -184,7 +188,7 @@ struct UpiScreen: View {
                                         .foregroundColor(.white)
                                         .padding()
                                         .frame(maxWidth: .infinity)
-                                        .background(viewModel.upiCollectValid == true ? Color(hex: viewModel.brandColor) : Color.gray.opacity(0.5))
+                                        .background(upiCollectValid == true ? Color(hex: viewModel.brandColor) : Color.gray.opacity(0.5))
                                         .cornerRadius(8)
                                         
                                 }
@@ -342,13 +346,13 @@ struct UpiScreen: View {
 
         if let regex = regex, regex.firstMatch(in: trimmedText, options: [], range: NSRange(location: 0, length: trimmedText.utf16.count)) != nil {
             // ✅ Valid UPI
-            viewModel.upiCollectValid = true
-            viewModel.upiCollectError = false
+            upiCollectValid = true
+            upiCollectError = false
         } else {
             // ❌ Invalid UPI
             if trimmedText.contains("@"), let suffix = trimmedText.split(separator: "@").last, suffix.count >= 2 {
-                viewModel.upiCollectError = true
-                viewModel.upiCollectValid = false
+                upiCollectError = true
+                upiCollectValid = false
             }
         }
     }
