@@ -19,6 +19,8 @@ struct GeneralSuccessScreen: View {
     var brandColor:String
     
     @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
+    
+    var checkoutDetails = CheckoutManager.shared
 
     var body: some View {
         VStack(spacing: 20) {
@@ -106,6 +108,14 @@ struct GeneralSuccessScreen: View {
         .padding(EdgeInsets(top: 30, leading: 16, bottom: 16, trailing: 16))
         .background(Color.white)
         .cornerRadius(12)
+        .onAppear() {
+            Task {
+                if(await checkoutDetails.getIsSuccessScreenVisible()) {
+                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "Success Screen Proceeded Automatically", "")
+                    onDone()
+                }
+            }
+        }
     }
 }
 
