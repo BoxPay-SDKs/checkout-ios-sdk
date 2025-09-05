@@ -14,7 +14,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "BoxPayiOSCheckoutSDK",
-            targets: ["iosCheckoutSdk"]),
+            targets: ["BoxPayiOSCheckoutSDK"]),
     ],
     dependencies: [
         .package(url: "https://github.com/airbnb/lottie-ios.git", from: "4.5.1"),
@@ -31,7 +31,7 @@ let package = Package(
             path: "Framework/CrossPlatformSDK.xcframework"
         ),
         .target(
-            name: "iosCheckoutSdk",
+            name: "BoxPayiOSCheckoutSDK",
             dependencies: [
                 "CrossPlatformSDK",
                 .product(name: "Lottie", package: "lottie-ios"),
