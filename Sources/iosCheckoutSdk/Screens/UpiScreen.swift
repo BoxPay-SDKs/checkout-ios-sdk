@@ -8,27 +8,28 @@
 
 import SwiftUI
 import CrossPlatformSDK
+import Combine
 
 struct UpiScreen: View {
     let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
+    let handleQRPayment : () -> ()
     @Binding var savedUpiIds : [CommonDataClass]
     @ObservedObject var viewModel : UpiViewModel
     @Binding var isUpiIntentVisible: Bool
     @Binding var isUpiCollectVisible: Bool
+    @Binding var isUPIQRVisible : Bool
+    @Binding var qrUrl : String
+    @Binding var timerCancellable: AnyCancellable?
+    
+    @State private var timeRemaining: Int = 300 // 5 minutes = 300 seconds
+    @State private var progress: CGFloat = 1.0
     
     private let detector = UPIAppDetectorIOS()
     @State private var installedApps : [String] = []
-
-    @State private var upiCollectVisible = false
-    @State private var upiCollectError = false
-    @State private var upiCollectValid: Bool? = nil
-    @State private var upiCollectTextInput = ""
-    @State private var isRotated = false
-    @State private var isFocused = false
-    @State private var selectedIntent: String? = nil
     
     @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
     
+    @State private var qrImage: UIImage?
 
     var body: some View {
         VStack{
@@ -48,30 +49,33 @@ struct UpiScreen: View {
                 if isUpiIntentVisible {
                     HStack {
                         if isGooglePayInstalled() {
-                            intentButton(title: "GPay", imageName: "gpay_upi_logo", isSelected: selectedIntent == "GPay") {
-                                selectedIntent = "GPay"
-                                resetCollect()
+                            intentButton(title: "GPay", imageName: "gpay_upi_logo", isSelected: viewModel.selectedIntent == "GPay") {
+                                viewModel.selectedIntent = "GPay"
+                                viewModel.resetCollect()
+                                timerCancellable?.cancel()
                             }
                         }
 
                         if isPhonePeInstalled() {
-                            intentButton(title: "PhonePe", imageName: "phonepe", isSelected: selectedIntent == "PhonePe") {
-                                selectedIntent = "PhonePe"
-                                resetCollect()
+                            intentButton(title: "PhonePe", imageName: "phonepe", isSelected: viewModel.selectedIntent == "PhonePe") {
+                                viewModel.selectedIntent = "PhonePe"
+                                viewModel.resetCollect()
+                                timerCancellable?.cancel()
                             }
                         }
 
                         if isPaytmInstalled() {
-                            intentButton(title: "PayTm", imageName: "paytm_upi_logo", isSelected: selectedIntent == "PayTm") {
-                                selectedIntent = "PayTm"
-                                resetCollect()
+                            intentButton(title: "PayTm", imageName: "paytm_upi_logo", isSelected: viewModel.selectedIntent == "PayTm") {
+                                viewModel.selectedIntent = "PayTm"
+                                viewModel.resetCollect()
+                                timerCancellable?.cancel()
                             }
                         }
 
                     }
                     .padding(.top, isGooglePayInstalled() || isPaytmInstalled() || isPhonePeInstalled() ? 16 : 0)
 
-                    if let intent = selectedIntent, !intent.isEmpty {
+                    if let intent = viewModel.selectedIntent, !intent.isEmpty {
                         Button(action: {
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "UPI Intent \(intent)", "")
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "UPI Intent \(intent)", "")
@@ -98,7 +102,7 @@ struct UpiScreen: View {
                 }
 
                 // 👇 Insert the divider here
-                if (isGooglePayInstalled() || isPhonePeInstalled() || isPaytmInstalled()) && !upiCollectVisible {
+                if (isGooglePayInstalled() || isPhonePeInstalled() || isPaytmInstalled()) && !viewModel.upiCollectVisible {
                     Divider()
                         .padding(.top, 12)
                 }
@@ -106,7 +110,10 @@ struct UpiScreen: View {
 
                 if isUpiCollectVisible {
                     VStack {
-                        Button(action: toggleCollectSection) {
+                        Button(action: {
+                            viewModel.toggleCollectSection()
+                            timerCancellable?.cancel()
+                        }) {
                             HStack {
                                 Image(frameworkAsset: "add_green", isTemplate: true)
                                     .foregroundColor(Color(hex: viewModel.brandColor))
@@ -116,15 +123,15 @@ struct UpiScreen: View {
                                     .font(.custom("Poppins-SemiBold", size: 14))
                                 Spacer()
                                 Image(frameworkAsset: "chevron")
-                                    .rotationEffect(.degrees(isRotated ? 0 : 180))
+                                    .rotationEffect(.degrees(viewModel.isCollectChevronRotated ? 0 : 180))
                             }
                             .padding(.horizontal, 12)
                             .padding(.top, 12)
-                            .padding(.bottom , isRotated ? 16 : 0)
+                            .padding(.bottom , viewModel.isCollectChevronRotated ? 16 : 0)
                         }
                         .background(
                             Group {
-                                if upiCollectVisible {
+                                if viewModel.upiCollectVisible {
                                     Image(frameworkAsset: "add_upi_id_background")
                                         .resizable()
                                         .scaledToFill()
@@ -135,35 +142,35 @@ struct UpiScreen: View {
                             }
                         )
 
-                        if upiCollectVisible {
+                        if viewModel.upiCollectVisible {
                             VStack(alignment: .leading, spacing: 4) {
                                 FloatingLabelTextField(
                                     placeholder: "Enter UPI ID",
-                                    text: $upiCollectTextInput,
-                                    isValid: $upiCollectValid,
+                                    text: $viewModel.upiCollectTextInput,
+                                    isValid: $viewModel.upiCollectValid,
                                     onChange: { newText in
                                         handleTextChange(newText)
                                     },
-                                    isFocused: $isFocused,
+                                    isFocused: $viewModel.isFocused,
                                     trailingIcon: .constant(""),
                                     leadingIcon: .constant(""),
                                     isSecureText: .constant(false)
                                 )
 
-                                if upiCollectError {
+                                if viewModel.upiCollectError {
                                     Text("Please enter a valid UPI Id")
                                         .foregroundColor(Color(hex: "#E12121"))
                                         .font(.custom("Poppins-Regular", size: 12))
                                 }
 
                                 Button(action: {
-                                    if let _ = upiCollectValid {
+                                    if let _ = viewModel.upiCollectValid {
                                         analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "UPI Collect", "")
                                         analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "UPI Collect", "")
                                         analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "UPI Collect", "")
-                                        handleUpiPayment(nil, upiCollectTextInput, nil, "upi")
+                                        handleUpiPayment(nil, viewModel.upiCollectTextInput, nil, "upi")
                                     } else {
-                                        upiCollectError = true
+                                        viewModel.upiCollectError = true
                                     }
                                 }){
                                     (
@@ -177,7 +184,7 @@ struct UpiScreen: View {
                                         .foregroundColor(.white)
                                         .padding()
                                         .frame(maxWidth: .infinity)
-                                        .background(upiCollectValid == true ? Color(hex: viewModel.brandColor) : Color.gray.opacity(0.5))
+                                        .background(viewModel.upiCollectValid == true ? Color(hex: viewModel.brandColor) : Color.gray.opacity(0.5))
                                         .cornerRadius(8)
                                         
                                 }
@@ -188,14 +195,95 @@ struct UpiScreen: View {
                     }
                     .background(Color.white)
                     .cornerRadius(12)
+                    .padding(.bottom, 8)
+                }
+                
+                if isUpiCollectVisible && isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
+                    Divider()
+                }
+                
+                if isUPIQRVisible && !UIDevice.current.name.contains("iPhone") {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Button(action: handleQRPayment) {
+                            HStack {
+                                Image(frameworkAsset: "qr_code",isTemplate : true)
+                                    .frame(width: 16, height: 15)
+                                    .foregroundColor(Color(hex: "black"))
+                                Text("Pay Using QR")
+                                    .foregroundColor(Color(hex: viewModel.brandColor))
+                                    .font(.custom("Poppins-SemiBold", size: 14))
+                                Spacer()
+                                Image(frameworkAsset: "chevron")
+                                    .rotationEffect(.degrees(viewModel.isQRChevronRotated ? 0 : 180))
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.top, 12)
+                        }
+                        if viewModel.upiQRVisible {
+                            HStack(alignment: .center, spacing: 0) {
+                                if let qrImage = qrImage {
+                                    ZStack {
+                                        Image(uiImage: qrImage)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 300, height: 300)
+                                            .opacity(viewModel.qrIsExpired ? 0.2 : 1.0)
+                                        
+                                        // Blur overlay when expired
+                                        if viewModel.qrIsExpired {
+                                            Button(action: handleQRPayment) {
+                                                HStack {
+                                                    Image(systemName: "arrow.clockwise")
+                                                    Text("Retry")
+                                                        .foregroundColor(Color(hex: viewModel.brandColor))
+                                                        .font(.custom("Poppins-SemiBold", size: 20))
+                                                }
+                                                .padding(.horizontal, 24)
+                                                .padding(.vertical, 12)
+                                            }
+                                            .background(Color.white)
+                                            .cornerRadius(12)
+                                        }
+                                    }
+                                }
+                                VStack(alignment: .leading) {
+                                    Text("Scan & Pay with UPI Application")
+                                        .foregroundColor(Color(hex: "#2D2B32"))
+                                        .font(.custom("Poppins-Medium", size: 12))
+                                    Text("QR code will expire in")
+                                        .foregroundColor(Color(hex: "#2D2B32"))
+                                        .font(.custom("Poppins-Medium", size: 12))
+                                    Text(StringUtils.formattedTime(timeRemaining: $timeRemaining))
+                                        .font(.custom("Poppins-SemiBold", size: 20))
+                                        .foregroundColor(Color(hex: viewModel.brandColor))
+                                }
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.top, 12)
+                        }
+                    }
+                    .background(Color.white)
+                    .cornerRadius(12)
                     .padding(.bottom, 16)
                 }
-
             }
         }
         .onAppear() {
             let upiService = UPIService(detector: detector)
             installedApps = upiService.getAvailableApps()
+        }
+        .onChange(of: qrUrl) { url in
+            if !url.isEmpty {
+                guard let data = Data(base64Encoded: url) else {
+                    return
+                }
+                qrImage = UIImage(data: data)
+                viewModel.toggleQRSection()
+                startTimer()
+            }
+        }
+        .onDisappear {
+            timerCancellable?.cancel()
         }
         .frame(maxWidth: .infinity)
         .background(Color.white)
@@ -230,18 +318,20 @@ struct UpiScreen: View {
         }
         .padding(.leading, 16)
     }
-
-
-    func toggleCollectSection() {
-        selectedIntent = nil
-        upiCollectVisible.toggle()
-        isRotated.toggle()
-    }
-
-    func resetCollect() {
-        upiCollectVisible = false
-        isRotated = false
-        upiCollectError = false
+    func startTimer() {
+        timerCancellable?.cancel() // Cancel any existing timer
+        timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                if timeRemaining > 0 {
+                    timeRemaining -= 1
+                    progress = CGFloat(timeRemaining) / 300.0
+                } else {
+                    analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "UPIQR Timer Timed Out", "")
+                    viewModel.qrIsExpired = true
+                    timerCancellable?.cancel()
+                }
+            }
     }
 
     func handleTextChange(_ text: String) {
@@ -252,13 +342,13 @@ struct UpiScreen: View {
 
         if let regex = regex, regex.firstMatch(in: trimmedText, options: [], range: NSRange(location: 0, length: trimmedText.utf16.count)) != nil {
             // ✅ Valid UPI
-            upiCollectValid = true
-            upiCollectError = false
+            viewModel.upiCollectValid = true
+            viewModel.upiCollectError = false
         } else {
             // ❌ Invalid UPI
             if trimmedText.contains("@"), let suffix = trimmedText.split(separator: "@").last, suffix.count >= 2 {
-                upiCollectError = true
-                upiCollectValid = false
+                viewModel.upiCollectError = true
+                viewModel.upiCollectValid = false
             }
         }
     }

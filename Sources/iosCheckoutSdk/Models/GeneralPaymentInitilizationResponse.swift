@@ -28,6 +28,7 @@ struct GeneralActionResponse: Codable,Sendable {
     let url: String?
     let type: String?
     let htmlPageString : String?
+    let content : String?
 }
 
 struct ApiErrorResponse: Codable, Error {

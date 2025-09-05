@@ -31,6 +31,8 @@ struct PaymentActionUtils {
                 case "UpiIntent":
                     let base64 = decodeBase64(url: first.url ?? "")
                     return .openIntentUrl(url: base64 ?? "")
+                case "UPIQR" :
+                    return .openQRUrl(url: first.content ?? "")
                 default:
                     if first.type == "html" {
                         return .openWebViewHTML(htmlString: first.htmlPageString ?? "")

@@ -181,6 +181,9 @@ struct WalletScreen: View {
             case .openUpiTimer(_) :
                 // no operation
                 break
+            case .openQRUrl(url: let url):
+                // no operation
+                break
             }
         }
     }

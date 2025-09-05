@@ -19,3 +19,8 @@ public enum AnalyticsEvents: String {
     case SDK_CRASH = "SDK_CRASH"
     case PAYMENT_RESULT_SCREEN_DISPLAYED = "PAYMENT_RESULT_SCREEN_DISPLAYED"
 }
+
+
+struct AnalyticsResponse : Decodable, Sendable {
+    let id : String
+}

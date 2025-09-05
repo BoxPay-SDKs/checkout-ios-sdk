@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUICore
 
 struct StringUtils {
     static func generateRandomAlphanumericString(length: Int) -> String {
@@ -44,6 +45,12 @@ struct StringUtils {
             "X-Client-Connector-Name":"IOS SDK",
             "X-Client-Connector-Version":SDKVersion.version
         ]
+    }
+    
+    static func formattedTime(timeRemaining : Binding<Int>) -> String {
+        let minutes = timeRemaining.wrappedValue / 60
+        let seconds = timeRemaining.wrappedValue % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 }
 

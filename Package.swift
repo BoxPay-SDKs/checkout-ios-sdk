@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "boxpay-ios-checkout-sdk",
+    name: "boxpay_ios_checkout_sdk",
     defaultLocalization: "en",
     platforms: [
         .macOS(.v10_15),

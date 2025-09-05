@@ -11,6 +11,7 @@ enum PaymentAction {
     case openWebViewUrl(url: String)
     case openWebViewHTML(htmlString:String)
     case openIntentUrl(url: String)
+    case openQRUrl(url:String)
     case openUpiTimer(shopperVpa:String)
     case showFailed(message: String)
     case showSuccess(timestamp: String)

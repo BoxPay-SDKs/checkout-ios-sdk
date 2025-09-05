@@ -10,6 +10,18 @@ class UpiViewModel: ObservableObject {
     @Published var transactionId: String = ""
     @Published var errorReason: String = ""
     @Published var actions: PaymentAction?
+    @Published var qrUrl : String = ""
+    
+    @Published var upiCollectVisible = false
+    @Published var upiQRVisible = false
+    @Published var upiCollectError = false
+    @Published var upiCollectValid: Bool? = nil
+    @Published var upiCollectTextInput = ""
+    @Published var isQRChevronRotated = false
+    @Published var isCollectChevronRotated = false
+    @Published var isFocused = false
+    @Published var selectedIntent: String? = nil
+    @Published var qrIsExpired = false
 
     let checkoutManager = CheckoutManager.shared
     let userDataManager = UserDataManager.shared
@@ -160,5 +172,138 @@ class UpiViewModel: ObservableObject {
             }
             self.isLoading = false
         }
+    }
+    
+    func initiateUpiQRPostRequest() {
+        self.isLoading = true
+        Task {
+            var headers = StringUtils.getRequestHeaders()
+
+            let shopperToken = await checkoutManager.getShopperToken()
+            if !shopperToken.isEmpty {
+                headers["Authorization"] = "Session \(shopperToken)"
+            }
+
+            let deliveryAddress: [String: Any?] = await[
+                "address1": userDataManager.getAddress1(),
+                "address2": userDataManager.getAddress2(),
+                "city": userDataManager.getCity(),
+                "state": userDataManager.getState(),
+                "countryCode": userDataManager.getCountryCode(),
+                "postalCode": userDataManager.getPinCode(),
+                "labelType": userDataManager.getLabelType(),
+                "labelName": userDataManager.getLabelName()
+            ]
+
+            let isDeliveryEmpty = deliveryAddress.values.contains { value in
+                if value == nil {
+                    return true
+                }
+                if let str = value as? String {
+                    return str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                }
+                return false // Non-string & non-nil values considered valid
+            }
+            let payload: [String: Any] = await[
+                "browserData": [
+                    "screenHeight": Int(UIScreen.main.bounds.height),
+                    "screenWidth": Int(UIScreen.main.bounds.width),
+                    "acceptHeader": "application/json",
+                    "userAgentHeader": "iOS App",
+                    "browserLanguage": Locale.current.identifier,
+                    "ipAddress": "null",
+                    "colorDepth": 24,
+                    "javaEnabled": true,
+                    "timeZoneOffSet": TimeZone.current.secondsFromGMT() / 60,
+                    "packageId": Bundle.main.bundleIdentifier ?? "com.boxpay.checkout.sdk"
+                ],
+                "instrumentDetails": [
+                    "type" : "upi/qr"
+                ],
+                "shopper": [
+                    "email": userDataManager.getEmail(),
+                    "firstName": userDataManager.getFirstName(),
+                    "lastName": userDataManager.getLastName(),
+                    "phoneNumber": userDataManager.getPhone(),
+                    "uniqueReference": userDataManager.getUniqueId(),
+                    "dateOfBirth": userDataManager.getDOB(),
+                    "panNumber": userDataManager.getPan(),
+                    "deliveryAddress": isDeliveryEmpty ? nil : deliveryAddress
+                ],
+                "deviceDetails": [
+                    "browser": "iOS",
+                    "platformVersion": UIDevice.current.systemVersion,
+                    "deviceType": UIDevice.current.model,
+                    "deviceName": UIDevice.current.name,
+                    "deviceBrandName": "Apple"
+                ]
+            ]
+
+            guard JSONSerialization.isValidJSONObject(payload),
+                  let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
+                await MainActor.run { self.isLoading = false }
+                return
+            }
+
+            do {
+                let response: GeneralPaymentInitilizationResponse = try await apiManager.request(
+                    method: .POST,
+                    headers: headers,
+                    body: jsonData,
+                    responseType: GeneralPaymentInitilizationResponse.self
+                )
+                await self.checkoutManager.setStatus(response.status.status.uppercased())
+                await self.checkoutManager.setTransactionId(response.transactionId)
+                self.actions = await PaymentActionUtils.handle(
+                    timeStamp: response.transactionTimestampLocale,
+                    reasonCode: response.status.reasonCode,
+                    reason: response.status.reason,
+                    methodType: "UPIQR",
+                    response: PaymentActionResponse(action: response.actions),
+                    shopperVpa: ""
+                )
+
+            } catch {
+                let errorDescription = error.localizedDescription.lowercased()
+                if errorDescription.contains("expired") {
+                    await self.checkoutManager.setStatus("EXPIRED")
+                } else {
+                    await self.checkoutManager.setStatus("FAILED")
+                }
+                AnalyticsViewModel().callUIAnalytics(AnalyticsEvents.ERROR_GETTING_UPI_URL.rawValue, "UPIScreen", errorDescription)
+                self.actions = await PaymentActionUtils.handle(
+                    timeStamp: "",
+                    reasonCode: "",
+                    reason: error.localizedDescription,
+                    methodType: "",
+                    response: PaymentActionResponse(action: nil),
+                    shopperVpa: ""
+                )
+            }
+            self.isLoading = false
+        }
+    }
+    func toggleCollectSection() {
+        selectedIntent = nil
+        upiCollectVisible.toggle()
+        upiQRVisible = false
+        isQRChevronRotated = false
+        isCollectChevronRotated.toggle()
+    }
+    
+    func toggleQRSection() {
+        selectedIntent = nil
+        upiCollectVisible = false
+        isQRChevronRotated.toggle()
+        upiQRVisible.toggle()
+        isCollectChevronRotated = false
+    }
+
+    func resetCollect() {
+        upiCollectVisible = false
+        upiQRVisible = false
+        isQRChevronRotated = false
+        isCollectChevronRotated = false
+        upiCollectError = false
     }
 }
