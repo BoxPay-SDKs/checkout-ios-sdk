@@ -14,9 +14,6 @@ class UpiViewModel: ObservableObject {
     
     @Published var upiCollectVisible = false
     @Published var upiQRVisible = false
-    @Published var upiCollectError = false
-    @Published var upiCollectValid: Bool? = nil
-    @Published var upiCollectTextInput = ""
     @Published var isQRChevronRotated = false
     @Published var isCollectChevronRotated = false
     @Published var isFocused = false
@@ -304,6 +301,5 @@ class UpiViewModel: ObservableObject {
         upiQRVisible = false
         isQRChevronRotated = false
         isCollectChevronRotated = false
-        upiCollectError = false
     }
 }

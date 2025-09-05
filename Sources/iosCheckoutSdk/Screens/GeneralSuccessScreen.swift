@@ -110,7 +110,7 @@ struct GeneralSuccessScreen: View {
         .cornerRadius(12)
         .onAppear() {
             Task {
-                if(await checkoutDetails.getIsSuccessScreenVisible()) {
+                if(await !checkoutDetails.getIsSuccessScreenVisible()) {
                     analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_RESULT_SCREEN_DISPLAYED.rawValue, "Success Screen Proceeded Automatically", "")
                     onDone()
                 }
