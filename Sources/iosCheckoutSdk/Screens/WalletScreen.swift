@@ -66,6 +66,7 @@ struct WalletScreen: View {
                         .foregroundColor(Color(hex: "#020815").opacity(0.71))
                         .padding(.top, 12)
                         .padding(.horizontal, 16)
+                        .padding(.bottom, 8)
                     
                     ScrollView {
                         if(viewModel.walletDataClass.isEmpty) {

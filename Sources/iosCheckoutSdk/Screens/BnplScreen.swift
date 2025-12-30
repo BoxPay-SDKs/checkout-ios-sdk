@@ -82,6 +82,7 @@ struct BnplScreen: View {
                                 showLastUsed: false
                             )
                             .commonCardStyle()
+                            .padding(.top, 8)
                         }
                     }
                 }

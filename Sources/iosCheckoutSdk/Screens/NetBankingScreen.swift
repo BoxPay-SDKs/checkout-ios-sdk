@@ -118,6 +118,7 @@ struct NetBankingScreen: View {
                                 },
                                 showLastUsed: false
                             )
+                            .commonCardStyle()
                         }
                     }
                 }
