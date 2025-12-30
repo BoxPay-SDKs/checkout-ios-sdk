@@ -257,6 +257,5 @@ class EmiViewModel: ObservableObject {
                 )
             }
         }
-        self.isLoading = false
     }
 }

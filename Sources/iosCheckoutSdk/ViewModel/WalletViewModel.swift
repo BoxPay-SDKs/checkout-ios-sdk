@@ -175,8 +175,6 @@ class WalletViewModel : ObservableObject {
                     shopperVpa: ""
                 )
             }
-
-            await MainActor.run { self.isLoading = false }
         }
     }
 }

@@ -362,7 +362,7 @@ struct CardScreen : View {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: totalAmount,currencySymbol: currencySymbol, onDone: {
                 isCheckoutFocused = true
                 sessionCompleteScreen = false
-                presentationMode.wrappedValue.dismiss()
+//                presentationMode.wrappedValue.dismiss()
             },brandColor: brandColor)
         }
         .sheet(isPresented: $showWebView) {
@@ -371,7 +371,6 @@ struct CardScreen : View {
                 htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
-                    viewModel.isLoading = true
                     fetchStatusViewModel.startFetchingStatus(methodType: "Card")
                 }
             )

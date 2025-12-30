@@ -239,7 +239,7 @@ struct MainCheckoutScreen : View {
             GeneralSuccessScreen(transactionID: transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "", onDone: {
                 sessionCompleteScreen = false
                 isCheckoutMainScreenFocused = true
-                presentationMode.wrappedValue.dismiss()
+//                presentationMode.wrappedValue.dismiss()
             },brandColor: viewModel.brandColor)
         }
         .bottomSheet(isPresented: $showTimerSheet) {
@@ -279,7 +279,6 @@ struct MainCheckoutScreen : View {
                 htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
-                    upiViewModel.isLoading = true
                     fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
                 }
             )

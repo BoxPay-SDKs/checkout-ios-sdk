@@ -156,7 +156,6 @@ class CardViewModel: ObservableObject {
                     shopperVpa: ""
                 )
             }
-            self.isLoading = false
         }
     }
     
@@ -287,7 +286,6 @@ class CardViewModel: ObservableObject {
                     shopperVpa: ""
                 )
             }
-            self.isLoading = false
         }
     }
     

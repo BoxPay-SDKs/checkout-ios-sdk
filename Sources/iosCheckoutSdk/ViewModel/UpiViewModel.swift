@@ -127,8 +127,8 @@ class UpiViewModel: ObservableObject {
             ]
 
             guard JSONSerialization.isValidJSONObject(payload),
-                  let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
-                await MainActor.run { self.isLoading = false }
+                  let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+                  let jsonString = String(data: jsonData, encoding: .utf8) else {
                 return
             }
 
@@ -167,7 +167,6 @@ class UpiViewModel: ObservableObject {
                     shopperVpa: ""
                 )
             }
-            self.isLoading = false
         }
     }
     
@@ -237,8 +236,8 @@ class UpiViewModel: ObservableObject {
             ]
 
             guard JSONSerialization.isValidJSONObject(payload),
-                  let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
-                await MainActor.run { self.isLoading = false }
+                  let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+                  let jsonString = String(data: jsonData, encoding: .utf8) else {
                 return
             }
 
@@ -277,7 +276,6 @@ class UpiViewModel: ObservableObject {
                     shopperVpa: ""
                 )
             }
-            self.isLoading = false
         }
     }
     func toggleCollectSection() {

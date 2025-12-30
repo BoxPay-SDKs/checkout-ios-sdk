@@ -134,7 +134,7 @@ struct WalletScreen: View {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
                 sessionCompleteScreen = false
                 isCheckoutFocused = true
-                presentationMode.wrappedValue.dismiss()
+//                presentationMode.wrappedValue.dismiss()
             },brandColor: viewModel.brandColor)
         }
         .sheet(isPresented: $showWebView) {
@@ -143,7 +143,6 @@ struct WalletScreen: View {
                 htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
-                    viewModel.isLoading = true
                     fetchStatusViewModel.startFetchingStatus(methodType: "Wallet")
                 }
             )
