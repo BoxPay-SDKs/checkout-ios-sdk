@@ -6,7 +6,6 @@
 //
 
 
-import SwiftUICore
 import SwiftUI
 
 struct SelectTenureScreen : View {

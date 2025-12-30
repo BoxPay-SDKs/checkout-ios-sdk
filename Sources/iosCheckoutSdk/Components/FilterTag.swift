@@ -5,7 +5,7 @@
 //  Created by Ishika Bansal on 13/05/25.
 //
 
-import SwiftUICore
+import SwiftUI
 
 struct FilterTag: View {
     var filterText: String

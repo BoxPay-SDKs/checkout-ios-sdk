@@ -6,7 +6,6 @@
 //
 
 
-import SwiftUICore
 import SwiftUI
 
 struct NetBankingScreen: View {

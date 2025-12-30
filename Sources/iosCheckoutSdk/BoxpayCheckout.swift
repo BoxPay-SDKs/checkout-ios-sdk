@@ -5,7 +5,6 @@
 //  Created by Ishika Bansal on 15/05/25.
 //
 
-import SwiftUICore
 import SwiftUI
 import SDWebImageSVGCoder
 

@@ -5,7 +5,6 @@
 //  Created by Ishika Bansal on 30/05/25.
 //
 
-import SwiftUICore
 import SwiftUI
 import CountryPickerView
 

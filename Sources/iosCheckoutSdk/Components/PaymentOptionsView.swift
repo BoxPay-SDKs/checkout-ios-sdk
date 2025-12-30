@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SwiftUICore
 
 struct PaymentOptionView: View {
     @Binding var items : [CommonDataClass]
