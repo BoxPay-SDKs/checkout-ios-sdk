@@ -179,10 +179,10 @@ class BnplViewModel: ObservableObject {
         bnplDataClass = []
         defaultBnplDataClass = []
         
-        @Published var itemsCount = 0
-        @Published var currencySymbol = ""
-        @Published var totalAmount = ""
-        @Published var brandColor = ""
-        @Published var transactionId = ""
+        itemsCount = 0
+        currencySymbol = ""
+        totalAmount = ""
+        brandColor = ""
+        transactionId = ""
     }
 }
