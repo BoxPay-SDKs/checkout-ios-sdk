@@ -527,11 +527,12 @@ struct CardScreen : View {
     }
 
     func handleCardExpiryTextChange(_ text: String) {
-        if ignoreNextExpiryChange {
+        let isDeleting = text.count < previousCardExpiryInput.count
+
+        if ignoreNextExpiryChange && isDeleting{
             ignoreNextExpiryChange = false
             return
         }
-        let isDeleting = text.count < previousCardExpiryInput.count
 
         // Remove all non-digit characters
         let cleaned = text.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression)
