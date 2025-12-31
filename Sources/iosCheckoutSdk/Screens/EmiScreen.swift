@@ -76,6 +76,7 @@ struct EmiScreen : View {
                             currencySymbol: viewModel.currencySymbol,
                             amount: viewModel.totalAmount,
                             onBackPress: {
+                                viewModel.clearAllFields()
                                 presentationMode.wrappedValue.dismiss()
                             }
                         )
@@ -213,6 +214,7 @@ struct EmiScreen : View {
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
                     sessionExpireScreen = false
+                    viewModel.clearAllFields()
                     onFinalDismiss()
                 }
             )
@@ -227,6 +229,7 @@ struct EmiScreen : View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
                 sessionCompleteScreen = false
+                viewModel.clearAllFields()
                 onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }

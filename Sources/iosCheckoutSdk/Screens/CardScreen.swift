@@ -90,6 +90,7 @@ struct CardScreen : View {
                         currencySymbol: "",
                         amount: "",
                         onBackPress: {
+                            viewModel.clearAllFields()
                             if(durationNumber != nil) {
                                 onClickBack()
                             } else {
@@ -346,6 +347,7 @@ struct CardScreen : View {
                 brandColor: brandColor,
                 onGoBackToHome: {
                     sessionExpireScreen = false
+                    viewModel.clearAllFields()
                     onFinalDismiss()
                 }
             )
@@ -360,6 +362,7 @@ struct CardScreen : View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: totalAmount,currencySymbol: currencySymbol, onDone: {
                 sessionCompleteScreen = false
+                viewModel.clearAllFields()
                 onFinalDismiss()
             },brandColor: brandColor)
         }

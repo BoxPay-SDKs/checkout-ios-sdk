@@ -63,6 +63,7 @@ struct MainCheckoutScreen : View {
                         currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
                         amount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
                         onBackPress: {
+                            upiViewModel.clearAllFields()
                             onFinalDismiss()
                         }
                     )
@@ -221,6 +222,7 @@ struct MainCheckoutScreen : View {
             SessionExpireScreen(
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
+                    upiViewModel.clearAllFields()
                     onFinalDismiss()
                 }
             )
@@ -235,6 +237,7 @@ struct MainCheckoutScreen : View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "", onDone: {
                 sessionCompleteScreen = false
+                upiViewModel.clearAllFields()
                 onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }

@@ -299,4 +299,10 @@ class CardViewModel: ObservableObject {
         
         return "20\(year)-\(month)"
     }
+    
+    func clearAllFields() {
+        isLoading = false
+        shopperToken = ""
+        transactionId = ""
+    }
 }

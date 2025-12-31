@@ -300,4 +300,25 @@ class UpiViewModel: ObservableObject {
         isQRChevronRotated = false
         isCollectChevronRotated = false
     }
+    
+    func clearAllFields() {
+        isLoading = false
+        paymentUrl = nil
+        status = "NOACTION"
+        transactionId = ""
+        errorReason = ""
+        qrUrl = ""
+        
+        upiCollectVisible = false
+        upiQRVisible = false
+        isQRChevronRotated = false
+        isCollectChevronRotated = false
+        isFocused = false
+        selectedIntent = nil
+        qrIsExpired = false
+        
+        brandColor = ""
+        currencySymbol = ""
+        amount = ""
+    }
 }

@@ -56,6 +56,7 @@ public struct BoxpayCheckout : View {
             
             await viewModel.checkoutManager.clearAllFields()
             await viewModel.userDataManager.clearAllFields()
+            viewModel.clearAllFields()
             presentationMode.wrappedValue.dismiss()
 
             PaymentCallBackManager.shared.triggerPaymentResult(

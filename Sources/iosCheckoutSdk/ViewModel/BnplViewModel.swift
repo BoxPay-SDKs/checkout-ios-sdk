@@ -171,4 +171,18 @@ class BnplViewModel: ObservableObject {
             }
         }
     }
+    
+    func clearAllFields() {
+        isFirstLoad = true
+        isLoading = false
+
+        bnplDataClass = []
+        defaultBnplDataClass = []
+        
+        @Published var itemsCount = 0
+        @Published var currencySymbol = ""
+        @Published var totalAmount = ""
+        @Published var brandColor = ""
+        @Published var transactionId = ""
+    }
 }
