@@ -314,7 +314,14 @@ struct CardScreen : View {
                             viewModel.initiateEMICardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, cardType: cardType ?? "", offerCode: offerCode, duration: "\(durationNumber ?? 0)",isSavedCardCheckBoxClicked: isSavedCardCheckBoxClicked, cardNickName: cardNickNameTextInput)
                         }
                     }){
-                        Text("Make Payment")
+                        (
+                            Text("Proceed to Pay ")
+                                .font(.custom("Poppins-SemiBold", size: 16)) +
+                            Text(currencySymbol)
+                                .font(.custom("Inter-SemiBold", size: 16)) +
+                            Text(totalAmount)
+                                .font(.custom("Poppins-SemiBold", size: 16))
+                        )
                             .foregroundColor(.white)
                             .padding()
                             .frame(maxWidth: .infinity)
