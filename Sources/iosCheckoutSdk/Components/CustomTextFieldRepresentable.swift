@@ -124,14 +124,7 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
         uiView.keyboardType = keyboardType
         uiView.isSecureTextEntry = isSecureText
         uiView.font = font
-        
-        uiView.attributedPlaceholder = NSAttributedString(
-            string: placeholder,
-            attributes: [
-                .foregroundColor: UIColor(Color("#2D2B32")),
-                .font: font
-            ]
-        )
+        uiView.placeholder = placeholder
         
 
         // Update trailing icon
