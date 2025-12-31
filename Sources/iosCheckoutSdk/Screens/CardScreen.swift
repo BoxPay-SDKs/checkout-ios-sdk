@@ -10,7 +10,7 @@ import SwiftUI
 
 struct CardScreen : View {
     @Environment(\.presentationMode) var presentationMode
-    @Binding var isCheckoutFocused : Bool
+    var onFinalDismiss: () -> Void
     
     // EMI Related params
     var durationNumber : Int? = nil
@@ -345,9 +345,8 @@ struct CardScreen : View {
             SessionExpireScreen(
                 brandColor: brandColor,
                 onGoBackToHome: {
-                    isCheckoutFocused = true
                     sessionExpireScreen = false
-                    presentationMode.wrappedValue.dismiss()
+                    onFinalDismiss()
                 }
             )
         }
@@ -360,9 +359,8 @@ struct CardScreen : View {
         }
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: totalAmount,currencySymbol: currencySymbol, onDone: {
-                isCheckoutFocused = true
                 sessionCompleteScreen = false
-//                presentationMode.wrappedValue.dismiss()
+                onFinalDismiss()
             },brandColor: brandColor)
         }
         .sheet(isPresented: $showWebView) {

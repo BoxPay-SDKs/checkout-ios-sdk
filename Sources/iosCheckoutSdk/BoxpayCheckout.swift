@@ -15,7 +15,6 @@ public struct BoxpayCheckout : View {
     var onPaymentResult : (PaymentResultObject) -> Void
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel = CheckoutViewModel()
-    @State private var isCheckoutMainScreenFocused = false
     
     
     public init(
@@ -37,7 +36,9 @@ public struct BoxpayCheckout : View {
         // Replace this with your actual SDK UI
         MainCheckoutScreen(
             viewModel : viewModel,
-            isCheckoutMainScreenFocused : $isCheckoutMainScreenFocused
+            onFinalDismiss : {
+                self.triggerPaymentStatusCallBack()
+            }
         )
         .onAppear {
             if !viewModel.isInitialized {
@@ -46,11 +47,6 @@ public struct BoxpayCheckout : View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
-        .onChange(of: isCheckoutMainScreenFocused) { focused in
-            if focused {
-                triggerPaymentStatusCallBack()
-            }
-        }
     }
     
     private func triggerPaymentStatusCallBack() {

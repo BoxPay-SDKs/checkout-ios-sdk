@@ -10,7 +10,7 @@ import SwiftUI
 
 struct NetBankingScreen: View {
     @Environment(\.presentationMode) private var presentationMode
-    @Binding var isCheckoutFocused : Bool
+    var onFinalDismiss : () -> Void
 
     @StateObject private var viewModel = NetBankingViewModel()
     @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
@@ -136,9 +136,8 @@ struct NetBankingScreen: View {
             SessionExpireScreen(
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
-                    isCheckoutFocused = true
                     sessionExpireScreen = false
-                    presentationMode.wrappedValue.dismiss()
+                    onFinalDismiss()
                 }
             )
         }
@@ -152,8 +151,7 @@ struct NetBankingScreen: View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
                 sessionCompleteScreen = false
-                isCheckoutFocused = true
-//                presentationMode.wrappedValue.dismiss()
+                onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }
         .sheet(isPresented: $showWebView) {

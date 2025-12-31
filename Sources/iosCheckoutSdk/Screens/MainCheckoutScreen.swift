@@ -11,11 +11,10 @@ import Combine
 
 struct MainCheckoutScreen : View {
     @ObservedObject var viewModel: CheckoutViewModel
-    @Environment(\.presentationMode) var presentationMode
     
     @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
 
-    @Binding var isCheckoutMainScreenFocused : Bool
+    var onFinalDismiss: () -> Void
     
     @ObservedObject private var upiViewModel: UpiViewModel = UpiViewModel()
     @ObservedObject private var fetchStatusViewModel: FetchStatusViewModel = FetchStatusViewModel()
@@ -64,8 +63,7 @@ struct MainCheckoutScreen : View {
                         currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "",
                         amount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",
                         onBackPress: {
-                            isCheckoutMainScreenFocused = true
-                            presentationMode.wrappedValue.dismiss()
+                            onFinalDismiss()
                         }
                     )
                     ScrollView {
@@ -193,20 +191,20 @@ struct MainCheckoutScreen : View {
                 }
                 .background(Color(hex: "#F5F6FB"))
             }
-            NavigationLink(destination: CardScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToCardScreen) {
+            NavigationLink(destination: CardScreen(onFinalDismiss : {onFinalDismiss()}), isActive: $navigateToCardScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: WalletScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToWalletScreen) {
+            NavigationLink(destination: WalletScreen(onFinalDismiss : {onFinalDismiss()}), isActive: $navigateToWalletScreen) {
                         EmptyView()
                     }
             
-            NavigationLink(destination: NetBankingScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToNetBankingScreen) {
+            NavigationLink(destination: NetBankingScreen(onFinalDismiss : {onFinalDismiss()}), isActive: $navigateToNetBankingScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: BnplScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToBnplScreen) {
+            NavigationLink(destination: BnplScreen(onFinalDismiss : {onFinalDismiss()}), isActive: $navigateToBnplScreen) {
                         EmptyView()
                     }
-            NavigationLink(destination: EmiScreen(isCheckoutFocused: $isCheckoutMainScreenFocused), isActive: $navigateToEmiScreen) {
+            NavigationLink(destination: EmiScreen(onFinalDismiss : {onFinalDismiss()}), isActive: $navigateToEmiScreen) {
                         EmptyView()
                     }
             NavigationLink(destination: AddAddressScreen(), isActive: $navigateToAddressScreen) {
@@ -223,8 +221,7 @@ struct MainCheckoutScreen : View {
             SessionExpireScreen(
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
-                    isCheckoutMainScreenFocused = true
-                    presentationMode.wrappedValue.dismiss()
+                    onFinalDismiss()
                 }
             )
         }
@@ -238,8 +235,7 @@ struct MainCheckoutScreen : View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.sessionData?.paymentDetails.money.amountLocaleFull ?? "",currencySymbol: viewModel.sessionData?.paymentDetails.money.currencySymbol ?? "", onDone: {
                 sessionCompleteScreen = false
-                isCheckoutMainScreenFocused = true
-//                presentationMode.wrappedValue.dismiss()
+                onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }
         .bottomSheet(isPresented: $showTimerSheet) {
