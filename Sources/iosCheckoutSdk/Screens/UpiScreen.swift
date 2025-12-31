@@ -69,8 +69,8 @@ struct UpiScreen: View {
                         }
 
                         if isPaytmInstalled() {
-                            intentButton(title: "PayTm", imageName: "paytm_upi_logo", isSelected: viewModel.selectedIntent == "PayTm") {
-                                viewModel.selectedIntent = "PayTm"
+                            intentButton(title: "Paytm", imageName: "paytm_upi_logo", isSelected: viewModel.selectedIntent == "Paytm") {
+                                viewModel.selectedIntent = "Paytm"
                                 viewModel.resetCollect()
                                 timerCancellable?.cancel()
                             }
@@ -84,7 +84,7 @@ struct UpiScreen: View {
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "UPI Intent \(intent)", "")
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "UPI Intent \(intent)", "")
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "UPI Intent \(intent)", "")
-                            handleUpiPayment(intent,nil, nil, "upi")
+                            handleUpiPayment(intent,nil, nil, "")
                         }) {
                             (
                                 Text("Pay ")
@@ -297,17 +297,18 @@ struct UpiScreen: View {
     }
 
     func intentButton(title: String, imageName: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        VStack(spacing: 6) { // spacing instead of .padding(.top)
+        VStack(spacing: 6) {
             Button(action: action) {
                 ZStack {
-                    // Always reserve the same space
+                    // Background circle to maintain consistent hit area and spacing
                     Circle()
-                        .fill(Color.clear) // invisible background to ensure size
-                        .frame(width: 44, height: 44) // total size always constant
+                        .fill(Color.clear)
+                        .frame(width: 44, height: 44)
 
                     Image(frameworkAsset: imageName)
                         .resizable()
-                        .frame(width: isSelected ? 36 : 40, height: isSelected ? 36 : 40)
+                        .scaledToFit() // <--- ADD THIS LINE
+                        .frame(width: isSelected ? 32 : 36, height: isSelected ? 32 : 36) // Slightly smaller frame to prevent hitting edges
                         .padding(isSelected ? 4 : 0)
                 }
                 .overlay(

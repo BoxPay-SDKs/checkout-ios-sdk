@@ -304,43 +304,4 @@ class CheckoutViewModel: ObservableObject {
         // This will return the symbol for the currency, e.g., "$", "€", "₹", etc.
         return formatter.currencySymbol ?? "₹"
     }
-    
-    func clearAllFields() {
-        isFirstLoad = true
-        upiCollectMethod = false
-        upiIntentMethod = false
-        upiQrMethod = false
-        cardsMethod = false
-        walletsMethod = false
-        netBankingMethod = false
-        emiMethod = false
-        bnplMethod = false
-        recommendedIds = []
-        savedCards = []
-        savedUpiIds = []
-        
-        isShippingEnabled = false
-        isShippingEditable = false
-        isFullNameEnabled = false
-        isFullNameEditable = false
-        isMobileNumberEditable = false
-        isMobileNumberEnabled = false
-        isEmailIdEnabled = false
-        isEmailIdEditable = false
-        
-        fullNameText = ""
-        phoneNumberText = ""
-        emailIdText = ""
-        isAddressScreenRequiredToCompleteDetails = false
-        hasFetechedCheckoutDetails = false
-        
-        shopperTokenSaved = nil
-        
-        errorReason = ""
-        itemsCount = 0
-        
-        brandColor = ""
-        
-        isInitialized = false
-    }
 }

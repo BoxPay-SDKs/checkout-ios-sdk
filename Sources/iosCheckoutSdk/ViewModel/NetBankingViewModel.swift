@@ -187,20 +187,4 @@ class NetBankingViewModel : ObservableObject {
             }
         }
     }
-    
-    func clearAllFields() {
-        isFirstLoad = true
-        isLoading = false
-        
-        netBankingDataClass = []
-        defaultNetBankingDataClass = []
-        
-        popularBankDataClass = []
-        
-        itemsCount = 0
-        currencySymbol = ""
-        totalAmount = ""
-        brandColor = ""
-        transactionId = ""
-    }
 }

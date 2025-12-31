@@ -258,18 +258,4 @@ class EmiViewModel: ObservableObject {
             }
         }
     }
-    
-    func clearAllFields() {
-        isFirstLoad = true
-        isLoading = false
-        emiDataClass = EmiDataClass(cards: [])
-        duplicateEmiDataClass = EmiDataClass(cards: [])
-        selectedCardType = "Credit Card"
-        
-        itemsCount = 0
-        currencySymbol = ""
-        totalAmount = ""
-        brandColor = ""
-        transactionId = ""
-    }
 }

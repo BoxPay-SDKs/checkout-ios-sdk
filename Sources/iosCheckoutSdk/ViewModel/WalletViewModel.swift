@@ -177,18 +177,4 @@ class WalletViewModel : ObservableObject {
             }
         }
     }
-    
-    func clearAllFields() {
-        isFirstLoad = true
-        isLoading = false
-        
-        walletDataClass = []
-        defaultWalletDataClass = []
-        
-        itemsCount = 0
-        currencySymbol = ""
-        totalAmount = ""
-        brandColor = ""
-        transactionId = ""
-    }
 }
