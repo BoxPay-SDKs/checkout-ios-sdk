@@ -208,11 +208,15 @@ struct CardScreen : View {
                                     leadingIcon: .constant(""),
                                     onClickIcon : {
                                         isCardCvvFocused = false
+                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                         isCvvShowDetailsClicked = true
                                     },
                                     isSecureText: .constant(true)
                                 )
                                 .fixedSize(horizontal: false, vertical: true) // Prevents expanding height
+                                .onTapGesture {
+                                    isCardCvvFocused = true
+                                }
 
                                 if(isCardCvvValid == false) {
                                     Text("\(cardCvvErrorText)")
@@ -514,51 +518,29 @@ struct CardScreen : View {
     }
 
     func handleCardExpiryTextChange(_ text: String) {
-        let isDeleting = text.count < cardExpiryTextInput.count
-        
-        if text.isEmpty {
-            cardExpiryTextInput = ""
-            isCardExpiryValid = nil // Reset validation state
-            return
-        }
-        
-        // 1. Remove all non-digit characters
+        let previousText = cardExpiryTextInput
+        let isDeleting = text.count < previousText.count
+
+        // Remove all non-digit characters
         let cleaned = text.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression)
         let limited = String(cleaned.prefix(4))
-        
-        var formatted = ""
-        
-        // Formatting logic (MM/YY)
-        if limited.count == 1 {
-            let firstDigit = Int(limited) ?? 0
-            if firstDigit >= 2 {
-                formatted = isDeleting ? "0\(firstDigit)" : "0\(firstDigit)/"
-            } else {
-                formatted = limited
-            }
-        } else if limited.count == 2 {
-            let month = Int(limited) ?? 0
-            if month == 0 {
-                formatted = ""
-            } else if month > 12 {
-                formatted = "01/" // Correct to Jan if invalid month entered
-            } else {
-                formatted = isDeleting ? limited : limited + "/"
-            }
-        } else if limited.count > 2 {
+
+        var formatted = limited
+        // Insert the slash automatically after two digits if there are more digits
+        if limited.count > 2 {
             let month = limited.prefix(2)
             let year = limited.suffix(from: limited.index(limited.startIndex, offsetBy: 2))
             formatted = "\(month)/\(year)"
+        } else if limited.count == 2 && !isDeleting {
+            formatted = "\(limited)/"
         }
-
-        // Safety check for backspacing the slash
-        if isDeleting && text.last != "/" && formatted.hasSuffix("/") {
-            formatted.removeLast()
+        // If deleting and the last character is '/', remove it
+        if isDeleting && previousText.last == "/" && formatted.count == 2 {
+            formatted = String(formatted.prefix(2))
         }
-
         cardExpiryTextInput = formatted
 
-        // 2. Perform Validation when formatting is complete (MM/YY)
+        // Perform validation when formatting is complete (MM/YY)
         if formatted.count == 5 {
             let components = formatted.split(separator: "/")
             if components.count == 2,
@@ -723,3 +705,4 @@ struct CardScreen : View {
         }
     }
 }
+

@@ -99,7 +99,7 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
             textField.leftPadding = 12
         }
 
-        
+
         // Trailing icon
         if let trailingIconName = trailingIconName, !trailingIconName.isEmpty {
             let trailingImage = UIImage(named: trailingIconName, in: bundle, compatibleWith: nil)
@@ -125,7 +125,7 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
         uiView.isSecureTextEntry = isSecureText
         uiView.font = font
         uiView.placeholder = placeholder
-        
+
 
         // Update trailing icon
         let currentIconName = (uiView.rightView as? UIButton)?.image(for: .normal)?.accessibilityIdentifier
@@ -147,6 +147,12 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
             }
         } else {
             uiView.rightView = nil
+        }
+
+        if isFocused && !uiView.isFirstResponder {
+            uiView.becomeFirstResponder()
+        } else if !isFocused && uiView.isFirstResponder {
+            uiView.resignFirstResponder()
         }
     }
 
