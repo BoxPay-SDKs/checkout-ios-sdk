@@ -541,7 +541,7 @@ struct CardScreen : View {
             formatted = "\(limited)/"
         }
         // If deleting and the last character is '/', remove it
-        if isDeleting && previousText.last == "/" && formatted.count == 2 {
+        if isDeleting && previousCardExpiryInput.last == "/" && formatted.count == 2 {
             formatted = String(formatted.prefix(2))
         }
         cardExpiryTextInput = formatted
