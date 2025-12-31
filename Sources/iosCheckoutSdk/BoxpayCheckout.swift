@@ -53,14 +53,14 @@ public struct BoxpayCheckout : View {
         Task {
             let status = await viewModel.checkoutManager.getStatus()
             let transactionId = await viewModel.checkoutManager.getTransactionId()
+            
+            await viewModel.checkoutManager.clearAllFields()
+            await viewModel.userDataManager.clearAllFields()
+            presentationMode.wrappedValue.dismiss()
 
             PaymentCallBackManager.shared.triggerPaymentResult(
                 result: PaymentResultObject(status: status, transactionId: transactionId)
             )
-
-            await viewModel.checkoutManager.clearAllFields()
-            await viewModel.userDataManager.clearAllFields()
-            presentationMode.wrappedValue.dismiss()
         }
     }
 }

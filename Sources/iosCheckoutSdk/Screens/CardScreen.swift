@@ -436,9 +436,11 @@ struct CardScreen : View {
         cardNumberTextInput = formatted
 
         // Validation and fetching based on digit count
-        if limited.count > 10 {
+        if limited.count == 9 {
             viewModel.fetchCardInfo(limited)
-        } else {
+        }
+        
+        if limited.count < 9 {
             cardImage = "ic_default_card"
             maxCardCvvLength = 3
             maxCardNumberLength = 16
@@ -453,6 +455,11 @@ struct CardScreen : View {
         
         // Check the cleaned length based on the card type (Max length check for cards)
         let cleanedLength = maxCardNumberLength
+        
+        // Set the validity flag after checking the card number length and Luhn check
+        isCardNumberValid = cleaned.count >= cleanedLength &&
+                            isMethodEnabled &&
+                            isValidCardNumberByLuhn(cleaned)
 
         // Determine the error message based on the cleaned card number length
         cardNumberErrorText = cleaned.isEmpty
@@ -465,10 +472,6 @@ struct CardScreen : View {
                 ? "This card is not supported for the payment"
                 : "test reason"  // Replace with other conditions if needed
 
-        // Set the validity flag after checking the card number length and Luhn check
-        isCardNumberValid = cleaned.count >= cleanedLength &&
-                            isMethodEnabled &&
-                            isValidCardNumberByLuhn(cleaned)
 
         // Trigger UI updates and set the focus to false after validation
         isCardNumberFocused = false
