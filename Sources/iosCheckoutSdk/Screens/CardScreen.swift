@@ -78,6 +78,8 @@ struct CardScreen : View {
     @State var brandColor = ""
     
     @State private var isSavedCardCheckBoxClicked = false
+    @State private var ignoreNextExpiryChange = false
+
     
     var body: some View {
         VStack {
@@ -470,7 +472,7 @@ struct CardScreen : View {
         
         if limited.count == maxCardNumberLength {
             isCardNumberFocused = false
-            DispatchQueue.main.async {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isCardExpiryFocused = true
             }
         }
@@ -525,6 +527,10 @@ struct CardScreen : View {
     }
 
     func handleCardExpiryTextChange(_ text: String) {
+        if ignoreNextExpiryChange {
+            ignoreNextExpiryChange = false
+            return
+        }
         let isDeleting = text.count < previousCardExpiryInput.count
 
         // Remove all non-digit characters
@@ -544,6 +550,7 @@ struct CardScreen : View {
         if isDeleting && previousCardExpiryInput.last == "/" && formatted.count == 2 {
             formatted = String(formatted.prefix(2))
         }
+        ignoreNextExpiryChange = true
         cardExpiryTextInput = formatted
         previousCardExpiryInput = formatted
 
@@ -580,7 +587,8 @@ struct CardScreen : View {
             cardExpiryErrorText = "Invalid expiry year"
         } else {
             // CASE: Valid
-            DispatchQueue.main.async {
+            isCardExpiryFocused = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isCardCvvFocused = true
             }
             isCardExpiryValid = true
@@ -632,7 +640,8 @@ struct CardScreen : View {
         }
         
         if updatedText.count == maxCardCvvLength {
-            DispatchQueue.main.async {
+            isCardCvvFocused = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
                 isCardNameFocused = true
             }
         }
