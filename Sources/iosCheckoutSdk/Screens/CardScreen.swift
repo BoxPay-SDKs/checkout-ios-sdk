@@ -69,6 +69,9 @@ struct CardScreen : View {
     @State private var isCvvShowDetailsClicked = false
     @State private var isSavedCardKnowMoreClicked = false
     
+    @State private var previousCardExpiryInput: String = ""
+
+    
     @State var itemsCount = 0
     @State var currencySymbol = ""
     @State var totalAmount = ""
@@ -344,7 +347,9 @@ struct CardScreen : View {
                 currencySymbol = await viewModel.checkoutManager.getCurrencySymbol()
                 totalAmount = await viewModel.checkoutManager.getTotalAmount()
                 brandColor = await viewModel.checkoutManager.getBrandColor()
-                isCardNumberFocused = true
+                DispatchQueue.main.async {
+                    isCardNumberFocused = true
+                }
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -465,7 +470,9 @@ struct CardScreen : View {
         
         if limited.count == maxCardNumberLength {
             isCardNumberFocused = false
-            isCardExpiryFocused = true
+            DispatchQueue.main.async {
+                isCardExpiryFocused = true
+            }
         }
         allCardFieldsMandate = checkCardValid()
     }
@@ -518,8 +525,7 @@ struct CardScreen : View {
     }
 
     func handleCardExpiryTextChange(_ text: String) {
-        let previousText = cardExpiryTextInput
-        let isDeleting = text.count < previousText.count
+        let isDeleting = text.count < previousCardExpiryInput.count
 
         // Remove all non-digit characters
         let cleaned = text.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression)
@@ -539,6 +545,7 @@ struct CardScreen : View {
             formatted = String(formatted.prefix(2))
         }
         cardExpiryTextInput = formatted
+        previousCardExpiryInput = formatted
 
         // Perform validation when formatting is complete (MM/YY)
         if formatted.count == 5 {
@@ -573,7 +580,9 @@ struct CardScreen : View {
             cardExpiryErrorText = "Invalid expiry year"
         } else {
             // CASE: Valid
-            isCardCvvFocused = true
+            DispatchQueue.main.async {
+                isCardCvvFocused = true
+            }
             isCardExpiryValid = true
         }
     }
@@ -620,7 +629,12 @@ struct CardScreen : View {
         } else {
             cardCvvErrorText = ""
             isCardCvvValid = true
-            isCardNameFocused = true
+        }
+        
+        if updatedText.count == maxCardCvvLength {
+            DispatchQueue.main.async {
+                isCardNameFocused = true
+            }
         }
         allCardFieldsMandate = checkCardValid()
     }
