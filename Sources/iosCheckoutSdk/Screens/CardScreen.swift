@@ -149,7 +149,7 @@ struct CardScreen : View {
                                         .padding(.bottom, 20)
                             }
                             FloatingLabelTextField(
-                                    placeholder: "Card Number",
+                                    placeholder: "Card Number*",
                                     text:$cardNumberTextInput,
                                     isValid: $isCardNumberValid,
                                     onChange: { newText in
@@ -172,7 +172,7 @@ struct CardScreen : View {
                         HStack(alignment: .top) {
                             VStack(alignment: .leading) {
                                 FloatingLabelTextField(
-                                    placeholder: "Expiry (MM/YY)",
+                                    placeholder: "Expiry (MM/YY)*",
                                     text: $cardExpiryTextInput,
                                     isValid: $isCardExpiryValid,
                                     onChange: { newTxt in
@@ -196,7 +196,7 @@ struct CardScreen : View {
                             .padding(.trailing, 6)
                             VStack(alignment: .leading) {
                                 FloatingLabelTextField(
-                                    placeholder: "CVV",
+                                    placeholder: "CVV*",
                                     text: $cardCvvTextInput,
                                     isValid: $isCardCvvValid,
                                     onChange: { newText in
@@ -225,7 +225,7 @@ struct CardScreen : View {
                         .padding(.bottom, 20)
                         VStack(alignment: .leading) {
                             FloatingLabelTextField(
-                                placeholder: "Name on the Card",
+                                placeholder: "Name on the Card*",
                                 text: $cardNameTextInput,
                                 isValid: $isCardNameValid,
                                 onChange: { newText in
