@@ -529,7 +529,7 @@ struct CardScreen : View {
     func handleCardExpiryTextChange(_ text: String) {
         let isDeleting = text.count < previousCardExpiryInput.count
 
-        if ignoreNextExpiryChange && isDeleting{
+        if ignoreNextExpiryChange && isDeleting {
             ignoreNextExpiryChange = false
             return
         }
@@ -539,14 +539,14 @@ struct CardScreen : View {
         let limited = String(cleaned.prefix(4))
 
         var formatted = limited
-        // Insert the slash automatically after two digits if there are more digits
         if limited.count > 2 {
             let month = limited.prefix(2)
             let year = limited.suffix(from: limited.index(limited.startIndex, offsetBy: 2))
             formatted = "\(month)/\(year)"
-        } else if limited.count == 2 && !isDeleting {
-            formatted = "\(limited)/"
+        } else if limited.count == 2 {
+            formatted = isDeleting ? String(limited) : "\(limited)/"
         }
+
         // If deleting and the last character is '/', remove it
         if isDeleting && previousCardExpiryInput.last == "/" && formatted.count == 2 {
             formatted = String(formatted.prefix(2))
