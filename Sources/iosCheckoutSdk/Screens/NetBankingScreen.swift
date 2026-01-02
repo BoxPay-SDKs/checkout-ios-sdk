@@ -164,6 +164,10 @@ struct NetBankingScreen: View {
                 }
             )
         }
+        .onTapGesture {
+            // This will dismiss the keyboard when the user taps the background
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
     }
     
     private func handlePaymentAction(_ action: PaymentAction) {

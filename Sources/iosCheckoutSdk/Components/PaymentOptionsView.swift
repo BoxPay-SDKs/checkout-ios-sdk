@@ -101,6 +101,7 @@ struct PaymentOptionRow : View {
             // Pay Button
             if isSelected {
                 Button(action: {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     onProceedButton()
                 }) {
                     (

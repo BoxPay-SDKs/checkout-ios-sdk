@@ -76,14 +76,5 @@ struct WebView: UIViewRepresentable {
 
             decisionHandler(.allow)
         }
-
-        
-        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            if ((webView.url?.absoluteString.contains("boxpay")) == true) {
-                DispatchQueue.main.async {
-                    self.parent.onDismiss?()
-                }
-            }
-        }
     }
 }

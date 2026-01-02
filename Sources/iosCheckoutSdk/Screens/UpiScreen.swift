@@ -81,6 +81,7 @@ struct UpiScreen: View {
 
                     if let intent = viewModel.selectedIntent, !intent.isEmpty {
                         Button(action: {
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "UPI Intent \(intent)", "")
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "UPI Intent \(intent)", "")
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "UPI Intent \(intent)", "")
@@ -168,6 +169,7 @@ struct UpiScreen: View {
                                 }
 
                                 Button(action: {
+                                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                     if let _ = upiCollectValid {
                                         analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "UPI Collect", "")
                                         analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "UPI Collect", "")

@@ -210,6 +210,7 @@ struct AddAddressScreen : View {
                 
                 Button(action: {
                     Task {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         let result = await viewModel.isAllDetailsValid()
                         if result {
                             if viewModel.shopperToken?.isEmpty == false {
@@ -245,6 +246,10 @@ struct AddAddressScreen : View {
             } else {
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             }
+        }
+        .onTapGesture {
+            // This will dismiss the keyboard when the user taps the background
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
     

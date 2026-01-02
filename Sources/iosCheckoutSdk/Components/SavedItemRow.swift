@@ -56,6 +56,7 @@ struct SavedItemRow : View {
             
             if selectedItemInstrumentValue == savedItem.instrumentTypeValue {
                 Button(action: {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     onProceedButton(selectedItemInstrumentValue)
                 }) {
                     (

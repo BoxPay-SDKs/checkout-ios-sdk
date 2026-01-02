@@ -311,6 +311,7 @@ struct CardScreen : View {
                     }
                     .padding(.horizontal, 16)
                     Button(action: {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         if checkCardValid() && durationNumber == nil {
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "CardsScreen", "")
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "CardsScreen", "")

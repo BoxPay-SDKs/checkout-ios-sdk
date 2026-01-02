@@ -145,7 +145,7 @@ class UpiViewModel: ObservableObject {
                     timeStamp: response.transactionTimestampLocale,
                     reasonCode: response.status.reasonCode,
                     reason: response.status.reason,
-                    methodType: selectedIntrumentRefType != nil && selectedIntrumentRefType == "upi" ? "UPICollect" : selectedIntent != nil ? "UpiIntent" : "",
+                    methodType: selectedIntrumentRefType != nil && selectedIntrumentRefType == "upi" ? "UPICollect" : selectedIntent != nil ? "UPIIntent" : "",
                     response: PaymentActionResponse(action: response.actions),
                     shopperVpa: shopperVpa ?? ""
                 )
