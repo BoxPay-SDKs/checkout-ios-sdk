@@ -527,35 +527,48 @@ struct CardScreen : View {
     }
 
     func handleCardExpiryTextChange(_ text: String) {
-        let isDeleting = text.count < previousCardExpiryInput.count
-
-        if ignoreNextExpiryChange && isDeleting {
-            ignoreNextExpiryChange = false
-            return
-        }
-
-        // Remove all non-digit characters
+        // 1. Clean the input to digits only
         let cleaned = text.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression)
-        let limited = String(cleaned.prefix(4))
-
-        var formatted = limited
-        if limited.count > 2 {
-            let month = limited.prefix(2)
-            let year = limited.suffix(from: limited.index(limited.startIndex, offsetBy: 2))
-            formatted = "\(month)/\(year)"
-        } else if limited.count == 2 {
-            formatted = isDeleting ? String(limited) : "\(limited)/"
+        
+        // 2. Detect if user is deleting (comparing digit counts is more reliable)
+        let isDeleting = cleaned.count < previousCardExpiryInput.replacingOccurrences(of: "/", with: "").count
+        
+        // Limit to 4 digits (MMYY)
+        let digits = String(cleaned.prefix(4))
+        
+        var formatted = ""
+        
+        if digits.count > 0 {
+            let firstDigit = Int(String(digits.prefix(1))) ?? 0
+            
+            // Auto-prefix 0 if first digit is 2-9 (e.g., user types '5', becomes '05/')
+            if firstDigit > 1 && digits.count == 1 && !isDeleting {
+                formatted = "0\(digits)/"
+            }
+            else if digits.count >= 2 {
+                let monthStr = String(digits.prefix(2))
+                let monthInt = Int(monthStr) ?? 0
+                
+                // Validate month range
+                let finalMonth = monthInt > 12 ? "12" : (monthInt == 0 ? "01" : monthStr)
+                
+                if digits.count > 2 {
+                    let year = digits.suffix(digits.count - 2)
+                    formatted = "\(finalMonth)/\(year)"
+                } else {
+                    // If exactly 2 digits, add slash unless deleting
+                    formatted = isDeleting ? finalMonth : "\(finalMonth)/"
+                }
+            } else {
+                formatted = digits
+            }
         }
 
-        // If deleting and the last character is '/', remove it
-        if isDeleting && previousCardExpiryInput.last == "/" && formatted.count == 2 {
-            formatted = String(formatted.prefix(2))
-        }
-        ignoreNextExpiryChange = true
+        // Update the state
         cardExpiryTextInput = formatted
         previousCardExpiryInput = formatted
 
-        // Perform validation when formatting is complete (MM/YY)
+        // 3. Validation Logic
         if formatted.count == 5 {
             let components = formatted.split(separator: "/")
             if components.count == 2,
@@ -564,7 +577,7 @@ struct CardScreen : View {
                 validateExpiryDate(month: month, year: year)
             }
         } else {
-            isCardExpiryValid = nil
+            isCardExpiryValid = nil // Reset while typing
         }
 
         allCardFieldsMandate = checkCardValid()
