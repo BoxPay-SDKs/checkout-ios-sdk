@@ -527,71 +527,59 @@ struct CardScreen : View {
     }
 
     func handleCardExpiryTextChange(_ text: String) {
-        // 1. Clean digits
-        var cleaned = text.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression)
+        // 1. Clean the input to digits only
+        let cleaned = text.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression)
         
-        // 2. Detect deletion correctly
-        // We compare total string length to see if a backspace was pressed
-        let isDeleting = text.count < previousCardExpiryInput.count
+        // 2. Detect if user is deleting (comparing digit counts is more reliable)
+        let isDeleting = cleaned.count < previousCardExpiryInput.count
         
-        // 3. REPLICATE ANDROID DELETE LOGIC:
-        // If we were at "MM/" and user hit backspace, text becomes "MM".
-        // We detect the slash is missing and delete the second month digit too.
-        if isDeleting && !text.contains("/") && previousCardExpiryInput.contains("/") {
-            if !cleaned.isEmpty {
-                cleaned.removeLast()
-            }
-        }
-
-        // 4. Limit to 4 digits (MMYY)
+        // Limit to 4 digits (MMYY)
         let digits = String(cleaned.prefix(4))
+        
         var formatted = ""
         
-        if !digits.isEmpty {
+        if digits.count > 0 {
             let firstDigit = Int(String(digits.prefix(1))) ?? 0
             
-            // Auto-prefix 0 if user types 2-9 (e.g., "5" becomes "05/")
+            // Auto-prefix 0 if first digit is 2-9 (e.g., user types '5', becomes '05/')
             if firstDigit > 1 && digits.count == 1 && !isDeleting {
                 formatted = "0\(digits)/"
             }
             else if digits.count >= 2 {
-                let month = String(digits.prefix(2))
-                let monthInt = Int(month) ?? 0
+                let monthStr = String(digits.prefix(2))
+                let monthInt = Int(monthStr) ?? 0
                 
-                // Validate Month range (00 -> 01, >12 -> 12)
-                var finalMonth = month
-                if monthInt > 12 { finalMonth = "12" }
-                else if monthInt == 0 && digits.count >= 2 { finalMonth = "01" }
+                // Validate month range
+                let finalMonth = monthInt > 12 ? "12" : (monthInt == 0 ? "01" : monthStr)
                 
                 if digits.count > 2 {
-                    let year = digits.dropFirst(2)
+                    let year = digits.suffix(digits.count - 2)
                     formatted = "\(finalMonth)/\(year)"
                 } else {
-                    // If exactly 2 digits, add slash if typing, keep plain if deleting
+                    // If exactly 2 digits, add slash unless deleting
                     formatted = isDeleting ? finalMonth : "\(finalMonth)/"
                 }
             } else {
-                // This handles the "0" or "1" case
                 formatted = digits
             }
         }
 
-        // 5. Update State
-        // Always update these to keep SwiftUI and UIKit in sync
+        // Update the state
         cardExpiryTextInput = formatted
         previousCardExpiryInput = formatted
 
-        // 6. Validation logic
+        // 3. Validation Logic
         if formatted.count == 5 {
             let components = formatted.split(separator: "/")
             if components.count == 2,
-               let m = Int(components[0]), let y = Int(components[1]) {
-                validateExpiryDate(month: m, year: y)
+               let month = Int(components[0]),
+               let year = Int(components[1]) {
+                validateExpiryDate(month: month, year: year)
             }
         } else {
-            isCardExpiryValid = nil
+            isCardExpiryValid = nil // Reset while typing
         }
-        
+
         allCardFieldsMandate = checkCardValid()
     }
 
