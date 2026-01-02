@@ -15,7 +15,7 @@ struct BoxpayLoaderView: View {
             LottieView(animation: .named("BoxpayLogo", bundle: .module))
                 .playbackMode(.playing(.toProgress(1, loopMode: .loop)))
                 .frame(width: 100, height: 100)
-            Text("Secured by")
+            Text("Loading")
                 .font(.custom("Poppins-Medium", size: 12))
                 .foregroundColor(Color(hex: "#888888"))
         }
