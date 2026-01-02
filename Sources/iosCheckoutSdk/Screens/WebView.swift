@@ -49,41 +49,32 @@ struct WebView: UIViewRepresentable {
             self.parent = parent
         }
 
-        // Intercept navigations and optionally dismiss
-        func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
-                     decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-
+        func webView(
+            _ webView: WKWebView,
+            decidePolicyFor navigationAction: WKNavigationAction,
+            decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+        ) {
             if let url = navigationAction.request.url {
-                let urlString = url.absoluteString
+                parent.onNavigationChange?(url.absoluteString)
 
-                // Notify parent of navigation
-                parent.onNavigationChange?(urlString)
-
-                // If URL contains "boxpay", trigger dismissal
-                if urlString.contains("boxpay") {
-                    DispatchQueue.main.async {
-                        self.parent.onDismiss?()
-                    }
-                }
-
-                // Open all links in same web view (even if target is nil)
                 if navigationAction.targetFrame == nil {
                     webView.load(URLRequest(url: url))
                     decisionHandler(.cancel)
                     return
                 }
             }
-
             decisionHandler(.allow)
         }
 
-        
-        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-            if ((webView.url?.absoluteString.contains("boxpay")) == true) {
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            guard let urlString = webView.url?.absoluteString else { return }
+
+            if urlString.contains("boxpay") {
                 DispatchQueue.main.async {
                     self.parent.onDismiss?()
                 }
             }
         }
     }
+
 }

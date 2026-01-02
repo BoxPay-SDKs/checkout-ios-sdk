@@ -28,7 +28,7 @@ struct PaymentActionUtils {
             if let actions = response.action, !actions.isEmpty, !methodType.isEmpty {
                 let first = actions[0]
                 switch methodType {
-                case "UpiIntent":
+                case "UPIIntent":
                     let base64 = decodeBase64(url: first.url ?? "")
                     return .openIntentUrl(url: base64 ?? "")
                 case "UPIQR" :
@@ -40,7 +40,7 @@ struct PaymentActionUtils {
                         return .openWebViewUrl(url: first.url ?? "")
                     }
                 }
-            } else if methodType == "UpiCollect" {
+            } else if methodType == "UPICollect" {
                 return .openUpiTimer(shopperVpa: shopperVpa)
             }
             fallthrough  // if you want a default for empty actions

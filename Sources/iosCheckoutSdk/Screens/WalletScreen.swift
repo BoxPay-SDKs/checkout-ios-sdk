@@ -6,13 +6,12 @@
 //
 
 
-import SwiftUICore
 import SwiftUI
 
 
 struct WalletScreen: View {
     @Environment(\.presentationMode) private var presentationMode
-    @Binding var isCheckoutFocused : Bool
+    var onFinalDismiss : () -> Void
 
     @StateObject private var viewModel = WalletViewModel()
     
@@ -67,6 +66,7 @@ struct WalletScreen: View {
                         .foregroundColor(Color(hex: "#020815").opacity(0.71))
                         .padding(.top, 12)
                         .padding(.horizontal, 16)
+                        .padding(.bottom, 8)
                     
                     ScrollView {
                         if(viewModel.walletDataClass.isEmpty) {
@@ -117,9 +117,8 @@ struct WalletScreen: View {
             SessionExpireScreen(
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
-                    isCheckoutFocused = true
                     sessionExpireScreen = false
-                    presentationMode.wrappedValue.dismiss()
+                    onFinalDismiss()
                 }
             )
         }
@@ -133,8 +132,7 @@ struct WalletScreen: View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
                 sessionCompleteScreen = false
-                isCheckoutFocused = true
-                presentationMode.wrappedValue.dismiss()
+                onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }
         .sheet(isPresented: $showWebView) {
@@ -143,10 +141,13 @@ struct WalletScreen: View {
                 htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
-                    viewModel.isLoading = true
                     fetchStatusViewModel.startFetchingStatus(methodType: "Wallet")
                 }
             )
+        }
+        .onTapGesture {
+            // This will dismiss the keyboard when the user taps the background
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
     

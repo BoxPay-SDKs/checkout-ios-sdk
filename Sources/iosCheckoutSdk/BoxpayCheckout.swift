@@ -5,7 +5,6 @@
 //  Created by Ishika Bansal on 15/05/25.
 //
 
-import SwiftUICore
 import SwiftUI
 import SDWebImageSVGCoder
 
@@ -16,7 +15,6 @@ public struct BoxpayCheckout : View {
     var onPaymentResult : (PaymentResultObject) -> Void
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel = CheckoutViewModel()
-    @State private var isCheckoutMainScreenFocused = false
     
     
     public init(
@@ -38,7 +36,9 @@ public struct BoxpayCheckout : View {
         // Replace this with your actual SDK UI
         MainCheckoutScreen(
             viewModel : viewModel,
-            isCheckoutMainScreenFocused : $isCheckoutMainScreenFocused
+            onFinalDismiss : {
+                self.triggerPaymentStatusCallBack()
+            }
         )
         .onAppear {
             if !viewModel.isInitialized {
@@ -47,25 +47,20 @@ public struct BoxpayCheckout : View {
         }
         .navigationBarBackButtonHidden(true)
         .navigationBarHidden(true)
-        .onChange(of: isCheckoutMainScreenFocused) { focused in
-            if focused {
-                triggerPaymentStatusCallBack()
-            }
-        }
     }
     
     private func triggerPaymentStatusCallBack() {
         Task {
             let status = await viewModel.checkoutManager.getStatus()
             let transactionId = await viewModel.checkoutManager.getTransactionId()
+            
+            await viewModel.checkoutManager.clearAllFields()
+            await viewModel.userDataManager.clearAllFields()
+            presentationMode.wrappedValue.dismiss()
 
             PaymentCallBackManager.shared.triggerPaymentResult(
                 result: PaymentResultObject(status: status, transactionId: transactionId)
             )
-
-            await viewModel.checkoutManager.clearAllFields()
-            await viewModel.userDataManager.clearAllFields()
-            presentationMode.wrappedValue.dismiss()
         }
     }
 }

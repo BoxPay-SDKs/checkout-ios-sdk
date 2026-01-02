@@ -6,7 +6,7 @@
 //
 
 
-import SwiftUICore
+import SwiftUI
 
 struct BottomSheet<SheetContent: View>: ViewModifier {
     @Binding var isPresented: Bool

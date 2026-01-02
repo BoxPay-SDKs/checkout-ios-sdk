@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftUICore
+import SwiftUI
 
 struct StringUtils {
     static func generateRandomAlphanumericString(length: Int) -> String {

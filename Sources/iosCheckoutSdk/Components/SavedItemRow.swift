@@ -5,7 +5,6 @@
 //  Created by Ishika Bansal on 17/07/25.
 //
 
-import SwiftUICore
 import SwiftUI
 
 struct SavedItemRow : View {
@@ -57,6 +56,7 @@ struct SavedItemRow : View {
             
             if selectedItemInstrumentValue == savedItem.instrumentTypeValue {
                 Button(action: {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     onProceedButton(selectedItemInstrumentValue)
                 }) {
                     (

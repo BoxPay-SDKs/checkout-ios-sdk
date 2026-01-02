@@ -127,8 +127,8 @@ class UpiViewModel: ObservableObject {
             ]
 
             guard JSONSerialization.isValidJSONObject(payload),
-                  let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
-                await MainActor.run { self.isLoading = false }
+                  let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+                  let jsonString = String(data: jsonData, encoding: .utf8) else {
                 return
             }
 
@@ -145,7 +145,7 @@ class UpiViewModel: ObservableObject {
                     timeStamp: response.transactionTimestampLocale,
                     reasonCode: response.status.reasonCode,
                     reason: response.status.reason,
-                    methodType: selectedIntrumentRefType != nil && selectedIntrumentRefType == "upi" ? "UPICollect" : selectedIntent != nil ? "UpiIntent" : "",
+                    methodType: selectedIntrumentRefType != nil && selectedIntrumentRefType == "upi" ? "UPICollect" : selectedIntent != nil ? "UPIIntent" : "",
                     response: PaymentActionResponse(action: response.actions),
                     shopperVpa: shopperVpa ?? ""
                 )
@@ -167,7 +167,6 @@ class UpiViewModel: ObservableObject {
                     shopperVpa: ""
                 )
             }
-            self.isLoading = false
         }
     }
     
@@ -237,8 +236,8 @@ class UpiViewModel: ObservableObject {
             ]
 
             guard JSONSerialization.isValidJSONObject(payload),
-                  let jsonData = try? JSONSerialization.data(withJSONObject: payload, options: []) else {
-                await MainActor.run { self.isLoading = false }
+                  let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+                  let jsonString = String(data: jsonData, encoding: .utf8) else {
                 return
             }
 
@@ -277,7 +276,6 @@ class UpiViewModel: ObservableObject {
                     shopperVpa: ""
                 )
             }
-            self.isLoading = false
         }
     }
     func toggleCollectSection() {

@@ -6,12 +6,11 @@
 //
 
 
-import SwiftUICore
 import SwiftUI
 
 struct BnplScreen: View {
     @Environment(\.presentationMode) private var presentationMode
-    @Binding var isCheckoutFocused : Bool
+    var onFinalDismiss: () -> Void
 
     @StateObject private var viewModel = BnplViewModel()
     
@@ -83,6 +82,7 @@ struct BnplScreen: View {
                                 showLastUsed: false
                             )
                             .commonCardStyle()
+                            .padding(.top, 8)
                         }
                     }
                 }
@@ -100,9 +100,8 @@ struct BnplScreen: View {
             SessionExpireScreen(
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
-                    isCheckoutFocused = true
                     sessionExpireScreen = false
-                    presentationMode.wrappedValue.dismiss()
+                    onFinalDismiss()
                 }
             )
         }
@@ -116,8 +115,7 @@ struct BnplScreen: View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
                 sessionCompleteScreen = false
-                isCheckoutFocused = true
-                presentationMode.wrappedValue.dismiss()
+                onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }
         .sheet(isPresented: $showWebView) {
@@ -126,7 +124,6 @@ struct BnplScreen: View {
                 htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
-                    viewModel.isLoading = true
                     fetchStatusViewModel.startFetchingStatus(methodType: "BNPL")
                 }
             )

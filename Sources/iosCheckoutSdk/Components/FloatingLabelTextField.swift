@@ -5,7 +5,6 @@
 //  Created by Ishika Bansal on 13/05/25.
 //
 
-import SwiftUICore
 import SwiftUI
 
 struct FloatingLabelTextField: View {
@@ -31,7 +30,7 @@ struct FloatingLabelTextField: View {
                 .background(Color.white)
 
             Text(placeholder)
-                .foregroundColor(isValid == false ? Color(hex: "#E12121") : isFocused || !text.isEmpty ? Color(hex: "#2D2B32"): Color(hex: "#E6E6E6"))
+                .foregroundColor(isValid == false ? Color(hex: "#E12121") : isFocused || !text.isEmpty ? Color(hex: "#2D2B32"): Color(hex: "#2D2B32"))
                 .background(Color.white)
                 .padding(.horizontal, 5)
                 .scaleEffect((isFocused || !text.isEmpty) ? 0.8 : 1.0, anchor: .leading)

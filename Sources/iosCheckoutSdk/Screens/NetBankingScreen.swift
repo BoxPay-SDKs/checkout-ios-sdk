@@ -6,12 +6,11 @@
 //
 
 
-import SwiftUICore
 import SwiftUI
 
 struct NetBankingScreen: View {
     @Environment(\.presentationMode) private var presentationMode
-    @Binding var isCheckoutFocused : Bool
+    var onFinalDismiss : () -> Void
 
     @StateObject private var viewModel = NetBankingViewModel()
     @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
@@ -119,6 +118,7 @@ struct NetBankingScreen: View {
                                 },
                                 showLastUsed: false
                             )
+                            .commonCardStyle()
                         }
                     }
                 }
@@ -136,9 +136,8 @@ struct NetBankingScreen: View {
             SessionExpireScreen(
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
-                    isCheckoutFocused = true
                     sessionExpireScreen = false
-                    presentationMode.wrappedValue.dismiss()
+                    onFinalDismiss()
                 }
             )
         }
@@ -152,8 +151,7 @@ struct NetBankingScreen: View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
                 sessionCompleteScreen = false
-                isCheckoutFocused = true
-                presentationMode.wrappedValue.dismiss()
+                onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }
         .sheet(isPresented: $showWebView) {
@@ -162,10 +160,13 @@ struct NetBankingScreen: View {
                 htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
-                    viewModel.isLoading = true
                     fetchStatusViewModel.startFetchingStatus(methodType: "NetBanking")
                 }
             )
+        }
+        .onTapGesture {
+            // This will dismiss the keyboard when the user taps the background
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
     

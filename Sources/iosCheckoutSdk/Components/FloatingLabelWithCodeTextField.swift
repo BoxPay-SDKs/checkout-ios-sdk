@@ -25,7 +25,7 @@ struct FloatingLabelWithCodeTextField: View {
             Text(placeholder)
                 .foregroundColor((isValid == false) ? Color(hex: "#E12121") :
                                     (isFocused || !text.isEmpty || !countryCode.isEmpty) ? Color(hex: "#2D2B32") :
-                                 Color(hex: "#E6E6E6"))
+                                 Color(hex: "#2D2B32"))
                 .background(Color.white)
                 .padding(.horizontal, 5)
                 .scaleEffect((isFocused || !text.isEmpty || !countryCode.isEmpty) ? 0.8 : 1.0, anchor: .leading)

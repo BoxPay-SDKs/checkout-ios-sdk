@@ -169,8 +169,6 @@ class BnplViewModel: ObservableObject {
                     shopperVpa: ""
                 )
             }
-
-            await MainActor.run { self.isLoading = false }
         }
     }
 }

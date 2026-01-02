@@ -6,12 +6,11 @@
 //
 
 
-import SwiftUICore
 import SwiftUI
 
 struct EmiScreen : View {
     @Environment(\.presentationMode) private var presentationMode
-    @Binding var isCheckoutFocused : Bool
+    var onFinalDismiss : () -> Void
 
     @StateObject private var viewModel = EmiViewModel()
     @StateObject private var fetchStatusViewModel = FetchStatusViewModel()
@@ -51,7 +50,7 @@ struct EmiScreen : View {
                 })
             } else if isCardScreenVisible {
                 CardScreen(
-                    isCheckoutFocused: $isCheckoutFocused,
+                    onFinalDismiss : {onFinalDismiss()},
                     durationNumber: selectedEMI?.duration,
                     bankName: selectedBank?.name,
                     bankUrl: selectedBank?.iconUrl,
@@ -213,9 +212,8 @@ struct EmiScreen : View {
             SessionExpireScreen(
                 brandColor: viewModel.brandColor,
                 onGoBackToHome: {
-                    isCheckoutFocused = true
                     sessionExpireScreen = false
-                    presentationMode.wrappedValue.dismiss()
+                    onFinalDismiss()
                 }
             )
         }
@@ -229,8 +227,7 @@ struct EmiScreen : View {
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: viewModel.totalAmount,currencySymbol: viewModel.currencySymbol, onDone: {
                 sessionCompleteScreen = false
-                isCheckoutFocused = true
-                presentationMode.wrappedValue.dismiss()
+                onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }
         .sheet(isPresented: $showWebView) {
@@ -239,7 +236,6 @@ struct EmiScreen : View {
                 htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
-                    viewModel.isLoading = true
                     fetchStatusViewModel.startFetchingStatus(methodType: "EMI")
                 }
             )

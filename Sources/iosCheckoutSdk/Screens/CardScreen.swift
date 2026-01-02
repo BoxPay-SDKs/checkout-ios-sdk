@@ -6,12 +6,11 @@
 //
 
 
-import SwiftUICore
 import SwiftUI
 
 struct CardScreen : View {
     @Environment(\.presentationMode) var presentationMode
-    @Binding var isCheckoutFocused : Bool
+    var onFinalDismiss: () -> Void
     
     // EMI Related params
     var durationNumber : Int? = nil
@@ -70,12 +69,17 @@ struct CardScreen : View {
     @State private var isCvvShowDetailsClicked = false
     @State private var isSavedCardKnowMoreClicked = false
     
+    @State private var previousCardExpiryInput: String = ""
+
+    
     @State var itemsCount = 0
     @State var currencySymbol = ""
     @State var totalAmount = ""
     @State var brandColor = ""
     
     @State private var isSavedCardCheckBoxClicked = false
+    @State private var ignoreNextExpiryChange = false
+
     
     var body: some View {
         VStack {
@@ -149,7 +153,7 @@ struct CardScreen : View {
                                         .padding(.bottom, 20)
                             }
                             FloatingLabelTextField(
-                                    placeholder: "Card Number",
+                                    placeholder: "Card Number*",
                                     text:$cardNumberTextInput,
                                     isValid: $isCardNumberValid,
                                     onChange: { newText in
@@ -172,7 +176,7 @@ struct CardScreen : View {
                         HStack(alignment: .top) {
                             VStack(alignment: .leading) {
                                 FloatingLabelTextField(
-                                    placeholder: "Expiry (MM/YY)",
+                                    placeholder: "Expiry (MM/YY)*",
                                     text: $cardExpiryTextInput,
                                     isValid: $isCardExpiryValid,
                                     onChange: { newTxt in
@@ -196,7 +200,7 @@ struct CardScreen : View {
                             .padding(.trailing, 6)
                             VStack(alignment: .leading) {
                                 FloatingLabelTextField(
-                                    placeholder: "CVV",
+                                    placeholder: "CVV*",
                                     text: $cardCvvTextInput,
                                     isValid: $isCardCvvValid,
                                     onChange: { newText in
@@ -208,11 +212,16 @@ struct CardScreen : View {
                                     trailingIcon: .constant("ic_question_mark"),
                                     leadingIcon: .constant(""),
                                     onClickIcon : {
+                                        isCardCvvFocused = false
+                                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                                         isCvvShowDetailsClicked = true
                                     },
                                     isSecureText: .constant(true)
                                 )
                                 .fixedSize(horizontal: false, vertical: true) // Prevents expanding height
+                                .onTapGesture {
+                                    isCardCvvFocused = true
+                                }
 
                                 if(isCardCvvValid == false) {
                                     Text("\(cardCvvErrorText)")
@@ -225,7 +234,7 @@ struct CardScreen : View {
                         .padding(.bottom, 20)
                         VStack(alignment: .leading) {
                             FloatingLabelTextField(
-                                placeholder: "Name on the Card",
+                                placeholder: "Name on the Card*",
                                 text: $cardNameTextInput,
                                 isValid: $isCardNameValid,
                                 onChange: { newText in
@@ -302,6 +311,7 @@ struct CardScreen : View {
                     }
                     .padding(.horizontal, 16)
                     Button(action: {
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         if checkCardValid() && durationNumber == nil {
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "CardsScreen", "")
                             analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_METHOD_SELECTED.rawValue, "CardsScreen", "")
@@ -314,7 +324,14 @@ struct CardScreen : View {
                             viewModel.initiateEMICardPostRequest(cardNumber: cardNumberTextInput.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression), cardExpiry: cardExpiryTextInput, cardCvv: cardCvvTextInput, cardHolderName: cardNameTextInput, cardType: cardType ?? "", offerCode: offerCode, duration: "\(durationNumber ?? 0)",isSavedCardCheckBoxClicked: isSavedCardCheckBoxClicked, cardNickName: cardNickNameTextInput)
                         }
                     }){
-                        Text("Make Payment")
+                        (
+                            Text("Proceed to Pay ")
+                                .font(.custom("Poppins-SemiBold", size: 16)) +
+                            Text(currencySymbol)
+                                .font(.custom("Inter-SemiBold", size: 16)) +
+                            Text(totalAmount)
+                                .font(.custom("Poppins-SemiBold", size: 16))
+                        )
                             .foregroundColor(.white)
                             .padding()
                             .frame(maxWidth: .infinity)
@@ -333,6 +350,9 @@ struct CardScreen : View {
                 currencySymbol = await viewModel.checkoutManager.getCurrencySymbol()
                 totalAmount = await viewModel.checkoutManager.getTotalAmount()
                 brandColor = await viewModel.checkoutManager.getBrandColor()
+                DispatchQueue.main.async {
+                    isCardNumberFocused = true
+                }
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -346,9 +366,8 @@ struct CardScreen : View {
             SessionExpireScreen(
                 brandColor: brandColor,
                 onGoBackToHome: {
-                    isCheckoutFocused = true
                     sessionExpireScreen = false
-                    presentationMode.wrappedValue.dismiss()
+                    onFinalDismiss()
                 }
             )
         }
@@ -361,9 +380,8 @@ struct CardScreen : View {
         }
         .bottomSheet(isPresented: $sessionCompleteScreen) {
             GeneralSuccessScreen(transactionID: viewModel.transactionId, date: StringUtils.formatDate(from:timeStamp, to: "MMM dd, yyyy"), time: StringUtils.formatDate(from : timeStamp, to: "hh:mm a"), totalAmount: totalAmount,currencySymbol: currencySymbol, onDone: {
-                isCheckoutFocused = true
                 sessionCompleteScreen = false
-                presentationMode.wrappedValue.dismiss()
+                onFinalDismiss()
             },brandColor: brandColor)
         }
         .sheet(isPresented: $showWebView) {
@@ -372,7 +390,6 @@ struct CardScreen : View {
                 htmlString: paymentHtmlString,
                 onDismiss: {
                     showWebView = false
-                    viewModel.isLoading = true
                     fetchStatusViewModel.startFetchingStatus(methodType: "Card")
                 }
             )
@@ -386,6 +403,10 @@ struct CardScreen : View {
             SavedCardKnowMore(onGoBack: {
                 isSavedCardKnowMoreClicked = false
             },brandColor: brandColor)
+        }
+        .onTapGesture {
+            // This will dismiss the keyboard when the user taps the background
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
     
@@ -440,12 +461,21 @@ struct CardScreen : View {
         cardNumberTextInput = formatted
 
         // Validation and fetching based on digit count
-        if limited.count > 10 {
+        if limited.count == 9 {
             viewModel.fetchCardInfo(limited)
-        } else {
+        }
+        
+        if limited.count < 9 {
             cardImage = "ic_default_card"
             maxCardCvvLength = 3
             maxCardNumberLength = 16
+        }
+        
+        if limited.count == maxCardNumberLength {
+            isCardNumberFocused = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                isCardExpiryFocused = true
+            }
         }
         allCardFieldsMandate = checkCardValid()
     }
@@ -457,6 +487,11 @@ struct CardScreen : View {
         
         // Check the cleaned length based on the card type (Max length check for cards)
         let cleanedLength = maxCardNumberLength
+        
+        // Set the validity flag after checking the card number length and Luhn check
+        isCardNumberValid = cleaned.count >= cleanedLength &&
+                            isMethodEnabled &&
+                            isValidCardNumberByLuhn(cleaned)
 
         // Determine the error message based on the cleaned card number length
         cardNumberErrorText = cleaned.isEmpty
@@ -469,10 +504,6 @@ struct CardScreen : View {
                 ? "This card is not supported for the payment"
                 : "test reason"  // Replace with other conditions if needed
 
-        // Set the validity flag after checking the card number length and Luhn check
-        isCardNumberValid = cleaned.count >= cleanedLength &&
-                            isMethodEnabled &&
-                            isValidCardNumberByLuhn(cleaned)
 
         // Trigger UI updates and set the focus to false after validation
         isCardNumberFocused = false
@@ -497,64 +528,86 @@ struct CardScreen : View {
     }
 
     func handleCardExpiryTextChange(_ text: String) {
-        if text.isEmpty {
-            cardExpiryTextInput = ""
-            return
-        }
-        
-        isCardExpiryValid = nil
-
-        // Remove all non-digit characters
+        // 1. Clean the input to digits only
         let cleaned = text.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression)
-
-        var limited = String(cleaned.prefix(4))
+        
+        // 2. Detect if user is deleting (comparing digit counts is more reliable)
+        let isDeleting = cleaned.count < previousCardExpiryInput.count
+        
+        // Limit to 4 digits (MMYY)
+        let digits = String(cleaned.prefix(4))
         
         var formatted = ""
-
-        // Handle case when user enters only 1 digit
-        if limited.count == 1 {
-            let firstDigit = Int(limited) ?? 0
-            if firstDigit >= 2 {
-                // Auto prepend 0 when first digit is >= 2 (e.g., '2' becomes '02/')
-                formatted = "0\(firstDigit)/"
-                limited = "0\(firstDigit)"
-            } else {
-                // Allow single '0' or '1' as valid for first digit
-                formatted = limited
+        
+        if digits.count > 0 {
+            let firstDigit = Int(String(digits.prefix(1))) ?? 0
+            
+            // Auto-prefix 0 if first digit is 2-9 (e.g., user types '5', becomes '05/')
+            if firstDigit > 1 && digits.count == 1 && !isDeleting {
+                formatted = "0\(digits)/"
             }
-        } else if limited.count == 2 {
-            let month = Int(limited) ?? 0
-            if month == 0 {
-                // Reset if the month starts with '00'
-                formatted = ""
-                limited = ""
-            } else if month > 12 {
-                // Auto-correct months greater than 12 (e.g., '13' becomes '01/')
-                let firstDigit = String(limited.prefix(1))
-                formatted = "0\(firstDigit)/"
-                limited = "0\(firstDigit)"
+            else if digits.count >= 2 {
+                let monthStr = String(digits.prefix(2))
+                let monthInt = Int(monthStr) ?? 0
+                
+                // Validate month range
+                let finalMonth = monthInt > 12 ? "12" : (monthInt == 0 ? "01" : monthStr)
+                
+                if digits.count > 2 {
+                    let year = digits.suffix(digits.count - 2)
+                    formatted = "\(finalMonth)/\(year)"
+                } else {
+                    // If exactly 2 digits, add slash unless deleting
+                    formatted = isDeleting ? finalMonth : "\(finalMonth)/"
+                }
             } else {
-                // Valid month, append slash after 2 digits
-                formatted = limited + "/"
-            }
-        } else if limited.count > 2 {
-            // Handle full MM/YY format, adding the slash automatically after two digits
-            let month = limited.prefix(2)
-            let year = limited.suffix(from: limited.index(limited.startIndex, offsetBy: 2))
-            formatted = "\(month)/\(year)"
-        }
-
-        // Now handle deletion of slash correctly
-        if text.count < cardExpiryTextInput.count {
-            // If the user is deleting, ensure we handle slash deletion too
-            if formatted.last == "/" {
-                // If slash is the last character, remove it
-                formatted.removeLast()
+                formatted = digits
             }
         }
 
+        // Update the state
         cardExpiryTextInput = formatted
+        previousCardExpiryInput = formatted
+
+        // 3. Validation Logic
+        if formatted.count == 5 {
+            let components = formatted.split(separator: "/")
+            if components.count == 2,
+               let month = Int(components[0]),
+               let year = Int(components[1]) {
+                validateExpiryDate(month: month, year: year)
+            }
+        } else {
+            isCardExpiryValid = nil // Reset while typing
+        }
+
         allCardFieldsMandate = checkCardValid()
+    }
+
+    // 3. Validation Helper Function
+    private func validateExpiryDate(month: Int, year: Int) {
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date()) % 100 // Last 2 digits (e.g., 25)
+        let currentMonth = calendar.component(.month, from: Date())
+        
+        let maxFutureYear = currentYear + 15
+        
+        if year < currentYear || (year == currentYear && month < currentMonth) {
+            // CASE: Date is in the past
+            isCardExpiryValid = false
+            cardExpiryErrorText = "Card expired"
+        } else if year > maxFutureYear {
+            // CASE: Date is too far in the future (> 15 years)
+            isCardExpiryValid = false
+            cardExpiryErrorText = "Invalid expiry year"
+        } else {
+            // CASE: Valid
+            isCardExpiryFocused = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                isCardCvvFocused = true
+            }
+            isCardExpiryValid = true
+        }
     }
 
 
@@ -599,6 +652,13 @@ struct CardScreen : View {
         } else {
             cardCvvErrorText = ""
             isCardCvvValid = true
+        }
+        
+        if updatedText.count == maxCardCvvLength {
+            isCardCvvFocused = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                isCardNameFocused = true
+            }
         }
         allCardFieldsMandate = checkCardValid()
     }
@@ -683,3 +743,4 @@ struct CardScreen : View {
         }
     }
 }
+
