@@ -527,6 +527,10 @@ struct CardScreen : View {
     }
 
     func handleCardExpiryTextChange(_ text: String) {
+        
+        if text == cardExpiryTextInput {
+            return 
+        }
         // 1. Clean the input to digits only
         let cleaned = text.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression)
         
