@@ -69,7 +69,7 @@ struct CardScreen : View {
     @State private var isCvvShowDetailsClicked = false
     @State private var isSavedCardKnowMoreClicked = false
     
-    @State private var previousExpiryDigits = ""
+    @State private var previousCardExpiryInput: String = ""
 
     
     @State var itemsCount = 0
@@ -527,59 +527,61 @@ struct CardScreen : View {
     }
 
     func handleCardExpiryTextChange(_ text: String) {
-
-        // 1. Extract digits only
-        let digits = text.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression)
-
-        // 2. Detect delete based on digit count
-        let isDeleting = digits.count < previousExpiryDigits.count
-
-        // 3. Limit to MMYY
-        let limitedDigits = String(digits.prefix(4))
-        previousExpiryDigits = limitedDigits
-
+        // 1. Clean the input to digits only
+        let cleaned = text.replacingOccurrences(of: "[^\\d]", with: "", options: .regularExpression)
+        
+        // 2. Detect if user is deleting (comparing digit counts is more reliable)
+        let isDeleting = cleaned.count < previousCardExpiryInput.count
+        
+        // Limit to 4 digits (MMYY)
+        let digits = String(cleaned.prefix(4))
+        
         var formatted = ""
-
-        if limitedDigits.count == 0 {
-            formatted = ""
-        }
-        else if limitedDigits.count == 1 {
-            let first = Int(limitedDigits) ?? 0
-            formatted = (first > 1 && !isDeleting) ? "0\(first)/" : "\(first)"
-        }
-        else {
-            let month = String(limitedDigits.prefix(2))
-            let monthInt = Int(month) ?? 0
-            let validMonth = monthInt == 0 ? "01" : min(monthInt, 12).description
-
-            if limitedDigits.count > 2 {
-                let year = limitedDigits.suffix(from: limitedDigits.index(limitedDigits.startIndex, offsetBy: 2))
-                formatted = "\(validMonth)/\(year)"
+        
+        if digits.count > 0 {
+            let firstDigit = Int(String(digits.prefix(1))) ?? 0
+            
+            // Auto-prefix 0 if first digit is 2-9 (e.g., user types '5', becomes '05/')
+            if firstDigit > 1 && digits.count == 1 && !isDeleting {
+                formatted = "0\(digits)/"
+            }
+            else if digits.count >= 2 {
+                let monthStr = String(digits.prefix(2))
+                let monthInt = Int(monthStr) ?? 0
+                
+                // Validate month range
+                let finalMonth = monthInt > 12 ? "12" : (monthInt == 0 ? "01" : monthStr)
+                
+                if digits.count > 2 {
+                    let year = digits.suffix(digits.count - 2)
+                    formatted = "\(finalMonth)/\(year)"
+                } else {
+                    // If exactly 2 digits, add slash unless deleting
+                    formatted = isDeleting ? finalMonth : "\(finalMonth)/"
+                }
             } else {
-                formatted = isDeleting ? validMonth : "\(validMonth)/"
+                formatted = digits
             }
         }
 
-        // 4. Assign ONLY if different (prevents recursion)
-        if cardExpiryTextInput != formatted {
-            cardExpiryTextInput = formatted
-        }
+        // Update the state
+        cardExpiryTextInput = formatted
+        previousCardExpiryInput = formatted
 
-        // 5. Validation + focus
+        // 3. Validation Logic
         if formatted.count == 5 {
-            let parts = formatted.split(separator: "/")
-            if parts.count == 2,
-               let month = Int(parts[0]),
-               let year = Int(parts[1]) {
+            let components = formatted.split(separator: "/")
+            if components.count == 2,
+               let month = Int(components[0]),
+               let year = Int(components[1]) {
                 validateExpiryDate(month: month, year: year)
             }
         } else {
-            isCardExpiryValid = nil
+            isCardExpiryValid = nil // Reset while typing
         }
 
         allCardFieldsMandate = checkCardValid()
     }
-
 
     // 3. Validation Helper Function
     private func validateExpiryDate(month: Int, year: Int) {
