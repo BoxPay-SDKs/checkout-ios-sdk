@@ -317,10 +317,12 @@ struct MainCheckoutScreen : View {
                 upiViewModel.isLoading = true
                 openURL(urlString: base64Url)
             case .openUpiTimer(let vpa) :
+                upiViewModel.isLoading = false
                 fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
                 shopperVpa = vpa
                 showTimerSheet = true
             case .openQRUrl(url: let url):
+                upiViewModel.isLoading = false
                 upiViewModel.qrUrl = url
             }
         }
