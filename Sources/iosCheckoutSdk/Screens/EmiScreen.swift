@@ -21,8 +21,8 @@ struct EmiScreen : View {
     @State private var sessionFailedScreen = false
     @State private var errorReason = ""
     @State private var timeStamp = ""
-    @State private var paymentUrl : String? = nil
-    @State private var paymentHtmlString: String? = nil
+    @State private var paymentUrl : String = ""
+    @State private var paymentHtmlString: String = ""
     @State private var showWebView = false
     
     @State private var searchTextField : String = ""
@@ -150,7 +150,7 @@ struct EmiScreen : View {
                                         ForEach(Array(banks.enumerated()), id: \.1.name) { index, bank in
                                             VStack(spacing: 0) {
                                                 if(viewModel.selectedCardType == "Others") {
-                                                    PaymentOptionRow(isSelected: selectedOtherInstrumentValue == bank.cardLessEmiValue, imageUrl: bank.iconUrl, title: bank.name, currencySymbol: viewModel.currencySymbol, amount: viewModel.totalAmount, instrumentValue: bank.cardLessEmiValue, brandColor: viewModel.brandColor, onClick: { instrumentValue , _  in
+                                                    PaymentOptionRow(isSelected: selectedOtherInstrumentValue == bank.cardLessEmiValue,isSourceActive : true, imageUrl: bank.iconUrl, title: bank.name, currencySymbol: viewModel.currencySymbol, amount: viewModel.totalAmount, instrumentValue: bank.cardLessEmiValue, brandColor: viewModel.brandColor, onClick: { instrumentValue , _  in
                                                         selectedOtherInstrumentValue = instrumentValue
                                                     }, onProceedButton: {
                                                         analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_CATEGORY_SELECTED.rawValue, "EMIScreen - Other Selected", "")
@@ -230,14 +230,24 @@ struct EmiScreen : View {
                 onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }
-        .sheet(isPresented: $showWebView) {
+        .fullScreenCover(isPresented: $showWebView) {
             WebView(
-                url: paymentUrl,
-                htmlString: paymentHtmlString,
+                url: $paymentUrl,
+                htmlString: $paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     fetchStatusViewModel.startFetchingStatus(methodType: "EMI")
-                }
+                },
+                onClickCancel : {
+                    Task {
+                        viewModel.isLoading = false
+                        showWebView = false
+                        errorReason = await viewModel.checkoutManager.getpaymentErrorMessage()
+                        await viewModel.checkoutManager.setStatus("FAILED")
+                        sessionFailedScreen = true
+                    }
+                },
+                brandColor : viewModel.brandColor
             )
         }
     }

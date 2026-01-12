@@ -21,7 +21,7 @@ struct SavedCardsComponent : View {
                     savedItem : item,
                     fallbackImage:"ic_default_card",
                     onClick : { instrumentValue in
-                        viewModel.onChangeInstrumentValue(newInstrumentValue: instrumentValue, newDisplayValue: "", paymentType: item.type)
+                        viewModel.onChangeInstrumentValue(newInstrumentValue: instrumentValue, newDisplayValue: "", paymentType: item.type, source : "")
                     },
                     selectedItemInstrumentValue: viewModel.selectedInstrumentValue,
                     onProceedButton: onProceedButton,

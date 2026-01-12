@@ -13,6 +13,7 @@ struct NetBankingScreen: View {
     var onFinalDismiss : () -> Void
 
     @StateObject private var viewModel = NetBankingViewModel()
+    @StateObject var sharedItemViewModel = ItemsViewModel()
     @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
     @State private var searchTextField: String = ""
     @State private var isSearchTextFieldFocused: Bool = false
@@ -26,8 +27,8 @@ struct NetBankingScreen: View {
     @State private var sessionFailedScreen = false
     @State private var errorReason = ""
     @State private var timeStamp = ""
-    @State private var paymentUrl : String? = nil
-    @State private var paymentHtmlString: String? = nil
+    @State private var paymentUrl : String = ""
+    @State private var paymentHtmlString: String = ""
     @State private var showWebView = false
     
     var body: some View {
@@ -75,7 +76,9 @@ struct NetBankingScreen: View {
                                 onProceed: { instrumentValue, _ , _  in
                                     viewModel.initiateNetBankingPostRequest(instrumentValue: instrumentValue)
                                 },
-                                showLastUsed: false
+                                showLastUsed: false,
+                                source : "popular",
+                                viewModel : sharedItemViewModel
                             )
                             .commonCardStyle()
                         }
@@ -116,7 +119,9 @@ struct NetBankingScreen: View {
                                     analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "NetBankingScreen", "")
                                     viewModel.initiateNetBankingPostRequest(instrumentValue: instrumentValue)
                                 },
-                                showLastUsed: false
+                                showLastUsed: false,
+                                source : "all",
+                                viewModel : sharedItemViewModel
                             )
                             .commonCardStyle()
                         }
@@ -154,15 +159,26 @@ struct NetBankingScreen: View {
                 onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }
-        .sheet(isPresented: $showWebView) {
+        .fullScreenCover(isPresented: $showWebView) {
             WebView(
-                url: paymentUrl,
-                htmlString: paymentHtmlString,
+                url: $paymentUrl,
+                htmlString: $paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     fetchStatusViewModel.startFetchingStatus(methodType: "NetBanking")
-                }
+                },
+                onClickCancel : {
+                    Task {
+                        viewModel.isLoading = false
+                        showWebView = false
+                        errorReason = await viewModel.checkoutManager.getpaymentErrorMessage()
+                        await viewModel.checkoutManager.setStatus("FAILED")
+                        sessionFailedScreen = true
+                    }
+                },
+                brandColor : viewModel.brandColor
             )
+            .ignoresSafeArea()
         }
         .onTapGesture {
             // This will dismiss the keyboard when the user taps the background

@@ -19,6 +19,7 @@ class ItemsViewModel : ObservableObject {
     @Published var selectedInstrumentValue = ""
     @Published var selectedDisplayName = ""
     @Published var selectedPaymentType = ""
+    @Published var selectedSource = ""
     
     init() {
         Task {
@@ -29,9 +30,10 @@ class ItemsViewModel : ObservableObject {
     }
     
     
-    func onChangeInstrumentValue(newInstrumentValue : String, newDisplayValue : String, paymentType : String) {
+    func onChangeInstrumentValue(newInstrumentValue : String, newDisplayValue : String, paymentType : String, source : String) {
         selectedInstrumentValue = newInstrumentValue
         selectedDisplayName = newDisplayValue
         selectedPaymentType = paymentType
+        selectedSource = source
     }
 }
