@@ -13,6 +13,7 @@ struct BnplScreen: View {
     var onFinalDismiss: () -> Void
 
     @StateObject private var viewModel = BnplViewModel()
+    @StateObject var sharedItemViewModel = ItemsViewModel()
     
     @StateObject var fetchStatusViewModel = FetchStatusViewModel()
     @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
@@ -22,8 +23,8 @@ struct BnplScreen: View {
     @State private var sessionFailedScreen = false
     @State private var errorReason = ""
     @State private var timeStamp = ""
-    @State private var paymentUrl : String? = nil
-    @State private var paymentHtmlString: String? = nil
+    @State private var paymentUrl : String = ""
+    @State private var paymentHtmlString: String = ""
     @State private var showWebView = false
     
     
@@ -79,7 +80,9 @@ struct BnplScreen: View {
                                     analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "BNPLScreen", "")
                                     viewModel.initiateBnplPostRequest(instrumentValue: instrumentValue)
                                 },
-                                showLastUsed: false
+                                showLastUsed: false,
+                                source : "all",
+                                viewModel : sharedItemViewModel
                             )
                             .commonCardStyle()
                             .padding(.top, 8)
@@ -118,14 +121,24 @@ struct BnplScreen: View {
                 onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }
-        .sheet(isPresented: $showWebView) {
+        .fullScreenCover(isPresented: $showWebView) {
             WebView(
-                url: paymentUrl,
-                htmlString: paymentHtmlString,
+                url: $paymentUrl,
+                htmlString: $paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     fetchStatusViewModel.startFetchingStatus(methodType: "BNPL")
-                }
+                },
+                onClickCancel : {
+                    Task {
+                        viewModel.isLoading = false
+                        showWebView = false
+                        errorReason = await viewModel.checkoutManager.getpaymentErrorMessage()
+                        await viewModel.checkoutManager.setStatus("FAILED")
+                        sessionFailedScreen = true
+                    }
+                },
+                brandColor : viewModel.brandColor
             )
         }
     }

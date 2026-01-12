@@ -44,7 +44,6 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
         }
 
         @objc func textFieldDidChangeSelection(_ textField: UITextField) {
-            parent.text = textField.text ?? ""
             parent.onChange?(textField.text ?? "")
         }
 
@@ -118,7 +117,9 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
 
     // MARK: - updateUIView
     func updateUIView(_ uiView: UITextField, context: Context) {
-        uiView.text = text
+        if uiView.text != text {
+            uiView.text = text
+        }
         uiView.textColor = textColor
         uiView.tintColor = accentColor
         uiView.keyboardType = keyboardType
@@ -147,12 +148,6 @@ struct CustomTextFieldRepresentable: UIViewRepresentable {
             }
         } else {
             uiView.rightView = nil
-        }
-
-        if isFocused && !uiView.isFirstResponder {
-            uiView.becomeFirstResponder()
-        } else if !isFocused && uiView.isFirstResponder {
-            uiView.resignFirstResponder()
         }
     }
 

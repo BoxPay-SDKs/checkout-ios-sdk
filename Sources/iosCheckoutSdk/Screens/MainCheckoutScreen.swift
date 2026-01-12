@@ -13,6 +13,8 @@ struct MainCheckoutScreen : View {
     @ObservedObject var viewModel: CheckoutViewModel
     
     @ObservedObject private var analyticsViewModel : AnalyticsViewModel = AnalyticsViewModel()
+    
+    @StateObject var sharedItemViewModel = ItemsViewModel()
 
     var onFinalDismiss: () -> Void
     
@@ -37,8 +39,8 @@ struct MainCheckoutScreen : View {
     @State private var navigateToAddressScreen = false
     @State private var navigateToSavedAddressScreen = false
         
-    @State private var paymentUrl : String? = nil
-    @State private var paymentHtmlString: String? = nil
+    @State private var paymentUrl : String = ""
+    @State private var paymentHtmlString: String = ""
     @State private var showWebView = false
     
     @State private var status : String = ""
@@ -90,7 +92,9 @@ struct MainCheckoutScreen : View {
                                     analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "RecommendedUPI", "")
                                     upiViewModel.initiateUpiPostRequest(nil , displayName , instrumentValue , paymentType)
                                 },
-                                showLastUsed: true
+                                showLastUsed: true,
+                                source : "all",
+                                viewModel : sharedItemViewModel
                             )
                             .commonCardStyle()
                         }
@@ -102,6 +106,7 @@ struct MainCheckoutScreen : View {
                                 handleUpiPayment: upiViewModel.initiateUpiPostRequest,
                                 handleQRPayment : upiViewModel.initiateUpiQRPostRequest,
                                 savedUpiIds: $viewModel.savedUpiIds,
+                                itemsViewModel : sharedItemViewModel,
                                 viewModel : upiViewModel,
                                 isUpiIntentVisible: $viewModel.upiIntentMethod,
                                 isUpiCollectVisible: $viewModel.upiCollectMethod,
@@ -269,14 +274,24 @@ struct MainCheckoutScreen : View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
             fetchStatusViewModel.startFetchingStatus(methodType: "UpiIntent")
         }
-        .sheet(isPresented: $showWebView) {
+        .fullScreenCover(isPresented: $showWebView) {
             WebView(
-                url: paymentUrl,
-                htmlString: paymentHtmlString,
+                url: $paymentUrl,
+                htmlString: $paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     fetchStatusViewModel.startFetchingStatus(methodType: "UpiCollect")
-                }
+                },
+                onClickCancel : {
+                    Task {
+                        upiViewModel.isLoading = false
+                        showWebView = false
+                        errorReason = await viewModel.checkoutManager.getpaymentErrorMessage()
+                        await viewModel.checkoutManager.setStatus("FAILED")
+                        sessionFailedScreen = true
+                    }
+                },
+                brandColor : viewModel.brandColor
             )
         }
         .onChange(of: viewModel.isAddressScreenRequiredToCompleteDetails) {focused in

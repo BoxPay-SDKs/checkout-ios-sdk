@@ -21,14 +21,15 @@ struct WalletScreen: View {
     @State private var selectedInstrumentValue: String = ""
     
     @StateObject var fetchStatusViewModel = FetchStatusViewModel()
+    @StateObject var sharedItemViewModel = ItemsViewModel()
     
     @State private var sessionExpireScreen = false
     @State private var sessionCompleteScreen = false
     @State private var sessionFailedScreen = false
     @State private var errorReason = ""
     @State private var timeStamp = ""
-    @State private var paymentUrl : String? = nil
-    @State private var paymentHtmlString: String? = nil
+    @State private var paymentUrl : String = ""
+    @State private var paymentHtmlString: String = ""
     @State private var showWebView = false
     
     
@@ -97,7 +98,9 @@ struct WalletScreen: View {
                                     analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "WalletScreen", "")
                                     viewModel.initiateWalletPostRequest(instrumentValue: instrumentValue)
                                 },
-                                showLastUsed: false
+                                showLastUsed: false,
+                                source : "all",
+                                viewModel : sharedItemViewModel
                             )
                             .commonCardStyle()
                         }
@@ -135,14 +138,24 @@ struct WalletScreen: View {
                 onFinalDismiss()
             },brandColor: viewModel.brandColor)
         }
-        .sheet(isPresented: $showWebView) {
+        .fullScreenCover(isPresented: $showWebView) {
             WebView(
-                url: paymentUrl,
-                htmlString: paymentHtmlString,
+                url: $paymentUrl,
+                htmlString: $paymentHtmlString,
                 onDismiss: {
                     showWebView = false
                     fetchStatusViewModel.startFetchingStatus(methodType: "Wallet")
-                }
+                },
+                onClickCancel : {
+                    Task {
+                        viewModel.isLoading = false
+                        showWebView = false
+                        errorReason = await viewModel.checkoutManager.getpaymentErrorMessage()
+                        await viewModel.checkoutManager.setStatus("FAILED")
+                        sessionFailedScreen = true
+                    }
+                },
+                brandColor : viewModel.brandColor
             )
         }
         .onTapGesture {

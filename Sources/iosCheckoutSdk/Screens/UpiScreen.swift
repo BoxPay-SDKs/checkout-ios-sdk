@@ -14,6 +14,7 @@ struct UpiScreen: View {
     let handleUpiPayment: (_ selectedIntent: String?, _ shopperVpa: String?, _ selectedInstrumentRef : String?,_ selectedIntrumentRefType : String?) -> ()
     let handleQRPayment : () -> ()
     @Binding var savedUpiIds : [CommonDataClass]
+    @ObservedObject var itemsViewModel: ItemsViewModel
     @ObservedObject var viewModel : UpiViewModel
     @Binding var isUpiIntentVisible: Bool
     @Binding var isUpiCollectVisible: Bool
@@ -46,7 +47,9 @@ struct UpiScreen: View {
                         analyticsViewModel.callUIAnalytics(AnalyticsEvents.PAYMENT_INITIATED.rawValue, "SavedUPI", "")
                         handleUpiPayment(nil, displayName, instrumentValue, paymentType)
                     },
-                    showLastUsed: false
+                    showLastUsed: false,
+                    source : "all",
+                    viewModel : itemsViewModel
                 )
             }
             VStack(alignment: .leading) {
@@ -132,7 +135,7 @@ struct UpiScreen: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.top, 12)
-                            .padding(.bottom , viewModel.isCollectChevronRotated ? 16 : 0)
+                            .padding(.bottom , 12)
                         }
                         .background(
                             Group {

@@ -39,6 +39,8 @@ class CardViewModel: ObservableObject {
         Task {
             self.isLoading = true
             
+            print(cardCvv)
+            
             let expiry = formatExpiry(cardExpiry)
             
             var instrumentDetails: [String: Any] = [

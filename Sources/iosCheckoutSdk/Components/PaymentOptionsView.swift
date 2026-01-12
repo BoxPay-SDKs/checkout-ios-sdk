@@ -11,14 +11,16 @@ struct PaymentOptionView: View {
     @Binding var items : [CommonDataClass]
     var onProceed : (_ selectedInstrumentValue : String, _ selectedDisplayName : String, _ paymentType : String) -> Void
     var showLastUsed : Bool = false
+    var source: String //
     
-    @ObservedObject private var viewModel : ItemsViewModel = ItemsViewModel()
+    @ObservedObject var viewModel: ItemsViewModel
     
     var body: some View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 PaymentOptionRow(
                     isSelected: viewModel.selectedInstrumentValue == item.instrumentTypeValue,
+                    isSourceActive: viewModel.selectedSource == source,
                     imageUrl: item.logoUrl,
                     title: item.displayName,
                     currencySymbol: viewModel.currencySymbol,
@@ -26,7 +28,7 @@ struct PaymentOptionView: View {
                     instrumentValue: item.instrumentTypeValue,
                     brandColor: viewModel.brandColor,
                     onClick: { newInstrumentValue, newDisplayName in
-                        viewModel.onChangeInstrumentValue(newInstrumentValue: newInstrumentValue, newDisplayValue: newDisplayName, paymentType: item.type)
+                        viewModel.onChangeInstrumentValue(newInstrumentValue: newInstrumentValue, newDisplayValue: newDisplayName, paymentType: item.type, source: source)
                     },
                     onProceedButton: {
                         onProceed(viewModel.selectedInstrumentValue , viewModel.selectedDisplayName, viewModel.selectedPaymentType)
@@ -44,6 +46,7 @@ struct PaymentOptionView: View {
 
 struct PaymentOptionRow : View {
     var isSelected : Bool
+    var isSourceActive : Bool
     var imageUrl : String
     var title : String
     var currencySymbol : String
@@ -59,47 +62,46 @@ struct PaymentOptionRow : View {
         VStack{
             HStack(alignment: .center) {
                 SVGImageView(url: URL(string: imageUrl)!, fallbackImage: fallbackImage)
+
                 VStack(alignment: .leading) {
                     Text(title)
                         .font(.custom("Poppins-SemiBold", size: 14))
                         .foregroundColor(Color(hex: "#4F4D55"))
-                    if(showLastUsed) {
+
+                    if showLastUsed {
                         Text("Last Used")
                             .font(.custom("Poppins-Medium", size: 8))
                             .foregroundColor(Color(hex: "#1CA672"))
                             .padding(.bottom, 2)
-                        .padding(.horizontal, 4)
-                        .background(Color(hex: "#E8F6F1"))
-                        .cornerRadius(6)
-                        
+                            .padding(.horizontal, 4)
+                            .background(Color(hex: "#E8F6F1"))
+                            .cornerRadius(6)
                     }
                 }
-                
+
                 Spacer()
-                
-                // Radio Button
+
                 ZStack {
                     Circle()
-                        .stroke(isSelected ? Color(hex: brandColor) : Color.gray, lineWidth: 2)
+                        .stroke(isSelected && isSourceActive ? Color(hex: brandColor) : Color.gray, lineWidth: 2)
                         .frame(width: 20, height: 20)
-                    
-                    if isSelected {
+
+                    if isSelected && isSourceActive {
                         Circle()
                             .fill(Color(hex: brandColor))
                             .frame(width: 12, height: 12)
                     }
                 }
-                .onTapGesture {
-                    onClick(instrumentValue , title)
-                }
             }
+            .contentShape(Rectangle())   // 👈 THIS IS THE KEY
             .onTapGesture {
-                    onClick(instrumentValue , title)
+                onClick(instrumentValue, title)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)
+
             // Pay Button
-            if isSelected {
+            if isSelected && isSourceActive {
                 Button(action: {
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     onProceedButton()
@@ -124,6 +126,6 @@ struct PaymentOptionRow : View {
                 .padding(.bottom, 12)
             }
         }
-        .background(isSelected ? Color(hex: "#EDF8F4") : Color.white)
+        .background(isSelected && isSourceActive ? Color(hex: "#EDF8F4") : Color.white)
     }
 }
