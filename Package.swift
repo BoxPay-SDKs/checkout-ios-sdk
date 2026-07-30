@@ -16,38 +16,21 @@ let package = Package(
             name: "BoxPayiOSCheckoutSDK",
             targets: ["BoxPayiOSCheckoutSDK"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/airbnb/lottie-ios.git", from: "4.5.1"),
-        .package(url: "https://github.com/SDWebImage/SDWebImageSwiftUI.git", from: "3.1.3"),
-        .package(url: "https://github.com/SDWebImage/SDWebImageSVGCoder.git", from: "1.7.0"),
-        .package(url: "https://github.com/kizitonwose/CountryPickerView", .upToNextMajor(from: "3.3.0")),
-        .package(url: "https://github.com/marmelroy/PhoneNumberKit", from: "4.1.0")
-    ],
+    dependencies: [],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .binaryTarget(
             name: "CrossPlatformSDK",
-            path: "Framework/CrossPlatformSDK.xcframework"
+            url: "https://github.com/BoxPay-SDKs/cross-platform-sdk/releases/download/1.0.2-beta7/cross_platform_sdk.xcframework.zip",
+            checksum: "fd3601fe187df9b26a1f87a94fc8356ced022e6c30a1873a9f86fafa08f7f9f5"
         ),
         .target(
             name: "BoxPayiOSCheckoutSDK",
             dependencies: [
                 "CrossPlatformSDK",
-                .product(name: "Lottie", package: "lottie-ios"),
-                .product(name: "SDWebImageSwiftUI", package: "SDWebImageSwiftUI"),
-                .product(name: "SDWebImageSVGCoder", package: "SDWebImageSVGCoder"),
-                .product(name: "CountryPickerView", package: "CountryPickerView"),
-                .product(name: "PhoneNumberKit", package: "PhoneNumberKit")
             ],
-            path: "Sources/iosCheckoutSdk",
-            resources: [
-                .process("BoxpayLogo.json"),
-                .process("PaymentFailed.json"),
-                .process("PaymentSuccessful.json"),
-                .process("SessionExpired.json"),
-                .process("Fonts")
-            ]
+            path: "Sources/iosCheckoutSdk"
         ),
 
     ]
